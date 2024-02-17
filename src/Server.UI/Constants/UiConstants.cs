@@ -2,5 +2,5 @@
 
 public class UiConstants : Application.Constants.UiConstants
 {
-    public new const string LoginUrl = "/pages/authentication/login";//same as base
+    public const string LoginUrl = "/pages/authentication/login";//same as base
 }
