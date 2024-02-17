@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CleanArchitecture.Blazor.Domain.Common.Enums;
+using CleanArchitecture.Blazor.Domain.Entities;
+using LazyCache;
 using static CleanArchitecture.Blazor.Domain.Entities.V_VoteSummary;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services.Vote;
@@ -20,22 +22,37 @@ public interface IVoteSummaryService
     Task<bool> Update(ToAddRemove diff);
 }
 #if VOTING_SYSTEM
-public class VoteSummaryService(IApplicationDbContext context) : IVoteSummaryService
+public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) : IVoteSummaryService
 {
-    private readonly IApplicationDbContext _context = context;
+    //private readonly IApplicationDbContext _context = context;
+
+    private const string VoteSummaryCacheKey = "all-Summary";
+
+    //this can be cached at client side and refresh their itself after every 15 minuts from client side interval as well
+    public async Task<List<V_VoteSummary>> All()
+    {
+        if (cache is not null && context is not null)
+        {
+            //todo had to add logic of reading from vote db and converting into summary
+            return await cache.GetOrAddAsync(VoteSummaryCacheKey,
+                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.ToListAsync() : [], TimeSpan.FromMinutes(14));
+
+        }
+        return [];
+    }
 
     //for self read all properties
     //ideally 1 user can vote at one place only 
     //later we can allow for multiple
     public async Task<V_VoteSummary> ReadByConstituencyId(int constituencyId)
     {
-        var res = await _context.V_VoteSummarys.Where(x => x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
+        var res = await context.V_VoteSummarys.Where(x => x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
         return res;
     }
 
     public async Task<V_VoteSummary> ReadBySummaryId(int id)
     {
-        var res = await _context.V_VoteSummarys.FindAsync(id);
+        var res = await context.V_VoteSummarys.FindAsync(id);
         return res;
     }
     public async Task<bool> AddForNewVote(V_Vote vote)
@@ -57,8 +74,8 @@ public class VoteSummaryService(IApplicationDbContext context) : IVoteSummarySer
                 CommentsCount = vote.VoteKPIComments.Count == 0 ? 0 : 1
                 //,AggregateVote  had top check whether its added to db by generating or not
             };
-            await _context.V_VoteSummarys.AddAsync(new1);
-            return (await _context.SaveChangesAsync()) > 0;
+            await context.V_VoteSummarys.AddAsync(new1);
+            return (await context.SaveChangesAsync()) > 0;
         }
         else//case2 paqrticular MP details existing,now adding particular user vote counts only
         {
@@ -96,8 +113,8 @@ public class VoteSummaryService(IApplicationDbContext context) : IVoteSummarySer
 
             }));
 
-            var result = _context.V_VoteSummarys.Update(existing);
-            return (await _context.SaveChangesAsync()) > 0;
+            var result = context.V_VoteSummarys.Update(existing);
+            return (await context.SaveChangesAsync()) > 0;
         }
 
     }
@@ -119,8 +136,8 @@ public class VoteSummaryService(IApplicationDbContext context) : IVoteSummarySer
                     CommentsCount = diff.CommentCountDifference > 0 ? 1 : 0
                     //,AggregateVote  had top check whether its added to db by generating or not
                 };
-                await _context.V_VoteSummarys.AddAsync(new1);
-                return (await _context.SaveChangesAsync()) > 0;
+                await context.V_VoteSummarys.AddAsync(new1);
+                return (await context.SaveChangesAsync()) > 0;
             }
             return false;
         }
@@ -155,8 +172,8 @@ public class VoteSummaryService(IApplicationDbContext context) : IVoteSummarySer
                     }
                 }
             });
-            var result = _context.V_VoteSummarys.Update(existing);
-            return (await _context.SaveChangesAsync()) > 0;
+            var result = context.V_VoteSummarys.Update(existing);
+            return (await context.SaveChangesAsync()) > 0;
         }
     }
 
