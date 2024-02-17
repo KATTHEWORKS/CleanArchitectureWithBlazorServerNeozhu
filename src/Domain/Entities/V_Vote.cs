@@ -50,32 +50,24 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
         Modified = DateTime.UtcNow;
     }
     //[Column(TypeName = "jsonb")] //this wont working mssql Adjust based on your database
-    public string? VotesJsonAsString { get; set; }//here comments are not stored
+    //public string? VotesJsonAsString { get; set; }//here comments are not stored
 
-    public string? VotesJsonAsStringDelta { get; set; }//this is for the sake of update difference tracking tyo summary table
+    //public string? VotesJsonAsStringDelta { get; set; }//this is for the sake of update difference tracking tyo summary table
 
-    [NotMapped]
-    public (int constituencyId, List<VoteKPIRatingComment> kpiRating) VoteKPIRatingCommentsDelta { get; set; }
+    //[NotMapped]
+    //public (int constituencyId, List<VoteKPIRatingComment> kpiRating) VoteKPIRatingCommentsDelta { get; set; }
 
-    public string? CommentsJsonAsString { get; set; }//lIST<KPI,COMMENT>
+    //public string? CommentsJsonAsString { get; set; }//lIST<KPI,COMMENT>
 
     //below propertiues will be used in Dtos,so here commenting
 
     //at viewmodel had to parse all bytes into string by (KPIEnum)value
-    [NotMapped]
-    public List<VoteKPIComment> VoteKPIComments//for the sake of summary page,this will appear without any person name,so stays anonymous
-    {
-        get => ((!string.IsNullOrEmpty(CommentsJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIComment>>(CommentsJsonAsString, out var result1)) ? result1 : []);
-        set
-        {
-            if (value != null)
-                CommentsJsonAsString = JsonSerializer.Serialize(value.Where(c => !string.IsNullOrEmpty(c.Comment)).ToList(), JsonExtensions.IgnoreNullSerializationOptions);
+    //[NotMapped]
+    public List<VoteKPIComment>? VoteKPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
 
-        }
-    }
     //since comments of others also visible to all in summary page but not votes usually
-    [NotMapped]
-    public List<VoteKPIRatingComment> VoteKPIRatingComments//mostly for self
+    //[NotMapped]
+    public List<VoteKPIRatingComment>? VoteKPIRatingComments//mostly for self
     {//this comprises of vote & comments both 
         //so for summary page this should not be loaded
         //madhu continue here to address tweak
@@ -85,23 +77,7 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
         //get => ((!string.IsNullOrEmpty(VotesJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIRatingComments>>(VotesJsonAsString, out var result)) ? result : null);
         get
         {
-            if (string.IsNullOrEmpty(VotesJsonAsString)) return [];
-            var temp1 = ((!string.IsNullOrEmpty(VotesJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIRatingComment>>(VotesJsonAsString, out var result)) ? result : null);
-            if (temp1 != null)
-            {
-                if (!string.IsNullOrEmpty(VotesJsonAsString) &&
-                        (string.IsNullOrEmpty(CommentsJsonAsString) || VoteKPIComments.Count == 0))
-                    return temp1;
-                else
-                    foreach (var item in VoteKPIComments)
-                    {
-                        var toAddComments = temp1.Where(x => x.KPI == item.KPI).First();
-                        if (toAddComments != null)
-                            toAddComments.Comment = item.Comment;
-                    }
-                return temp1;
-            }
-            return [];
+            return VoteKPIRatingComments ?? [];
         }
         set
         {
@@ -109,13 +85,9 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
             {
                 //VotesJsonAsString = JsonSerializer.Serialize(value);
                 //for firsttime had to take all kpis so passing
-                VotesJsonAsString = JsonSerializer.Serialize(value.Where(c => Id > 0 ? c.Rating != null : c.KPI > 0).ToList(), JsonExtensions.IgnoreNullSerializationOptions);
+                //VotesJsonAsString = JsonSerializer.Serialize(value.Where(c => Id > 0 ? c.Rating != null : c.KPI > 0).ToList(), JsonExtensions.IgnoreNullSerializationOptions);
 
-                var commentsList = value.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment)).ToList();
-                if (commentsList != null && commentsList.Count > 0)
-                {
-                    CommentsJsonAsString = JsonSerializer.Serialize(commentsList, JsonExtensions.IgnoreNullSerializationOptions);
-                }
+                VoteKPIComments = value.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment)).ToList();
             }
         }
     }

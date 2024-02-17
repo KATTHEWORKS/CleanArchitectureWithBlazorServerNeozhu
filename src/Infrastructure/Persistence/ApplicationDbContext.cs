@@ -78,6 +78,23 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         //https://learn.microsoft.com/en-us/ef/core/modeling/generated-properties?tabs=fluent-api
         builder.Entity<V_Vote>().Property(b => b.Id).ValueGeneratedOnAdd();
         builder.Entity<V_Vote>().Property(b => b.Created).HasDefaultValueSql("getdate()");
+
+        builder.Entity<V_Vote>().OwnsOne(b => b.VoteKPIRatingComments, ownedNavigationBuilder =>
+        {
+            ownedNavigationBuilder.ToJson();
+        });
+        builder.Entity<V_Vote>().OwnsOne(b => b.VoteKPIComments, ownedNavigationBuilder =>
+        {
+            ownedNavigationBuilder.ToJson();
+        });
+
+        //builder.Entity<V_Vote>().OwnsOne(b => b.VoteKPIRatingCommentsDelta, ownedNavigationBuilder =>
+        //{
+        //    ownedNavigationBuilder.ToJson();
+        //});
+
+
+
         //for updatetime had to use triggers
 
         builder.Entity<V_VoteSummary>().HasKey(x => x.ConstituencyId);

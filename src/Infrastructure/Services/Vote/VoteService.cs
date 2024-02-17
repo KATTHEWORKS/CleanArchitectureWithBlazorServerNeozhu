@@ -81,12 +81,12 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
             var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
             .ExecuteUpdateAsync(x => x
             .SetProperty(u => u.Modified, DateTime.Now)
-            .SetProperty(u => u.VotesJsonAsStringDelta,
-            c => string.IsNullOrEmpty(c.VotesJsonAsStringDelta) ? c.CommentsJsonAsString : c.VotesJsonAsStringDelta)
-            .SetProperty(u => u.CommentsJsonAsString, vote.CommentsJsonAsString)
+            //.SetProperty(u => u.VotesJsonAsStringDelta,
+            //c => string.IsNullOrEmpty(c.VotesJsonAsStringDelta) ? c.CommentsJsonAsString : c.VotesJsonAsStringDelta)
+            .SetProperty(u => u.VoteKPIComments, vote.VoteKPIComments)
             .SetProperty(u => u.ConstituencyId, vote.ConstituencyId)
             .SetProperty(u => u.Rating, vote.Rating)//HAD TO CACLULATE here before saving or on display also but had to make sure
-            .SetProperty(u => u.VotesJsonAsString, vote.VotesJsonAsString)
+            .SetProperty(u => u.VoteKPIRatingComments, vote.VoteKPIRatingComments)
             );
             return vote;
 

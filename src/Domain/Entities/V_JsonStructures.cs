@@ -63,6 +63,10 @@ public class VoteKPIRatingComment
 //currently not used,will do later
 public class VoteKPIComment(int kpi, string comment)
 {
+    public VoteKPIComment() : this(default, default)
+    {
+
+    }
     public int KPI { get; set; } = kpi;
     public string Comment { get; set; } = comment;//this supposed to be like List<KPI-comment>
 }
