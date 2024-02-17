@@ -9,10 +9,18 @@
         <LangVersion>default</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup Label="Override Stack trace file locations">
+        <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+    </PropertyGroup>
+    
     <ItemGroup>
         <PackageReference Include="MediatR" Version="12.2.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.1" />
     </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\PublicCommon.csproj" />
+  </ItemGroup>
 
 </Project>

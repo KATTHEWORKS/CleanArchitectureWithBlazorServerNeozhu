@@ -1,0 +1,17 @@
+﻿Tenant edit or update only to internal
+View option to all users except Internal data(time beging ok)
+
+Roles edit or update only to internal
+View option to all users except Internal data(time beging ok)
+
+Users(with PIN)
+Internal can see all
+All logged in users can see all but except Internal data+patient data
+*If any result exists with pin then show a symbol as some PIN profile exists kind of later
+patient is visible to all
+All specific tenants internal they can see only not beyond
+
+
+Edit is specific to there tenants higher profile only
+Patient edit is to only valid linked hospital
+or if never logged in then any valid non-patients can modify

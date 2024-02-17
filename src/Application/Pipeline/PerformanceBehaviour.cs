@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace CleanArchitecture.Blazor.Application.Pipeline;
 
@@ -34,26 +34,40 @@ public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequ
     {
         Stopwatch? timer = null;
 
-        // Increment ExecutionCount in a thread-safe manner.
-        Interlocked.Increment(ref RequestCounter.ExecutionCount);
-        if (RequestCounter.ExecutionCount > 3) timer = Stopwatch.StartNew();
+        try
+        {
+            // Increment ExecutionCount in a thread-safe manner.
+            Interlocked.Increment(ref RequestCounter.ExecutionCount);
+            if (RequestCounter.ExecutionCount > 3) timer = Stopwatch.StartNew();
 
-        var response = await next().ConfigureAwait(false);
+            var response = await next().ConfigureAwait(false);
 
-        timer?.Stop();
-        var elapsedMilliseconds = timer?.ElapsedMilliseconds;
+            timer?.Stop();
+            var elapsedMilliseconds = timer?.ElapsedMilliseconds;
 
-        if (elapsedMilliseconds > 500)
+            if (elapsedMilliseconds > 500)
+            {
+                var requestName = typeof(TRequest).Name;
+                var userName = _currentUserService.UserName;
+
+                _logger.LogWarning(
+                    "{Name} long running request ({ElapsedMilliseconds} milliseconds) with {@Request} {@UserName} ",
+                    requestName, elapsedMilliseconds, request, userName);
+            }
+
+            return response;
+        }
+        catch (Exception ex)
         {
             var requestName = typeof(TRequest).Name;
-            var userName = _currentUserService.UserName;
-
-            _logger.LogWarning(
-                "{Name} long running request ({ElapsedMilliseconds} milliseconds) with {@Request} {@UserName} ",
-                requestName, elapsedMilliseconds, request, userName);
+            var userName = _currentUserService?.UserName;
+            var message = $" {requestName}: {ex.Message} with {request} by {userName ?? "null-username"}";
+            Console.WriteLine(ex.ToString() + message);
+            _logger.LogError(ex, message);
+            //_logger.LogError(ex, "{Name}: {Exception} with {@Request} by {@UserName}", requestName, ex.Message, request,
+            //  userName ?? "");
+            throw;
         }
-
-        return response;
     }
 }
 

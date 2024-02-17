@@ -1,0 +1,97 @@
+﻿@page "/tree"
+@* this is working treeview but not useful now so not using *@
+@inject NavigationManager Navigation
+
+@if (States == null || !States.Any())
+    {
+    <p>No data available.</p>
+    }
+else
+    {
+    <MudPaper Width="300px" Elevation="0">
+        <MudTreeView Items="TreeItems" MultiSelection="true" @bind-ActivatedValue="ActivatedValue" @bind-SelectedValues="SelectedValues">
+            <ItemTemplate>
+                <MudTreeViewItem @bind-Expanded="@context.IsExpanded" Items="@context.TreeItems" Value="@context"
+                                 Icon="@context.Icon" Text="@context.Title" EndText="@context.Number?.ToString()" EndTextTypo="@Typo.caption" />
+            </ItemTemplate>
+        </MudTreeView>
+    </MudPaper>
+    }
+
+@code {
+    private TreeItemData ActivatedValue { get; set; }
+
+    private HashSet<TreeItemData> SelectedValues { get; set; }
+
+    private HashSet<TreeItemData> TreeItems { get; set; } = new HashSet<TreeItemData>();
+
+    public class TreeItemData
+        {
+        public string Title { get; set; }
+
+        public string Icon { get; set; }
+
+        public int? Number { get; set; }
+
+        public bool IsExpanded { get; set; }
+
+        public HashSet<TreeItemData> TreeItems { get; set; }
+
+        public TreeItemData(string title, string icon, int? number = null)
+            {
+            Title = title;
+            Icon = icon;
+            Number = number;
+            }
+
+        public override bool Equals(object x)
+            {
+            var other = x as TreeItemData;
+            if (other == null)
+                return false;
+            return other.Title == Title;
+            }
+
+        public override int GetHashCode()
+            {
+            return Title.GetHashCode();
+            }
+        }
+
+
+    List<StateWithConstituencies> States { get; set; }
+    private List<V_Constituency> DataSourceDistrictwise { get; set; } = [];//dont know this is required or not
+    V_Constituency SelectedConstituency { get; set; }
+
+    protected override void OnInitialized()
+        {
+        States = ConstituencyServices.GetAllConstituencyStatewise;
+        DataSourceDistrictwise = ConstituencyServices.GetAllConstituency;
+        States.ForEach(x =>
+        {
+            TreeItems.Add(new TreeItemData(x.StateName, Icons.Filled.Group)//added state
+                    {
+                    TreeItems = new HashSet<TreeItemData>(x.Constituencies.Select(c => new TreeItemData(c.Constituency, Icons.Filled.Info)).ToList())//adding constituencies
+                    });
+
+        });
+
+
+        SelectedConstituency = DataSourceDistrictwise.FirstOrDefault();
+        //had to show latest or trending or like default kind of
+        // Fetch and populate States from server
+        // States = await ApiService.GetStates();
+        }
+
+    // void ExpandState(StateWithConstituencies state)
+    //     {
+    //     state.Expanded = !state.Expanded;
+    //     StateHasChanged();
+    //     }
+
+    // void ShowConstituencyDetails(V_Constituency constituency)
+    //     {
+    //     SelectedConstituency = constituency;
+    //     Navigation.NavigateTo($"#{constituency.Id}");
+    //     }
+}

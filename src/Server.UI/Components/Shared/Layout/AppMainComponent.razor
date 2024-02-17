@@ -1,0 +1,32 @@
+﻿<MudMainContent>
+    <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mb-4 mt-4">
+        <ErrorBoundary @ref="_errorBoundary">
+            <ChildContent>
+                @if (_userProfile != null)
+                    {
+                    <CascadingValue Value="@_userProfile">
+                        @Body
+                    </CascadingValue>
+                    }
+                else
+                    {
+                    @Body
+                    }
+            </ChildContent>
+            <ErrorContent Context="exception">
+                <CustomError Exception="exception"></CustomError>
+            </ErrorContent>
+        </ErrorBoundary>
+    </MudContainer>
+</MudMainContent>
+
+@code {
+    [Parameter]
+    public UserProfile? _userProfile { get; set; }
+
+    [Parameter]
+    public ErrorBoundary? _errorBoundary { set; get; }
+
+    [Parameter]
+    public RenderFragment? Body { get; set; }
+}

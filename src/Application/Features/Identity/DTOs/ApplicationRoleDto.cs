@@ -1,6 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+
+using CleanArchitecture.Blazor.Domain.Identity;
 
 namespace CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
 
@@ -14,4 +16,15 @@ public class ApplicationRoleDto
     [Description("Normalized Name")] public string? NormalizedName { get; set; }
 
     [Description("Description")] public string? Description { get; set; }
+
+    [Description("Tenant Type")] public byte TenantType { get; set; } = (byte)Domain.Enums.TenantTypeEnum.Default;
+    public byte Level { get; set; } = 1;
+
+    private class Mapping : Profile
+    {
+        public Mapping()
+        {
+            CreateMap<ApplicationRole, ApplicationRoleDto>().ReverseMap();
+        }
+    }
 }

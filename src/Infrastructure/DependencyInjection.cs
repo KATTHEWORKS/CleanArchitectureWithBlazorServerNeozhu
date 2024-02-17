@@ -1,6 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+﻿//#define HOSPITAL_SYSTEM
+#define VOTING_SYSTEM
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Text;
@@ -12,17 +15,23 @@ using CleanArchitecture.Blazor.Infrastructure.Constants.ClaimTypes;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Database;
 using CleanArchitecture.Blazor.Infrastructure.PermissionSet;
 using CleanArchitecture.Blazor.Infrastructure.Constants.User;
+using CleanArchitecture.Blazor.Infrastructure.Extensions;
 using CleanArchitecture.Blazor.Infrastructure.Persistence.Interceptors;
 using CleanArchitecture.Blazor.Infrastructure.Services.JWT;
 using CleanArchitecture.Blazor.Infrastructure.Services.MultiTenant;
 using CleanArchitecture.Blazor.Infrastructure.Services.PaddleOCR;
 using CleanArchitecture.Blazor.Infrastructure.Services.Serialization;
+#if VOTING_SYSTEM
+using CleanArchitecture.Blazor.Infrastructure.Services.Vote;
+#endif
 using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using ZiggyCreatures.Caching.Fusion;
+using CleanArchitecture.Blazor.Application.Constants.User;
+using CleanArchitecture.Blazor.Application.Constants;
 
 namespace CleanArchitecture.Blazor.Infrastructure;
 
@@ -80,6 +89,7 @@ public static class DependencyInjection
 
 
         services.AddSingleton<IUsersStateContainer, UsersStateContainer>();
+        services.AddScoped<StaticData>();
 
         return services;
     }
@@ -130,6 +140,9 @@ public static class DependencyInjection
         services.AddScoped<IDbContextFactory<ApplicationDbContext>, BlazorContextFactory<ApplicationDbContext>>();
         services.AddTransient<IApplicationDbContext>(provider =>
             provider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
+        services.AddScoped<CustomUserManager>();
+        services.AddScoped<CustomRoleManager>();
+
         services.AddScoped<ApplicationDbContextInitializer>();
 
         return services;
@@ -147,8 +160,15 @@ public static class DependencyInjection
                     .UseSnakeCaseNamingConvention();
 
             case DbProviderKeys.SqlServer:
-                return builder.UseSqlServer(connectionString,
-                    e => e.MigrationsAssembly("CleanArchitecture.Blazor.Migrators.MSSQL"));
+                if (Debugger.IsAttached)
+                {
+                    return builder.UseSqlServer(connectionString,
+                        e => e.MigrationsAssembly("CleanArchitecture.Blazor.Migrators.MSSQL"))
+                        .EnableDetailedErrors(true);
+                }
+                else
+                    return builder.UseSqlServer(connectionString,
+                        e => e.MigrationsAssembly("CleanArchitecture.Blazor.Migrators.MSSQL"));
 
             case DbProviderKeys.SqLite:
                 return builder.UseSqlite(connectionString,
@@ -176,7 +196,18 @@ public static class DependencyInjection
                 service.Initialize();
                 return service;
             });
+#if VOTING_SYSTEM
+        services.AddSingleton<ConstituencyService>()
+            .AddSingleton<IConstituencyService>(sp =>
+            {
+                var service = sp.GetRequiredService<ConstituencyService>();
+                service.Initialize();
+                return service;
+            });
 
+        services.AddScoped<IVoteSummaryService, VoteSummaryService>();
+        services.AddScoped<IVoteService, VoteService>();
+#endif
         return services.AddSingleton<ISerializer, SystemTextJsonSerializer>()
             .AddScoped<ICurrentUserService, CurrentUserService>()
             .AddScoped<ITenantProvider, TenantProvider>()
@@ -283,14 +314,17 @@ public static class DependencyInjection
                     }
                 };
             });
-        services.ConfigureApplicationCookie(options => { options.LoginPath = "/pages/authentication/login"; });
-        services.AddSingleton<UserService>()
-            .AddSingleton<IUserService>(sp =>
-            {
-                var service = sp.GetRequiredService<UserService>();
-                service.Initialize();
-                return service;
-            });
+        services.ConfigureApplicationCookie(options => { options.LoginPath = UiConstants.LoginUrl; });
+        //services.AddSingleton<UserService>()
+        //    .AddSingleton<IUserService>(sp =>
+        //    {
+        //        var service = sp.GetRequiredService<UserService>();
+        //        service.Initialize();
+        //        return service;
+        //    });
+        //This loads all users at a time,its wrong design so disabling all
+        //instead it can be made like fetch particular user and keep in cache in stack & upto some 100 like if 101 comes clear first earlier kind of
+        //till then commenting the code usage
 
         return services;
     }

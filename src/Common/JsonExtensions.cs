@@ -1,0 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+namespace PublicCommon;
+public static class JsonExtensions
+{
+    public static readonly JsonSerializerOptions IgnoreNullSerializationOptions = new JsonSerializerOptions
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+    public static bool TryDeserialize<T>(string json, out T result)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(json))
+            {
+                result = default;
+                return false;
+            }
+            result = JsonSerializer.Deserialize<T>(json);
+            return true;
+        }
+        //catch (JsonException)
+        //{
+        //    result = default;
+        //    return false;
+        //}
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            result = default;
+            return false;
+        }
+    }
+}
+

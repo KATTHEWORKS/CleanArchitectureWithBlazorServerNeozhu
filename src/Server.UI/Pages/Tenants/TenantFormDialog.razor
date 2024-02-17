@@ -1,3 +1,4 @@
+﻿@using CleanArchitecture.Blazor.Domain.Enums
 @using Severity = Severity
 @using CleanArchitecture.Blazor.Application.Features.Tenants.Commands.AddEdit
 @inherits MudComponentBase
@@ -22,14 +23,26 @@
                     <MudTextField Label="@L[Model.GetMemberDescription(x => x.Name)]" @bind-Value="Model.Name"
                                   For="@(() => Model.Name)"
                                   Required="true"
-                                  RequiredError="@L["Tenant name is required!"]">
+                                  RequiredError="@L["Tenant name is required!"]" Disabled="@isExistingTenant">
                     </MudTextField>
                 </MudItem>
+
+                <MudItem xs="12">
+                    <MudSelect T="byte" Placeholder="Type" @bind-Value="@Model.Type" Clearable="true" Required="true" Disabled="@isExistingTenant">
+                        @foreach (var t in TenantTypes)
+                            {
+                            <MudSelectItem Value="@((byte)t)">@t.ToString()</MudSelectItem>
+                            }
+
+                    </MudSelect>
+                </MudItem>
+
                 <MudItem xs="12">
                     <MudTextField Label="@L[Model.GetMemberDescription(x => x.Description)]" @bind-Value="Model.Description"
                                   For="@(() => Model.Description)">
                     </MudTextField>
                 </MudItem>
+
 
             </MudGrid>
         </MudForm>
@@ -43,15 +56,21 @@
 @code {
     [CascadingParameter] private MudDialogInstance MudDialog { get; set; } = default!;
 
-    [EditorRequired] [Parameter] public AddEditTenantCommand Model { get; set; } = default!;
+    [EditorRequired][Parameter] public AddEditTenantCommand Model { get; set; } = default!;
 
     private MudForm? _form;
     private bool _saving;
-
-    private async Task Submit()
-    {
-        try
+    private List<TenantTypeEnum> TenantTypes = new();
+    private bool isExistingTenant = false;
+    protected override void OnInitialized()
         {
+        isExistingTenant = !string.IsNullOrEmpty(Model.Name);
+        TenantTypes = TenantType.GetAll();
+        }
+    private async Task Submit()
+        {
+        try
+            {
             _saving = true;
             await _form!.Validate().ConfigureAwait(false);
 
@@ -60,24 +79,24 @@
             var result = await Mediator.Send(Model);
 
             if (result.Succeeded)
-            {
+                {
                 MudDialog.Close(DialogResult.Ok(true));
                 Snackbar.Add(ConstantString.SaveSuccess, Severity.Info);
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(result.ErrorMessage, Severity.Error);
+                }
+            }
+        finally
+            {
+            _saving = false;
             }
         }
-        finally
-        {
-            _saving = false;
-        }
-    }
 
     private void Cancel()
-    {
+        {
         MudDialog.Cancel();
-    }
+        }
 
 }

@@ -95,6 +95,7 @@ public static class ConstantString
     public static string Processing => Localize("Processing...");
     public static string DeleteConfirmationTitle => Localize("Delete Confirmation");
     public static string LogoutConfirmationTitle => Localize("Logout Confirmation");
+    public static string LogoutNecessaryConfirmationTitle => Localize("Logout Is Necessary To Reflect Changes");
 
     public static string LogoutConfirmation =>
         Localize("You are attempting to log out of application. Do you really want to log out?");

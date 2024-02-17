@@ -1,9 +1,12 @@
 ﻿using System.Net.Http.Headers;
 using System.Reflection;
+using Blazor.Server.UI.Services.Navigation;
 using BlazorDownloadFile;
+using CleanArchitecture.Blazor.Infrastructure;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Localization;
 using CleanArchitecture.Blazor.Server.Hubs;
 using CleanArchitecture.Blazor.Server.Middlewares;
+using CleanArchitecture.Blazor.Server.UI.Components.Shared;
 using CleanArchitecture.Blazor.Server.UI.Hubs;
 using CleanArchitecture.Blazor.Server.UI.Services;
 using CleanArchitecture.Blazor.Server.UI.Services.Layout;
@@ -52,6 +55,8 @@ public static class DependencyInjection
         }).AddTransientHttpErrorPolicy(policy => policy.WaitAndRetryAsync(3, _ => TimeSpan.FromSeconds(30)));
 
         services.AddScoped<HubClient>();
+
+        services.AddScoped<ILogOut, LogOut>();
 
         services.AddMudExtensions()
             .AddScoped<AuthenticationStateProvider, BlazorAuthenticationStateProvider>()

@@ -14,8 +14,28 @@
         <LangVersion>default</LangVersion>
     </PropertyGroup>
 
+    <PropertyGroup Label="Override Stack trace file locations">
+        <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+    </PropertyGroup>
+
+    
     <ItemGroup>
         <EmbeddedResource Include="Resources\EmailTemplates\*" />
+    </ItemGroup>
+
+    
+    <ItemGroup>
+      <Content Remove="Pages\Vote\ConstituencyChoose.razor" />
+      <Content Remove="Pages\Vote\Kpi.razor" />
+      <Content Remove="Pages\Vote\KpiRatingComment.razor" />
+      <Content Remove="Pages\Vote\Tree.razor" />
+      <Content Remove="Pages\Vote\Vote.razor" />
+      <Content Remove="Pages\Vote\VoteSummary.razor" />
+    </ItemGroup>
+
+    
+    <ItemGroup>
+      <None Remove="Pages\Vote\Structure.txt" />
     </ItemGroup>
 
     <ItemGroup>

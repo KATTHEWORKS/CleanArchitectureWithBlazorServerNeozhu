@@ -1,10 +1,17 @@
 ﻿@inject NavigationManager NavigationManager
 
 @code {
+    [Parameter]
+    public string ReturnUrl { get; set; }
 
     protected override void OnInitialized()
-    {
-        NavigationManager.NavigateTo("/pages/authentication/login", false);
-    }
+        {
+        // var redirectUrl = $"/pages/authentication/login{(string.IsNullOrEmpty(ReturnUrl) ? "" : $"returnUrl={ReturnUrl})}";
+        var redirectUrl = "/pages/authentication/login";
+        if (!string.IsNullOrEmpty(ReturnUrl))
+            redirectUrl += $"returnUrl={ReturnUrl}";
+
+        NavigationManager.NavigateTo(redirectUrl, false);
+        }
 
 }

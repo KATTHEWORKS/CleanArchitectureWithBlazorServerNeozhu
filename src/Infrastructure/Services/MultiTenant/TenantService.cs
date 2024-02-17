@@ -1,8 +1,13 @@
-﻿using AutoMapper;
+﻿using System.Linq.Dynamic.Core;
+using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
+using CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
 using CleanArchitecture.Blazor.Application.Features.Tenants.Caching;
 using CleanArchitecture.Blazor.Application.Features.Tenants.DTOs;
+using CleanArchitecture.Blazor.Domain.Enums;
+using CleanArchitecture.Blazor.Domain.Identity;
+using CleanArchitecture.Blazor.Infrastructure.Common.Extensions;
 using LazyCache;
 using ZiggyCreatures.Caching.Fusion;
 
@@ -48,5 +53,14 @@ public class TenantService : ITenantService
                  .ProjectTo<TenantDto>(_mapper.ConfigurationProvider)
                  .ToList()) ?? new List<TenantDto>();
         OnChange?.Invoke();
+    }
+
+    //public async Task<byte> GetTenantType(string tenantId)
+    //{
+    //    return await _context.Tenants.Where(x => x.Id == tenantId).Select(x => x.Type).FirstOrDefaultAsync();
+    //}
+    public byte GetTenantType(string tenantId)
+    {
+        return DataSource.Where(x => x.Id == tenantId).Select(x => x.Type).FirstOrDefault();
     }
 }

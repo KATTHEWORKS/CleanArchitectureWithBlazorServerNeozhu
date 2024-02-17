@@ -1,12 +1,17 @@
-using CleanArchitecture.Blazor.Infrastructure.Constants.Role;
+﻿//using Blazor.Server.UI.Models.NavigationMenu;
 using CleanArchitecture.Blazor.Server.UI.Models.NavigationMenu;
 
-namespace CleanArchitecture.Blazor.Server.UI.Services.Navigation;
+
+using CleanArchitecture.Blazor.Domain.Enums;
+using CleanArchitecture.Blazor.Server.UI.Services.Navigation;
+
+namespace Blazor.Server.UI.Services.Navigation;
 
 public class MenuService : IMenuService
 {
     private readonly List<MenuSectionModel> _features = new()
     {
+        //If roles not mentioned means anyone can access with authentication
         new MenuSectionModel
         {
             Title = "Application",
@@ -38,7 +43,7 @@ public class MenuService : IMenuService
                 new()
                 {
                     Title = "Analytics",
-                    Roles = new[] { RoleName.Admin, RoleName.Users },
+                    Roles = RoleType.GetAllAdminsAsStringArray(),
                     Icon = Icons.Material.Filled.Analytics,
                     Href = "/analytics",
                     PageStatus = PageStatus.ComingSoon
@@ -46,7 +51,7 @@ public class MenuService : IMenuService
                 new()
                 {
                     Title = "Banking",
-                    Roles = new[] { RoleName.Admin, RoleName.Users },
+                    Roles = RoleType.GetAllAdminsAsStringArray(),
                     Icon = Icons.Material.Filled.Money,
                     Href = "/banking",
                     PageStatus = PageStatus.ComingSoon
@@ -54,7 +59,7 @@ public class MenuService : IMenuService
                 new()
                 {
                     Title = "Booking",
-                    Roles = new[] { RoleName.Admin, RoleName.Users },
+                    Roles = RoleType.GetAllAdminsAsStringArray() ,
                     Icon = Icons.Material.Filled.CalendarToday,
                     Href = "/booking",
                     PageStatus = PageStatus.ComingSoon
@@ -64,7 +69,7 @@ public class MenuService : IMenuService
         new MenuSectionModel
         {
             Title = "MANAGEMENT",
-            Roles = new[] { RoleName.Admin },
+            //Roles = new[] { RoleNamesEnum.ROOTADMIN.ToString() , RoleNamesEnum.HOSPITALADMIN.ToString(), RoleNamesEnum.ELEVATEADMINGROUP.ToString(), RoleNamesEnum.ELEVATEADMINVIEWER.ToString() },
             SectionItems = new List<MenuSectionItemModel>
             {
                 new()

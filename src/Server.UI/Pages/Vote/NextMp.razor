@@ -1,0 +1,192 @@
+﻿@page "/rating/{ConstituencyIdSelected:int?}"
+@* @page "/rating/{StateSelected:string?}/{ConstituencyIdSelected:int?}" *@
+@page "/rating"
+
+
+<MudContainer>
+    <MudPaper>
+        <MudGrid>
+            <MudItem xs="12">
+                @* <MudSelect @bind-Value="StateSelected" Label="State" Variant="Variant.Filled" T="string">
+                @foreach (var state in states)
+                {
+                <MudSelectItem Value="state">@state</MudSelectItem>
+                }
+                </MudSelect> *@
+                <MudSelect T="string" Value="StateSelected"
+                           ValueChanged="StateChanged"
+                           Label="State"
+                           Variant="Variant.Filled"
+                           AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var state in states)
+                        {
+                        <MudSelectItem Value="state">@state</MudSelectItem>
+                        }
+                </MudSelect>
+
+            </MudItem>
+            <MudItem xs="12">
+                @*  <MudSelect @bind-Value="ConstituencyIdSelected" Label="Constituency" T="int" Variant="Variant.Filled">
+                @foreach (var constituency in constituencies)
+                {
+                <MudSelectItem Value="constituency.Id">@constituency.Constituency</MudSelectItem>
+                }
+                </MudSelect> *@
+                <MudSelect T="int" Value="ConstituencyIdSelected"
+                           ValueChanged="ConstituencyChanged"
+                           Label="Constituency"
+                           Variant="Variant.Filled"
+                           AnchorOrigin="Origin.BottomCenter">
+                    @foreach (var constituency in constituencies)
+                        {
+                        <MudSelectItem Value="constituency.Id">@constituency.Constituency</MudSelectItem>
+                        }
+                </MudSelect>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+    <VoteUpsert ConstituencyId="@ConstituencyIdSelected" IsToAdd="false"></VoteUpsert>
+    @if (VotesCount == 0 && ConstituencyIdSelected > 0)
+        {
+        <Label> Still No one voted for this constituency</Label>
+        }
+    @if (kPIVotes != null)
+        {
+        <MudTable Items="kPIVotes" Class="mt-4">
+            <HeaderContent>
+                <MudTh>Key Point</MudTh>
+                @if (VotesCount > 0)
+                    {
+                    <MudTh>Rating</MudTh>
+                    }
+                @*  <MudTh>Description</MudTh> *@
+            </HeaderContent>
+            <RowTemplate Context="rating">
+                @if (@V_KPI.Get(rating.KPI) != null)
+                    {
+                    <MudTd>@rating.KPI - @V_KPI.Get(rating.KPI).NameFull</MudTd>
+
+                    @if (VotesCount > 0)
+                        {
+                        <MudTd>@rating.AggregateKPIVote</MudTd>
+                        }
+                    @*  <MudTd>@rating.KeyPoint.Description</MudTd> *@
+                    }
+            </RowTemplate>
+        </MudTable>
+        }
+</MudContainer>
+
+@code {
+    // @inject NavigationManager NavigationManager;
+
+    [Parameter]
+    public string StateSelected { get; set; }
+
+    [Parameter]
+    public int ConstituencyIdSelected { get; set; }
+
+    int VotesCount = 0;
+
+    List<VoteSummary_KPIVote> kPIVotes = new();
+    
+    //to select on dropdown
+    List<string> states { get; set; } = [];//this shows always all states make it on clientside cache even for offline
+    List<V_Constituency> constituencies { get; set; } = [];//this shows only for particular state unless first time when no selection
+    List<V_Constituency> allConstituencies { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+        {
+
+        await LoadStateAndConstituencies();
+        await LoadKpiVotes();
+
+        // Download summary locally after page load
+        await DownloadSummaryLocally();
+        // Refresh summary every 1 hour
+        var timer = new System.Timers.Timer();
+        timer.Elapsed += async (sender, e) => await DownloadSummaryLocally();
+        timer.Interval = 3600000; // 1 hour in milliseconds
+        timer.Start();
+        }
+
+    async Task LoadKpiVotes()
+        {
+        VotesCount = 0;
+        //todo this can be cached or whatever from DownloadSummaryLocally()
+        if (ConstituencyIdSelected > 0 && allConstituencies.Exists(c=>c.Id== ConstituencyIdSelected))
+            {
+            var v_VoteSummary = await VoteSummaryServices.ReadByConstituencyId(ConstituencyIdSelected);
+            // Implement your service method to fetch
+            if (v_VoteSummary != null)
+                {
+                VotesCount = v_VoteSummary.VotesCount;
+                kPIVotes = v_VoteSummary.KPIVotes;
+                }
+            else
+                kPIVotes = null;
+
+            //ratings
+            }
+        if (kPIVotes == null || kPIVotes.Count == 0)
+            {
+            //load default kpi data
+            kPIVotes = V_KPI.Standard.Select(x => new VoteSummary_KPIVote() { KPI = x.Id }).ToList();
+            }
+        StateHasChanged();
+        }
+    async Task LoadAllStateAndConstituencies()//only for first time on client or anywheere
+        { //fetch once and server forever static datas
+        states = ConstituencyServices!.GetAllStateNames();//choose distinct
+        allConstituencies = ConstituencyServices!.GetAllConstituency;//choose distinct
+        }
+    async Task LoadStateAndConstituencies()
+        {
+        if (states == null || states.Count == 0 || allConstituencies == null || allConstituencies.Count == 0)
+            await LoadAllStateAndConstituencies();
+
+        if (allConstituencies is not null && allConstituencies.Count > 0 )
+            {
+            if (ConstituencyIdSelected > 0 && allConstituencies.Exists(c => c.Id == ConstituencyIdSelected))
+                {
+                StateSelected = allConstituencies.Find(x => x.Id == ConstituencyIdSelected).StateName;
+                constituencies = allConstituencies.Where(x => x.StateName == StateSelected).ToList();
+                }
+            else if (!string.IsNullOrEmpty(StateSelected))
+                {
+                constituencies = allConstituencies.Where(x => x.StateName == StateSelected).ToList();
+                ConstituencyIdSelected = constituencies.FirstOrDefault().Id;//load firstone
+                }
+
+            if (constituencies is null || constituencies.Count == 0)
+                constituencies = allConstituencies;//it can be like top or favourite or trending one
+            }
+        }
+    async Task DownloadSummaryLocally()
+        {
+        // Fetch and cache summary data
+        // Example: summaryData = await DataService.GetSummary();
+        }
+
+    public async Task StateChanged(string stateName)
+        {
+        StateSelected = stateName;
+        ConstituencyIdSelected = 0;
+        await LoadStateAndConstituencies();
+        await LoadKpiVotes();
+
+        // StateHasChanged(); // Refresh UI
+        }
+
+    public async Task ConstituencyChanged(int constituencyIdSelected)
+        {
+        ConstituencyIdSelected = constituencyIdSelected;
+        await LoadStateAndConstituencies();
+        await LoadKpiVotes();
+        }
+
+    public void Dispose()
+        {
+        // Dispose timer or any resources if needed
+        }
+}

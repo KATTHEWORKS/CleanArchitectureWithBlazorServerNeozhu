@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CleanArchitecture.Blazor.Application.Common.Interfaces;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
+ 
 using CleanArchitecture.Blazor.Domain.Identity;
 using CleanArchitecture.Blazor.Infrastructure;
 using CleanArchitecture.Blazor.Infrastructure.Extensions;
@@ -112,7 +113,7 @@ public class Testing
     {
         using var scope = _scopeFactory.CreateScope();
 
-        var userManager = scope.ServiceProvider.GetService<UserManager<ApplicationUser>>();
+        var userManager = scope.ServiceProvider.GetService<CustomUserManager>();
 
         var user = new ApplicationUser { UserName = userName, Email = userName };
 
@@ -120,11 +121,15 @@ public class Testing
 
         if (roles.Any())
         {
-            var roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
+            //var roleManager = scope.ServiceProvider.GetService<RoleManager<IdentityRole>>();
+            var roleManager = scope.ServiceProvider.GetService<CustomRoleManager>();
 
-            foreach (var role in roles) await roleManager.CreateAsync(new IdentityRole(role));
+            //foreach (var role in roles) await roleManager.CreateAsync(new IdentityRole(role));
+            foreach (var role in roles) await roleManager.CreateAsync(new ApplicationRole(role));
 
-            await userManager.AddToRolesAsync(user, roles);
+            //todo enable below line by making context object
+            //await userManager.AddToRolesAsyncWithTenant(user,user.DefaultTenantId, context, roles);
+            // await userManager.AddToRolesAsync(user, roles);
         }
 
         if (result.Succeeded)

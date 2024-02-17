@@ -1,4 +1,4 @@
-using CleanArchitecture.Blazor.Application.Common.Interfaces.Identity;
+﻿using CleanArchitecture.Blazor.Application.Common.Interfaces.Identity;
 using CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
 
 namespace CleanArchitecture.Blazor.Server.UI.Components.Autocompletes;
@@ -26,7 +26,7 @@ public class PickSuperiorIdAutocomplete : MudAutocomplete<string>
     private async Task<IEnumerable<string>> SearchKeyValues(string value, CancellationToken cancellation)
     {
         // if text is null or empty, show complete list
-        _userList = await IdentityService.GetUsers(TenantId, cancellation);
+        _userList = await IdentityService.GetUsersByTenantId(TenantId, cancellation);
         List<string> result = new();
 
         if (string.IsNullOrEmpty(value) && _userList is not null)

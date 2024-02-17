@@ -1,4 +1,7 @@
-﻿namespace CleanArchitecture.Blazor.Application.Pipeline.PreProcessors;
+﻿using CleanArchitecture.Blazor.Application.Common.Interfaces;
+using CleanArchitecture.Blazor.Application.Constants.User;
+
+namespace CleanArchitecture.Blazor.Application.Pipeline.PreProcessors;
 
 public sealed class ValidationPreProcessor<TRequest> : IRequestPreProcessor<TRequest> where TRequest : notnull
 {
@@ -11,6 +14,7 @@ public sealed class ValidationPreProcessor<TRequest> : IRequestPreProcessor<TReq
 
     public async Task Process(TRequest request, CancellationToken cancellationToken)
     {
+        try { 
         if (!_validators.Any()) return;
 
         var validationContext = new ValidationContext<TRequest>(request);
@@ -18,5 +22,14 @@ public sealed class ValidationPreProcessor<TRequest> : IRequestPreProcessor<TReq
         var failures = await _validators.ValidateAsync(validationContext, cancellationToken);
 
         if (failures.Any()) throw new ValidationException(failures);
+        }
+        catch (Exception ex)
+        {
+            var requestName = typeof(TRequest).Name;
+            var message = $" {requestName}: {ex.Message} with {request} ";
+            Console.WriteLine(ex.ToString() + message);
+           
+            throw;
+        }
     }
 }

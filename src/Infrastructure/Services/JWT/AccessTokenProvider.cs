@@ -1,9 +1,17 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography;
+using CleanArchitecture.Blazor.Application.Common.Interfaces.Identity.DTOs;
+using System.Text.Json;
+using AutoMapper;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
 using CleanArchitecture.Blazor.Domain.Identity;
 using CleanArchitecture.Blazor.Infrastructure.Extensions;
+using DocumentFormat.OpenXml.InkML;
+using FluentEmail.Core;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Newtonsoft.Json;
+using CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services.JWT;
 
@@ -19,7 +27,10 @@ public class AccessTokenProvider : IAccessTokenProvider
     private readonly string _tokenKey = nameof(_tokenKey);
     private readonly IAccessTokenValidator _tokenValidator;
     private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
-    private readonly UserManager<ApplicationUser> _userManager;
+    //private readonly UserManager<ApplicationUser> _userManager;
+    private readonly CustomUserManager _userManager;
+
+    private readonly IMapper _mapper;
 
     public AccessTokenProvider(IServiceScopeFactory scopeFactory,
         ProtectedLocalStorage localStorage,
@@ -28,10 +39,10 @@ public class AccessTokenProvider : IAccessTokenProvider
         IRefreshTokenValidator refreshTokenValidator,
         IAccessTokenGenerator tokenGenerator,
         ITenantProvider tenantProvider,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser, IMapper mapper)
     {
         var scope = scopeFactory.CreateScope();
-        _userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        _userManager = scope.ServiceProvider.GetRequiredService<CustomUserManager>();
         _userClaimsPrincipalFactory =
             scope.ServiceProvider.GetRequiredService<IUserClaimsPrincipalFactory<ApplicationUser>>();
         _localStorage = localStorage;
@@ -41,6 +52,7 @@ public class AccessTokenProvider : IAccessTokenProvider
         _tokenGenerator = tokenGenerator;
         _tenantProvider = tenantProvider;
         _currentUser = currentUser;
+        _mapper = mapper;
     }
 
     public string? AccessToken { get; private set; }
@@ -49,11 +61,16 @@ public class AccessTokenProvider : IAccessTokenProvider
     public async Task<string?> Login(ApplicationUser applicationUser)
     {
         var principal = await _userClaimsPrincipalFactory.CreateAsync(applicationUser);
+
+        SetUserPropertiesFromClaimsPrincipal(principal);
+        if (_currentUser.UserRoleTenants != null && _currentUser.UserRoleTenants.Count>0)
+            applicationUser.UserRoleTenants.ForEach(x => _currentUser.UserRoleTenants.Add(_mapper.Map<UserRoleTenantDto>(x)));
+
+
         var token = await _loginService.LoginAsync(principal);
         await _localStorage.SetAsync(_tokenKey, token);
         AccessToken = token.AccessToken;
         RefreshToken = token.RefreshToken;
-        SetUserPropertiesFromClaimsPrincipal(principal);
         return AccessToken;
     }
 
@@ -105,13 +122,13 @@ public class AccessTokenProvider : IAccessTokenProvider
 
     private ClaimsPrincipal SetUserPropertiesFromClaimsPrincipal(ClaimsPrincipal principal)
     {
-        _tenantProvider.TenantId = principal.GetTenantId();
+        _tenantProvider.TenantId = principal.GetDefaultTenantId();
         _tenantProvider.TenantName = principal.GetTenantName();
         _currentUser.UserId = principal.GetUserId();
         _currentUser.UserName = principal.GetUserName();
-        _currentUser.TenantId = principal.GetTenantId();
-        _currentUser.TenantName =
-            principal.GetTenantName(); // This seems to be an error in original code. Fixing it here.
+        _currentUser.DefaultTenantId = principal.GetDefaultTenantId();
+        _currentUser.DefaultTenantName = principal.GetTenantName(); // This seems to be an error in original code. Fixing it here.
+        _currentUser.UserRoleTenants = principal.GetUserRoleTenants();
         return principal;
     }
 

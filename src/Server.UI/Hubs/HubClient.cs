@@ -1,4 +1,4 @@
-using CleanArchitecture.Blazor.Infrastructure.Services.JWT;
+﻿using CleanArchitecture.Blazor.Infrastructure.Services.JWT;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 
@@ -6,6 +6,11 @@ namespace CleanArchitecture.Blazor.Server.UI.Hubs;
 
 public sealed class HubClient : IAsyncDisposable
 {
+    //public sealed class HubClient : IAsyncDisposable -client sends/each click request to server
+    //public class ServerHub : Hub<ISignalRHub> -server which recives each request 
+    //ServerHubWrapper is another linked entity where signlaR configuration exists.For detailed errors enable here only
+    //UI browser to server call happens throgh these only & in server side recieved & process happens always
+    
     public delegate Task MessageReceivedEventHandler(object sender, MessageReceivedEventArgs e);
 
     private readonly HubConnection _hubConnection;
@@ -42,7 +47,10 @@ public sealed class HubClient : IAsyncDisposable
             message => NotificationReceivedEvent?.Invoke(this, message));
 
         _hubConnection.On<string, string>(nameof(ISignalRHub.SendMessage),
-            (from, message) => { MessageReceivedEvent?.Invoke(this, new MessageReceivedEventArgs(from, message)); });
+            (from, message) =>
+            {
+                MessageReceivedEvent?.Invoke(this, new MessageReceivedEventArgs(from, message));
+            });
 
         _hubConnection.On<string, string, string>(nameof(ISignalRHub.SendPrivateMessage),
             (from, to, message) =>

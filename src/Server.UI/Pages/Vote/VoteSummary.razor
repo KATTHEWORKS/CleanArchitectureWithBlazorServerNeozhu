@@ -1,0 +1,56 @@
+﻿<h3>Summary of @vote_Summary.Constituency.Constituency.ToUpper() Constituency </h3>
+
+<h3>Current Sitting MP:@vote_Summary.Constituency.ExistingMpName</h3>
+@if (vote_Summary != null)
+    {
+    @if (vote_Summary.AggregateVote != 0 && @vote_Summary.VotesCount != 0)
+        {
+        <h3>@vote_Summary.AggregateVote.ToString()/(@RatingEnum.GreatWork) by @vote_Summary.VotesCount members</h3>
+        }
+    <VoteUpsert ConstituencyId="@vote_Summary.ConstituencyId" IsToAdd=@IsToAdd></VoteUpsert>
+    @if (vote_Summary.KPIVotes is not null && vote_Summary.KPIVotes.Count > 0)
+        {
+        <h3>Others Opinion Summary</h3>
+        @foreach (var item in vote_Summary.KPIVotes)
+            {
+            <h2> @V_KPI.Get(item.KPI).NameFull-@item.AggregateKPIVote</h2>
+            foreach (var ratingCount in @item.RatingTypeCountsList)
+                {
+                <small>@Enum.Parse(typeof(RatingEnum), ratingCount.RatingTypeByte.ToString()) -by @ratingCount.Count votes</small>
+                }
+            }
+        }
+    @*  else
+        {
+        <h3>you are the first to add opinion for  @vote_Summary.Constituency.Constituency.ToUpper() Constituency, Congratulations.</h3>
+        } *@
+    }
+
+@code {
+    [Parameter]
+    public V_VoteSummary vote_Summary { get; set; }
+    [Parameter]
+    public bool IsToAdd { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+    private string? userId;
+    protected override async Task OnInitializedAsync()
+        {
+        if (AuthState == null) return;
+        var state = await AuthState;
+        if (state == null) return;
+        userId = state.GetUserId();
+        if (!string.IsNullOrEmpty(userId))
+            {
+            if (vote_Summary is not null)
+                {
+                vote_Summary.Constituency = ConstituencyServices.GetConstituency(vote_Summary.ConstituencyId);
+
+                }
+
+            }
+        //var myVote = state.User.GetMyVote();
+        }
+
+}

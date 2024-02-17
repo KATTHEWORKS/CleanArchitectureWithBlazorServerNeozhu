@@ -8,6 +8,11 @@
         <Nullable>enable</Nullable>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
+
+    <PropertyGroup Label="Override Stack trace file locations">
+        <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
+    </PropertyGroup>
+    
     <ItemGroup>
         <PackageReference Include="Fluxor.Blazor.Web" Version="5.9.1" />
         <PackageReference Include="Fluxor.Blazor.Web.ReduxDevTools" Version="5.9.1" />
@@ -28,6 +33,7 @@
     
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
+        <ProjectReference Include="..\Common\PublicCommon.csproj" />
         <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     </ItemGroup>
 

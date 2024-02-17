@@ -14,10 +14,10 @@ public class AdvancedDocumentsSpecification : Specification<Document>
             CultureInfo.CurrentCulture);
         Query.Where(p =>
                     (p.CreatedBy == filter.CurrentUser.UserId && p.IsPublic == false) ||
-                    (p.IsPublic == true && p.TenantId == filter.CurrentUser.TenantId),
+                    (p.IsPublic == true && p.TenantId == filter.CurrentUser.DefaultTenantId),
                 filter.ListView == DocumentListView.All)
             .Where(p =>
-                    p.CreatedBy == filter.CurrentUser.UserId && p.TenantId == filter.CurrentUser.TenantId,
+                    p.CreatedBy == filter.CurrentUser.UserId && p.TenantId == filter.CurrentUser.DefaultTenantId,
                 filter.ListView == DocumentListView.My)
             .Where(q => q.Created >= start && q.Created <= end, filter.ListView == DocumentListView.CreatedToday)
             .Where(q => q.Created >= last30day, filter.ListView == DocumentListView.Created30Days)

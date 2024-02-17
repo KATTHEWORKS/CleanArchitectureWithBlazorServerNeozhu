@@ -33,12 +33,15 @@ public class PickUserAutocomplete : MudAutocomplete<string>
         ResetValueOnEmptyText = true;
         ShowProgressIndicator = true;
         MaxItems = 50;
-        _userList = string.IsNullOrEmpty(TenantId) ? UserService.DataSource : UserService.DataSource.Where(x => x.TenantId == TenantId).ToList();
+        _userList = string.IsNullOrEmpty(TenantId) ? UserService.DataSource : UserService.DataSource.Where(x => x.DefaultTenantId == TenantId).ToList();
         return base.SetParametersAsync(parameters);
     }
 
     private Task<IEnumerable<string>> SearchKeyValues(string value, CancellationToken cancellation)
     {
+        // if text is null or empty, show complete list
+        //_userList = DataProvider.DataSource.Where(x => x.DefaultTenantId == TenantId).ToList();
+        //madhu check here
 
         var result = string.IsNullOrEmpty(value) ?
         _userList?.Select(x => x.UserName) :

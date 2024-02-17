@@ -1,0 +1,35 @@
+﻿<h3>VoteKPIRatingComment</h3>
+
+@if (modelKpi.V_KPI is not null)
+    {
+    <Kpi kpi="@modelKpi.V_KPI"></Kpi>
+    }
+<MudTextField For="@(() => modelKpi.Rating)" @bind-Value="modelKpi.Rating" OnValueChanged="OnRatingChanged" Label="Rating" Variant="Variant.Text" ReadOnly="true"></MudTextField>
+<MudTextField For="@(() => modelKpi.Comment)" @bind-Value="modelKpi.Comment" OnValueChanged="OnCommentChanged" Label="Comment" Variant="Variant.Text" ReadOnly="true"></MudTextField>
+
+@code {
+    [Parameter]
+    public VoteKPIRatingComment modelKpi { get; set; }
+
+    [Parameter]
+    public EventCallback<VoteKPIRatingComment> modelKpiChanged { get; set; }
+
+    private async Task OnRatingChanged(sbyte? newValue)
+        {
+        modelKpi.Rating = newValue;
+        await modelKpiChanged.InvokeAsync(modelKpi);
+        }
+    private async Task OnCommentChanged(string? newValue)
+        {
+        modelKpi.Comment = newValue;
+        await modelKpiChanged.InvokeAsync(modelKpi);
+        }
+
+    protected override void OnInitialized()
+        {
+        if (modelKpi is not null && modelKpi.V_KPI is null && modelKpi.KPI > 0)
+            {
+            modelKpi.V_KPI = V_KPI.Get(modelKpi.KPI);
+            }
+        }
+}

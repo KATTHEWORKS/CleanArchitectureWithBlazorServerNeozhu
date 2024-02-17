@@ -28,16 +28,16 @@
                         </MudStack>
                     }
                     else
-                    {
+                        {
                         <MudAvatar>
                             @if (string.IsNullOrEmpty(UserProfile?.ProfilePictureDataUrl))
-                            {
+                                {
                                 <MudImage>@UserProfile?.UserName?.First()</MudImage>
-                            }
+                                }
                             else
-                            {
+                                {
                                 <MudImage Src="@UserProfile?.ProfilePictureDataUrl"></MudImage>
-                            }
+                                }
                         </MudAvatar>
 
                         <MudStack Justify="Justify.SpaceBetween" Spacing="0">
@@ -81,10 +81,19 @@
     [Parameter] public EventCallback<EventArgs> OnSettingClick { get; set; }
     [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
     private bool IsLoading => UserProfileState.Value.IsLoading;
-    private UserProfile UserProfile => UserProfileState.Value.UserProfile;
+    //private UserProfile UserProfile => UserProfileState.Value.UserProfile;
+    private UserProfile UserProfile { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
 
-    private async Task OnLogout()
-    {
+    protected override async Task OnInitializedAsync()
+        {
+        var state = await AuthState;
+        UserProfile = state.User.GetUserProfileFromClaim();
+        }
+
+    internal async Task OnLogout()
+        {
         var parameters = new DialogParameters<LogoutConfirmation>
         {
             { x => x.ContentText, $"{ConstantString.LogoutConfirmation}" },
@@ -96,10 +105,10 @@
         var result = await dialog.Result;
 
         if (!result.Canceled)
-        {
+            {
             await TokenProvider.RemoveAuthDataFromStorage();
             ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
             await new ExternalAuth(JS).Logout();
+            }
         }
-    }
 }

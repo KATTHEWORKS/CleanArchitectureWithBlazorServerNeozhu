@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
+using System;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
 using CleanArchitecture.Blazor.Application.Features.Tenants.Caching;
 using CleanArchitecture.Blazor.Application.Features.Tenants.DTOs;
@@ -15,6 +16,12 @@ public class AddEditTenantCommand : ICacheInvalidatorRequest<Result<string>>
     [Description("Tenant Name")] public string? Name { get; set; }
 
     [Description("Description")] public string? Description { get; set; }
+
+    public byte Type { get; set; } = (byte)Domain.Enums.TenantTypeEnum.Default;
+    public bool Active { get; set; } = true;
+
+    public DateTime? ApprovedDate { get; set; }
+    public string? ApprovedByUser { get; set; }
 
     public string CacheKey => TenantCacheKey.GetAllCacheKey;
     public CancellationTokenSource? SharedExpiryTokenSource => TenantCacheKey.SharedExpiryTokenSource();
@@ -60,9 +67,10 @@ public class AddEditTenantCommandHandler : IRequestHandler<AddEditTenantCommand,
         else
         {
             item = _mapper.Map(request, item);
+            _context.Tenants.Update(item);//Need to verify the right way
+           // item.AddDomainEvent(new UpdatedEvent<Tenant>(item));
         }
-
-        await _context.SaveChangesAsync(cancellationToken);
+        var result=await _context.SaveChangesAsync(cancellationToken);
         _tenantsService.Refresh();
         return await Result<string>.SuccessAsync(item.Id);
     }

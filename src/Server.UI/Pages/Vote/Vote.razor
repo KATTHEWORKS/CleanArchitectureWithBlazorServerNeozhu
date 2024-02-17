@@ -1,0 +1,19 @@
+﻿@page "/vote"
+@page "/vote/{Id:int}"
+@page "/vote/{Id:int}/{https:bool}"
+
+@attribute [AllowAnonymous]
+
+<h3>Vote</h3>
+<h3>Welcome to vote system transparent</h3>
+
+<ConstituencyChoose ConstituencyId=@Id IsToAdd=@https></ConstituencyChoose>
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    [Parameter]
+    public bool https { get; set; }//for to add directly on UpSert page
+}
+

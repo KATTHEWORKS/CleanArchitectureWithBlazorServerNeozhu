@@ -1,0 +1,194 @@
+﻿@* @page "/Vote/VoteUpsert/{ConstituencyId:int}" *@
+@inherits OwningComponentBase
+
+<MudContainer>
+    @if (ConstituencyId > 0)
+        {
+        @if (AuthState != null && newUpdatedVote != null)//means loggedin
+            {
+            @*   <MudTypography Variant="TypographyVariant.H5">Vote for Your Constituency</MudTypography> *@
+            @if (IsToAdd)
+                {
+                if (VoteExistsForConstituency && existingVote != null)
+                    {
+                    if (ConstituencyId != existingVote.ConstituencyId)
+                        {
+                        <h3>This overwrites existing Vote of @existingVote.ConstituencyId Constituency which voted on @existingVote.Created </h3>
+                        }
+                    else
+                        {
+                        <h3>Voted to @existingVote.ConstituencyId on @existingVote.Created </h3>
+                        }
+                    @* ideally date should show modified if not then created *@
+                    }
+                else
+                    {
+                    <h3>Adding vote now</h3>
+                    }
+
+                @foreach (var keyPoint in TempVoteKPIRatingComments)
+                    {
+                    var kkk = V_KPI.Get(keyPoint.KPI);
+                    if (kkk is not null)
+                        {
+                        <MudPaper Margin="Margin.Auto" Class="mt-3">
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudTypography Variant="TypographyVariant.H6">@kkk.Id-@kkk.NameShort</MudTypography>
+                                    <MudSelect T="sbyte?" @bind-Value="keyPoint.Rating" Variant="Variant.Filled" Label="Rating">
+                                        @foreach (var rate in Enum.GetValues<RatingEnum>())
+                                            {
+                                            <MudSelectItem T="sbyte?" Value="(sbyte?)rate">@rate</MudSelectItem>
+                                            }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField Label="Comments" Multiline="true" @bind-Value="keyPoint.Comment" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                        }
+                    }
+                <!-- Submit Button -->
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSubmit">Submit Vote</MudButton>
+                }
+            else
+                {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddMyVote">@(ConstituencyId == existingVote.ConstituencyId ? "Update" : "Add") My Vote</MudButton>
+                }
+            }
+        else @* anonymous *@
+            {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="LoginThenRedirectToAdd">Login and Add My Vote</MudButton>
+            @* <button @onclick="LoginThenRedirectToAdd">Login and Add My Vote</button> *@
+            }
+        }
+    else
+        {
+        <MudTypography Variant="TypographyVariant.H6">Please choose State & Constituency to View summary.</MudTypography>
+        }
+</MudContainer>
+
+
+@code {
+    [Parameter]
+    public int ConstituencyId { get; set; }
+    [Parameter]
+    public bool IsToAdd { get; set; }
+
+    private const byte SystemType = 1;//for MP its 1
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    @inject NavigationManager Navigation;
+    public V_Vote? newUpdatedVote { get; set; }
+    public V_Vote? existingVote { get; set; }
+    private string ButtonSubmitMessage = "Submit My Prompt Opinion.";
+    private bool VoteExistsForConstituency = false;
+    private string? userId;
+    private List<VoteKPIRatingComment> TempVoteKPIRatingComments;// = model.VoteKPIRatingComments;
+
+    protected override async Task OnInitializedAsync()
+        {
+        await BaseSettingsCorrection();
+        }
+    private async Task BaseSettingsCorrection()
+        {
+        if (AuthState == null) return;
+        var state = await AuthState;
+        if (state == null) userId = null;
+        else
+            {
+            userId = state.GetUserId();
+            }
+
+        if (!string.IsNullOrEmpty(userId))//means state exists but not sure of authenticated or not
+            {
+
+            existingVote = state.User.GetMyVote();
+
+            // var existing = await VoteServices.ReadByUserId(userId, ConstituencyId);
+            //this allows for multiple constituency voting
+            //below full can be at clientside only
+            //var existing = await VoteServices.ReadByUserId(userId);//this fetches all my vote of any constituency
+            if (existingVote == null || existingVote.VoteKPIRatingComments == null || existingVote.ConstituencyId != ConstituencyId)
+            //no vote exists or no vote for current constituency exists
+                {
+                if (existingVote != null && ConstituencyId > 0 && existingVote.ConstituencyId != ConstituencyId)
+                    {
+                    ButtonSubmitMessage = $"Earlier voted for other constituency({existingVote.ConstituencyId}),now that will be deleted if this opinion added";//in this case on submit previous will be cleared
+                    }
+                //for first time creating new fresh vote
+                newUpdatedVote = new V_Vote() { ConstituencyId = ConstituencyId, UserId = userId };
+                }
+            else
+                {
+
+                //user already voted for same constituency,now merging with standard to
+                VoteExistsForConstituency = true;
+                newUpdatedVote = existingVote;
+                }
+
+            TempVoteKPIRatingComments =
+       V_KPI.MergeWithExistingVoteKPIRatingCommentList(newUpdatedVote.VoteKPIRatingComments, SystemType);
+            //on page load assign all and on save save whichever is having value
+
+            //above full can be at clientside only
+            }
+        else
+            {
+            newUpdatedVote = null;
+            //Navigation.NavigateTo($"/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}");
+            }
+
+        }
+    protected async Task OnSubmit()
+        {
+        //todo need to validate is constId valid or not
+        if (newUpdatedVote != null && newUpdatedVote.ConstituencyId > 0)
+            {
+            //on page load assign all and on save save whichever is having value
+            newUpdatedVote.VoteKPIRatingComments = TempVoteKPIRatingComments.Where(x => x.Rating != null || !string.IsNullOrEmpty(x.Comment)).Select(x => new VoteKPIRatingComment()
+                    {
+                    Comment = x.Comment,
+                    KPI = x.KPI,
+                    Rating = x.Rating
+                    // about created or modified need to check more
+                    }).ToList();
+            var result = await VoteServices.AddOrUpdate(newUpdatedVote);
+            }
+        }
+
+    protected async Task AddMyVote()
+        {
+        if (!string.IsNullOrEmpty(userId) && ConstituencyId > 0)
+            {
+            IsToAdd = true;
+            await BaseSettingsCorrection();
+            }
+        else { IsToAdd = false; }
+        }
+    protected override async Task OnParametersSetAsync()
+        {
+        IsToAdd = false;
+        await BaseSettingsCorrection();
+        }
+    private async Task LoginThenRedirectToAdd()
+        {
+        var returnUrl = Uri.UnescapeDataString(Navigation.Uri).Replace(Navigation.BaseUri, string.Empty);
+        if (!string.IsNullOrEmpty(returnUrl))
+            returnUrl = $"?returnUrl={returnUrl}/{ConstituencyId}/true";
+        //vote/constid/true => vote/3/true means after login directly addvote
+        if (string.IsNullOrEmpty(userId))
+            {
+            // Redirect to the login page & then to this page
+            Navigation.NavigateTo($"{UiConstants.LoginUrl}{returnUrl}", forceLoad: true);
+            }
+        else
+            {
+            // Redirect to the specified URL after successful login
+            Navigation.NavigateTo(returnUrl);
+            }
+        }
+
+}

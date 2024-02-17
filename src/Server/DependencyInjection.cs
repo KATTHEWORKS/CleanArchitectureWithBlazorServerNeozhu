@@ -32,6 +32,10 @@ public static class DependencyInjection
 
         services.AddControllers();
 
+        //public sealed class HubClient : IAsyncDisposable -client sends/each click request to server
+        //public class ServerHub : Hub<ISignalRHub> -server which recives each request 
+        //ServerHubWrapper is another linked entity where signlaR configuration exists.For detailed errors enable here only
+        //UI browser to server call happens throgh these only & in server side recieved & process happens always
         services.AddScoped<IApplicationHubWrapper, ServerHubWrapper>()
             .AddSignalR();
         services.AddExceptionHandler<GlobalExceptionHandler>();

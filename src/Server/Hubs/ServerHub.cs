@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Concurrent;
@@ -12,6 +12,10 @@ namespace CleanArchitecture.Blazor.Server.Hubs;
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ServerHub : Hub<ISignalRHub>
 {
+    //public sealed class HubClient : IAsyncDisposable -client sends/each click request to server
+    //public class ServerHub : Hub<ISignalRHub> -server which recives each request 
+    //ServerHubWrapper is another linked entity where signlaR configuration exists.For detailed errors enable here only
+    //UI browser to server call happens throgh these only & in server side recieved & process happens always
     private static readonly ConcurrentDictionary<string, string> OnlineUsers = new();
 
     public override async Task OnConnectedAsync()

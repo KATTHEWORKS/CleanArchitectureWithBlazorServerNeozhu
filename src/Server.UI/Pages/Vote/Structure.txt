@@ -1,0 +1,7 @@
+﻿Vote.razor
+    ConstituencyChoose
+         KPI - name,description
+        VoteSummary
+            VoteUpsert
+                KPIRatingComment
+                    KPI - name,description

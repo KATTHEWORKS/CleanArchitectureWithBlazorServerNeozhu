@@ -1,10 +1,13 @@
-using CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
+﻿using CleanArchitecture.Blazor.Application.Common.ExceptionHandlers;
+using CleanArchitecture.Blazor.Domain.Enums;
 using CleanArchitecture.Blazor.Domain.Identity;
 using CleanArchitecture.Blazor.Infrastructure.Constants.Role;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using CleanArchitecture.Blazor.Infrastructure.Common.Extensions;
+using CleanArchitecture.Blazor.Infrastructure.Extensions;
 
 namespace CleanArchitecture.Blazor.Server.EndPoints;
 
@@ -13,15 +16,17 @@ public class AuthController : Controller
     private readonly IDataProtectionProvider _dataProtectionProvider;
     private readonly ILogger<AuthController> _logger;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly CustomUserManager _userManager;
+    private readonly CustomRoleManager _roleManager;
 
     public AuthController(
         ILogger<AuthController> logger,
         IDataProtectionProvider dataProtectionProvider,
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager
+        CustomUserManager userManager,
+        SignInManager<ApplicationUser> signInManager, CustomRoleManager roleManager
     )
     {
+        _roleManager = roleManager;
         _logger = logger;
         _dataProtectionProvider = dataProtectionProvider;
         _userManager = userManager;
@@ -32,6 +37,7 @@ public class AuthController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Login(string token, string returnUrl)
     {
+        //TODO need to change the extraction of roles & tenants
         var dataProtector = _dataProtectionProvider.CreateProtector("Login");
         var data = dataProtector.Unprotect(token);
         var parts = data.Split('|');
@@ -45,7 +51,8 @@ public class AuthController : Controller
             await _userManager.ResetAccessFailedCountAsync(identityUser);
             await _signInManager.SignInAsync(identityUser, isPersistent);
             identityUser.IsLive = true;
-            await _userManager.UpdateAsync(identityUser);
+            var resLive= await _userManager.UpdateIsLive(identityUser.Id, true);
+            //await _userManager.UpdateAsync(identityUser);
             _logger.LogInformation("{@UserName} has successfully logged in", identityUser.UserName);
             return Redirect($"/{returnUrl}");
         }
@@ -60,8 +67,11 @@ public class AuthController : Controller
         var user = await _userManager.FindByNameAsync(userName);
         if (user is null)
         {
-            var admin = await _userManager.FindByNameAsync("administrator") ??
-                        throw new NotFoundException("Application user administrator Not Found.");
+            var admin = await _userManager.FindByNameAsync("administrator") ?? throw new NotFoundException($"Application user administrator Not Found.");
+            if (admin.DefaultTenantId == null) return null;
+            var rl = await _roleManager.FindByNameAsync(RoleNamesEnum.Default.ToString());
+            if (rl == null) return null;
+            var rolesToInsert = new List<UserRoleTenant>() { new UserRoleTenant() { TenantId = admin.DefaultTenantId, Role = rl } };
             user = new ApplicationUser
             {
                 EmailConfirmed = true,
@@ -72,13 +82,15 @@ public class AuthController : Controller
                 Provider = provider,
                 DisplayName = name,
                 SuperiorId = admin.Id,
-                TenantId = admin.TenantId,
-                TenantName = admin.TenantName
+                DefaultTenantId = admin.DefaultTenantId,
+                DefaultTenantName = admin.DefaultTenantName,
+                UserRoleTenants = rolesToInsert
             };
             var createResult = await _userManager.CreateAsync(user);
-            if (!createResult.Succeeded) return Unauthorized();
-            var assignResult = await _userManager.AddToRoleAsync(user, RoleName.Basic);
-            if (!createResult.Succeeded) return Unauthorized();
+            if (!createResult.Succeeded)
+            {
+                return Unauthorized();
+            }
             await _userManager.AddLoginAsync(user, new UserLoginInfo(provider, userName, accessToken));
         }
 
@@ -92,11 +104,15 @@ public class AuthController : Controller
     public async Task<IActionResult> Logout()
     {
         var userId = _signInManager.Context.User.GetUserId();
-        var identityUser = await _userManager.FindByIdAsync(userId!) ??
-                           throw new NotFoundException("Application user not found.");
-        identityUser.IsLive = false;
-        await _userManager.UpdateAsync(identityUser);
-        _logger.LogInformation("{@UserName} logout successful", identityUser.UserName);
+        if (!userId.IsNullOrEmptyAndTrimSelf())
+        {
+            var resultLive = await  _userManager.UpdateIsLive(userId, false);
+            _logger.LogInformation($"User logout successful({(resultLive>0 ? "Successful" : "Failed")})");
+        }
+        //var identityUser = await _userManager.FindByIdAsync(userId!) ?? throw new NotFoundException($"Application user not found.");
+        //identityUser.IsLive = false;
+        //await _userManager.UpdateAsync(identityUser);
+
         await _signInManager.SignOutAsync();
         return Redirect("/");
     }

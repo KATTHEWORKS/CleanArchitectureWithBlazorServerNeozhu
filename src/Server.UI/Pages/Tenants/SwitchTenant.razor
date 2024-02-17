@@ -1,0 +1,125 @@
+﻿@page "/tenant/switch"
+@using System.ComponentModel.DataAnnotations
+@using CleanArchitecture.Blazor.Server.UI.Pages.Identity.Users
+
+@inject IStringLocalizer<Users> L
+@inject NavigationManager NavigationManager
+
+<h3>Switch Default Tenant</h3>
+@if (myTenants != null && myTenants.Count > 1)
+    {
+    <MudAlert Severity="Severity.Info">Switching Default tenant,so login will default to below set Tenant</MudAlert>
+    <MudGrid>
+        <MudItem xs="12" sm="7">
+            <MudPaper Class="pa-4">
+                <MudForm @ref="form" @bind-IsValid="@disable" @bind-Errors="@errors">
+                    <div class="d-flex align-center justify-space-between">
+                        <MudItem sm="6" xs="12">
+                            <MudSelect For="@(() => Model.TenantId)"
+                                       T="string"
+                                       Text="@Model.TenantName"
+                                       Required="true"
+                                       RequiredError="@L["Tenant is required."]"
+                                       Value="@Model.TenantId"
+                                       ValueChanged="TenantSelectChanged">
+                                @if (myTenants != null && myTenants.Any())
+                                    {
+                                    @foreach (var item in myTenants)
+                                        {
+                                        <MudSelectItem T="string" Value="@item.TenantId">@item.TenantName</MudSelectItem>
+                                        }
+                                    }
+                            </MudSelect>
+                            @*  <label>Note:Appearing will be set as Default tenant on login</label> *@
+                        </MudItem>
+
+                        <MudCheckBox T="bool" Required="true" RequiredError="You must agree" Label="I agree!" Value="true" />
+                        <MudButton OnClick="(() => Submit())" Variant="Variant.Filled" Color="Color.Primary" Disabled="@disable" Class="ml-auto">Change Default Tenant</MudButton>
+                    </div>
+                </MudForm>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+    }
+else if (myTenants != null && myTenants.Count == 1)
+    {
+    <MudAlert Severity="Severity.Info">You have only one tenant (@Model.TenantName (@Model.TenantId)),if switching is needed please contact repective group or raise complaint.</MudAlert>
+
+    }
+else
+    {
+    <MudAlert Severity="Severity.Info">You dont have any active tenant,if switching is needed please contact repective group or raise complaint.</MudAlert>
+
+    }
+@code {
+    @inject ITenantService TenantsService;
+    @inject CustomUserManager UserManager;
+    @inject ILogOut logout;
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    public class DefaultTenantSelectionFormModel
+        {
+        [Required]
+        public string TenantId { get; set; }
+
+        public string TenantName { get; set; }
+
+        }
+    //TODO currently disabled not working properly need to verify more
+    bool disable = true;
+    string[] errors = { };
+    MudForm form;
+    DefaultTenantSelectionFormModel Model = new();
+    private List<(string TenantId, string TenantName)> myTenants;
+    private string ExistingTenantId = null;
+    protected override async Task OnInitializedAsync()
+        {
+        var state = await AuthState;
+        ExistingTenantId = state.User.GetDefaultTenantId();
+        // if (ExistingTenantId == null) //TODO this needs to be fixed
+        //     NavigationManager.NavigateTo("@UiConstants.LoginUrl", true);
+        myTenants = await UserManager.GetMyTenants(state.User.GetUserId());
+        //myTenants = UserManager.GetAllowedTenants(new ApplicationUserDto() { UserRoleTenants = state.User.GetUserRoleTenants() });
+
+        if (myTenants.Count > 1)
+            {
+            var to1 = myTenants.Where(x => x.TenantId != ExistingTenantId).FirstOrDefault();
+            Model.TenantId = to1.TenantId;
+            Model.TenantName = to1.TenantName;
+            }
+        else
+            {
+            Model.TenantId = state.User.GetDefaultTenantId();
+            Model.TenantName = state.User.GetTenantName();
+            }
+        disable = false;
+        }
+    private void TenantSelectChanged(string id)
+        {
+        //more validation like user might try to set non-allowed tenant also so verify
+        //since its self change,so always do changes in existing mapping URT only
+        Model.TenantId = id;
+        Model.TenantName = myTenants.FirstOrDefault(x => x.TenantId == id).TenantName;
+
+        disable = !(myTenants.Exists(x => x.TenantId == id) && id != ExistingTenantId);
+        }
+    public async Task Submit()
+        {
+        if (form is not null && (myTenants.Exists(x => x.TenantId == Model.TenantId) && Model.TenantId != ExistingTenantId))
+            {
+            await form.Validate();
+            if (form.IsValid)
+                {
+                var state = await AuthState;
+
+                var result = await UserManager.UpdateUserDefaultTenant(state.User.GetUserId(), Model.TenantId);
+                if (result.Succeeded)
+                    {
+                    await logout.Execute();
+                    }
+                }
+            }
+        }
+
+}

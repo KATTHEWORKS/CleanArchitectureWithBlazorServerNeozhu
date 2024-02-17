@@ -1,0 +1,128 @@
+﻿@page "/vote/const"
+@page "/vote/const/{ConstituencyId:int}"
+<MudStack Row="true" AlignItems="AlignItems.Stretch">
+    <MudSelect For="@(()=>StateSelected)"
+               T="string"
+               Text="@StateSelected"
+               Required="true"
+               Value="@StateSelected"
+               Label="State Name"
+               ValueChanged="StateChanged">
+        @if (StateNamesToSelect != null && StateNamesToSelect.Count > 0)
+            {
+            @foreach (var s in StateNamesToSelect)
+                {
+                <MudSelectItem Value="@s" />
+                }
+            }
+    </MudSelect>
+
+    @* //todo change this to id instead of name *@
+    <MudSelect For="@(()=>ConstituencyNameSelected)"
+               T="string"
+               Text="@ConstituencyNameSelected"
+               Required="true"
+               Value="@ConstituencyNameSelected"
+               Label="Constituency Name" ValueChanged="ConstituencyChanged">
+        @if (ConstituenciesToSelect != null && ConstituenciesToSelect.Count > 0)
+            {
+            @foreach (var m in ConstituenciesToSelect)
+                {
+                <MudSelectItem Value="@m.Constituency">@m.Constituency</MudSelectItem>
+                }
+            }
+    </MudSelect>
+</MudStack>
+@if (ConstituencyId > 0)
+    {
+    @if (voteSummary is not null)
+        {
+        <VoteSummary vote_Summary=@voteSummary IsToAdd=@IsToAdd></VoteSummary>
+        @if (voteSummary.KPIVotes is null || voteSummary.KPIVotes.Count == 0 || voteSummary.VotesCount == 0)
+            {
+            var allKpis = V_KPI.GetAllDefault(1);
+            <h3>Currently no review added by anyone for @ConstituencyNameSelected.ToUpper() constituency. If you belong to this constituency you can add your prompt opinion. </h3>
+
+            @if (allKpis is not null && allKpis.Count > 0)
+                {
+                <h4> Default Key Performance indicators are as follows,</h4>
+                foreach (var k in allKpis)
+                    {
+                    <Kpi kpi="@k"></Kpi>
+                    // Display the name and description
+                    }
+                }
+            }
+        }
+    }
+else
+    {
+    <h3>Please choose your constituency and add your prompt opinion. </h3>
+    <DefaultKPIs />
+    }
+@code {
+    [Parameter]
+    public int ConstituencyId { get; set; }
+    //TODO on screen make constituencyId as value instead of name as current now
+    [Parameter]
+    public bool IsToAdd { get; set; }
+    public string StateSelected { get; set; }
+    public string ConstituencyNameSelected { get; set; }
+
+    public List<string> StateNamesToSelect { get; set; }//make it on clientside cache even for offline
+    public List<V_Constituency> ConstituenciesToSelect { get; set; }
+
+
+    private List<V_Constituency> DataSourceDistrictwise { get; set; } = [];
+    private List<StateWithConstituencies> DataSourceStatewise { get; set; } = [];
+
+    public V_VoteSummary voteSummary;//model
+    protected override async Task OnInitializedAsync()
+        {
+        DataSourceDistrictwise = ConstituencyServices.GetAllConstituency;
+        DataSourceStatewise = ConstituencyServices.GetAllConstituencyStatewise;
+        StateNamesToSelect = DataSourceStatewise.Select(x => x.StateName).Distinct().ToList();
+        if (ConstituencyId > 0)
+            {
+            var choosen = GetConstituency(ConstituencyId);
+            if (choosen != null)
+                {
+                StateSelected = choosen.StateName;
+                ConstituencyNameSelected = choosen.Constituency;
+                voteSummary = await VoteSummaryServices.ReadByConstituencyId(ConstituencyId);
+                if (voteSummary == null)
+                    voteSummary = new V_VoteSummary() { ConstituencyId = ConstituencyId, Constituency = choosen };
+                }
+            }
+        if (!string.IsNullOrEmpty(StateSelected))
+            {
+            ConstituenciesToSelect = GetConstituenciesOfState(StateSelected);
+            }
+        }
+    public void StateChanged(string stateName)
+        {
+        StateSelected = stateName;
+        ConstituenciesToSelect = DataSourceStatewise.Find(c => c.StateName == stateName)?.Constituencies;
+        }
+    public async Task ConstituencyChanged(string constituencyName)
+        {
+        ConstituencyNameSelected = constituencyName;
+        ConstituencyId = DataSourceStatewise.Find(c => c.StateName == StateSelected).Constituencies.Where(x => x.Constituency == constituencyName).FirstOrDefault().Id;
+        //call get summary
+        voteSummary = await VoteSummaryServices.ReadByConstituencyId(ConstituencyId);
+        if (voteSummary == null)
+            voteSummary = new V_VoteSummary() { ConstituencyId = ConstituencyId, Constituency = GetConstituency(ConstituencyId) };
+        // StateHasChanged();//madhu check requried or not
+        }
+
+    //below are for client offline improvement
+    private V_Constituency? GetConstituency(int mpId)
+        {
+        return DataSourceDistrictwise.Find(x => x.Id == mpId);
+        }
+    private List<V_Constituency>? GetConstituenciesOfState(string stateName)
+        {
+        return DataSourceStatewise.Find(c => c.StateName == stateName)?.Constituencies;
+        }
+
+}

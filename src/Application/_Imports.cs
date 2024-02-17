@@ -1,4 +1,4 @@
-global using System.ComponentModel;
+﻿global using System.ComponentModel;
 global using System.Data;
 global using System.Globalization;
 global using System.Linq.Dynamic.Core;
@@ -26,3 +26,9 @@ global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Localization;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Primitives;
+
+global using CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
+global using CleanArchitecture.Blazor.Application.Common.Security;
+global using CleanArchitecture.Blazor.Domain.Enums;
+global using CleanArchitecture.Blazor.Domain.Identity;
+global using PublicCommon;

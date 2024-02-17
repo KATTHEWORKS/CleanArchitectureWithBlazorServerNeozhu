@@ -12,7 +12,8 @@
 @attribute [Authorize(Policy = Permissions.Roles.View)]
 @inherits OwningComponentBase
 
-@inject RoleManager<ApplicationRole> RoleManager
+@* @inject RoleManager<ApplicationRole> RoleManager *@
+@inject CustomRoleManager RoleManager
 @inject IAppCache Cache
 @inject IStringLocalizer<Roles> L
 
@@ -194,13 +195,14 @@
     [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private string? Title { get; set; }
+    //DANGER todo need to add Level in all and also restrict from user to corrupt the system
     private bool _processing;
     private string _currentRoleName = string.Empty;
     private int _defaultPageSize = 15;
     private HashSet<ApplicationRoleDto> _selectedItems = new();
     private readonly ApplicationRoleDto _currentDto = new();
     private string _searchString = string.Empty;
-
+  
     private TimeSpan RefreshInterval => TimeSpan.FromSeconds(60);
     private LazyCacheEntryOptions Options => new LazyCacheEntryOptions().SetAbsoluteExpiration(RefreshInterval, ExpirationMode.LazyExpiration);
 
@@ -220,7 +222,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        RoleManager = ScopedServices.GetRequiredService<RoleManager<ApplicationRole>>();
+        RoleManager = ScopedServices.GetRequiredService<CustomRoleManager>();
         Title = L[_currentDto.GetClassDescription()];
         var state = await AuthState;
         _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Roles.Create)).Succeeded;
@@ -269,6 +271,7 @@
 
     private async Task OnCreate()
     {
+        //DANGER todo need to add Level in all and also restrict from user to corrupt the system
         var model = new ApplicationRoleDto { Name = "" };
         var parameters = new DialogParameters<RoleFormDialog> { { x => x.Model, model } };
         var options = new DialogOptions { CloseButton = true, CloseOnEscapeKey = true, MaxWidth = MaxWidth.Small, FullWidth = true };
@@ -280,7 +283,8 @@
             var applicationRole = new ApplicationRole
             {
                 Name = model.Name,
-                Description = model.Description
+                Description = model.Description,
+                Level=model.Level
             };
 
             var state = await RoleManager.CreateAsync(applicationRole);

@@ -11,11 +11,12 @@ public class UserProfile
     public required string Email { get; set; }
     public string? PhoneNumber { get; set; }
     public string? DefaultRole { get; set; }
+    public ICollection<UserRoleTenantDto> UserRoleTenants { get; set; }
     public string[]? AssignedRoles { get; set; }
     public required string UserId { get; set; } = Guid.NewGuid().ToString();
     public bool IsActive { get; set; }
-    public string? TenantId { get; set; }
-    public string? TenantName { get; set; }
+    public string? DefaultTenantId { get; set; }
+    public string? DefaultTenantName { get; set; }
 }
 
 public class UserProfileEditValidator : AbstractValidator<UserProfile>
