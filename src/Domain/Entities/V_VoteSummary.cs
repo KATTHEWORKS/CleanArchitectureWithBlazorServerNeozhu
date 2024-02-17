@@ -50,7 +50,7 @@ public class V_VoteSummary//each location one row as summary
     public List<VoteSummary_KPIVote> KPIVotes
     {
         //get => JsonSerializer.Deserialize<KPIVotes>(KPIVotesAsJsonString);
-        get => JsonExtensions.TryDeserialize<List<VoteSummary_KPIVote>>(KPIVotesAsJsonString, out var result) ? result : null;
+        get => JsonExtensions.TryDeserialize<List<VoteSummary_KPIVote>>(KPIVotesAsJsonString, out var result) ? result : [];
         set
         {
             //KPIVotesAsJsonString = JsonSerializer.Serialize(value);

@@ -86,7 +86,7 @@
     private string ButtonSubmitMessage = "Submit My Prompt Opinion.";
     private bool VoteExistsForConstituency = false;
     private string? userId;
-    private List<VoteKPIRatingComment> TempVoteKPIRatingComments;// = model.VoteKPIRatingComments;
+    private List<VoteKPIRatingComment> TempVoteKPIRatingComments = new();// = model.VoteKPIRatingComments;
 
     protected override async Task OnInitializedAsync()
         {
@@ -96,11 +96,8 @@
         {
         if (AuthState == null) return;
         var state = await AuthState;
-        if (state == null) userId = null;
-        else
-            {
-            userId = state.GetUserId();
-            }
+        if (state == null) return;
+        userId = state.GetUserId();
 
         if (!string.IsNullOrEmpty(userId))//means state exists but not sure of authenticated or not
             {
@@ -119,7 +116,7 @@
                     ButtonSubmitMessage = $"Earlier voted for other constituency({existingVote.ConstituencyId}),now that will be deleted if this opinion added";//in this case on submit previous will be cleared
                     }
                 //for first time creating new fresh vote
-                newUpdatedVote = new V_Vote() { ConstituencyId = ConstituencyId, UserId = userId };
+                newUpdatedVote = new V_Vote(constituencyId: ConstituencyId, userId: userId);
                 }
             else
                 {

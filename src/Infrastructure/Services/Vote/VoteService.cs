@@ -19,11 +19,11 @@ namespace CleanArchitecture.Blazor.Infrastructure.Services.Vote;
 
 public interface IVoteService
 {
-    Task<V_Vote> AddOrUpdate(V_Vote vote);
+    Task<V_Vote?> AddOrUpdate(V_Vote vote);
     Task<bool> Delete(int id);
-    Task<V_Vote> ReadByUserId(string userId);
-    Task<V_Vote> ReadByUserId(string userId, int constituencyId);
-    Task<V_Vote> ReadByVoteId(int id);
+    Task<V_Vote?> ReadByUserId(string userId);
+    Task<V_Vote?> ReadByUserId(string userId, int constituencyId);
+    Task<V_Vote?> ReadByVoteId(int id);
 
 }
 #if VOTING_SYSTEM
@@ -36,7 +36,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
     //later we can allow for multiple
 
     //TODO Need to maintiaing system_type of MP...
-    public async Task<V_Vote> ReadByUserId(string userId)
+    public async Task<V_Vote?> ReadByUserId(string userId)
     {
         if (userId.IsNullOrEmptyAndTrimSelf())
             return null;
@@ -47,7 +47,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
     }
 
 
-    public async Task<V_Vote> ReadByUserId(string userId, int constituencyId)
+    public async Task<V_Vote?> ReadByUserId(string userId, int constituencyId)
     {
         if (userId.IsNullOrEmptyAndTrimSelf() || constituencyId == 0)
             return null;
@@ -55,12 +55,12 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
             .Where(x => x.UserId == userId && x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
         return res;
     }
-    public async Task<V_Vote> ReadByVoteId(int id)
+    public async Task<V_Vote?> ReadByVoteId(int id)
     {
         var res = await _context.V_Votes.FindAsync(id);
         return res;
     }
-    public async Task<V_Vote> AddOrUpdate(V_Vote vote)
+    public async Task<V_Vote?> AddOrUpdate(V_Vote vote)
     {
         if (vote is null || vote.UserId is null || vote.ConstituencyId <= 0) return null;
 
@@ -73,46 +73,65 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         //TODO dont go for deletion instead always go for update only except if multiple row exists
         if (existing is not null && existing.Count > 0)//means something already exists
         {
-            if (existing.Any(x => x.ConstituencyId == vote.ConstituencyId))//same exists so go for update
-            {
-                //this makes only one allowed all the time
-                //&& x.MPId == vote.MPId))//this makes allowing multiple mp vote by one person
-                //if any condition required like allowing 2 or 3 max then it can be done here
-                return await Update(updatedVote: vote, existingVote: existing.First(x => x.ConstituencyId == vote.ConstituencyId));
-                //return null;
+            if (existing.Count > 1)
+            {    //delete all except first
+                var deleted = await _context.V_Votes.Where(x => x.UserId == vote.UserId).Skip(1).ExecuteDeleteAsync();
             }
-            else//means different constitunecy,delete & create this
-            {
-                //TODO instead of deleting,make update on existing only 
-                //do delet only if more than 1 exists not everytime,simply cracks db
-                await DeleteOfUser(vote.UserId);
-                foreach (var existingVote in existing)//this is must
-                {
-                    if (existingVote.VoteKPIRatingComments.Count > 0)
-                        await _summaryServices.Update(new ToAddRemove()
-                        {
-                            CommentCountDifference = -existingVote.VoteKPIComments.Count,
-                            ConstituencyId = existingVote.ConstituencyId,
-                            ToRemove = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList()
-                        });
-                }
-                //then go for adding
-            }
+            var existingVote = existing.First();
+            var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
+            .ExecuteUpdateAsync(x => x
+            .SetProperty(u => u.Modified, DateTime.Now)
+            .SetProperty(u => u.VotesJsonAsStringDelta,
+            c => string.IsNullOrEmpty(c.VotesJsonAsStringDelta) ? c.CommentsJsonAsString : c.VotesJsonAsStringDelta)
+            .SetProperty(u => u.CommentsJsonAsString, vote.CommentsJsonAsString)
+            .SetProperty(u => u.ConstituencyId, vote.ConstituencyId)
+            .SetProperty(u => u.Rating, vote.Rating)//HAD TO CACLULATE here before saving or on display also but had to make sure
+            .SetProperty(u => u.VotesJsonAsString, vote.VotesJsonAsString)
+            );
+            return vote;
+
         }
         vote.Id = 0;//todo need to verify here
-        var updatedVote = await _context.V_Votes.AddAsync(vote);
+        var addedVote = await _context.V_Votes.AddAsync(vote);
 
         var result = await _context.SaveChangesAsync();
-        await _summaryServices.AddForNewVote(updatedVote.Entity);
-        return updatedVote.Entity;
+        await _summaryServices.AddForNewVote(addedVote.Entity);
+        return addedVote.Entity;
     }
     private async Task<List<V_Vote>> ReadByUserIdAll(string userId)
     {
         if (userId.IsNullOrEmptyAndTrimSelf())
-            return null;
+            return [];
         var res = await _context.V_Votes.Where(x => x.UserId == userId).ToListAsync();
         return res;
     }
+
+    private async Task<int> DeleteOfUser(string userId)
+    {
+        return await _context.V_Votes.Where(x => x.UserId == userId).ExecuteDeleteAsync();
+    }
+    //public async Task<int> Delete(int id)
+    //{
+    //    return await _context.V_Votes.Where(x => x.Id == id).ExecuteDeleteAsync();
+    //    //here comments count or vote count not changing
+    //}
+    public async Task<bool> Delete(int id)//avoid this from frontend
+    {
+        var existingVote = _context.V_Votes.Find(id);
+        if (existingVote == null) return false;
+
+        _context.V_Votes.Remove(existingVote);
+        var result = (await _context.SaveChangesAsync()) > 0;
+        if (existingVote.VoteKPIRatingComments.Count > 0)
+            await _summaryServices.Update(new ToAddRemove()
+            {
+                CommentCountDifference = -existingVote.VoteKPIComments.Count,
+                ConstituencyId = existingVote.ConstituencyId,
+                ToRemove = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList()
+            });
+        return result;
+    }
+    /*
     private async Task<V_Vote> Update(V_Vote updatedVote, V_Vote existingVote)
     {
         // var existingVote = _context.V_Votes.Find(id);
@@ -182,31 +201,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
 
         return expr;
     }
-    private async Task<int> DeleteOfUser(string userId)
-    {
-        return await _context.V_Votes.Where(x => x.UserId == userId).ExecuteDeleteAsync();
-    }
-    //public async Task<int> Delete(int id)
-    //{
-    //    return await _context.V_Votes.Where(x => x.Id == id).ExecuteDeleteAsync();
-    //    //here comments count or vote count not changing
-    //}
-    public async Task<bool> Delete(int id)//avoid this from frontend
-    {
-        var existingVote = _context.V_Votes.Find(id);
-        if (existingVote == null) return false;
-
-        _context.V_Votes.Remove(existingVote);
-        var result = (await _context.SaveChangesAsync()) > 0;
-        if (existingVote.VoteKPIRatingComments.Count > 0)
-            await _summaryServices.Update(new ToAddRemove()
-            {
-                CommentCountDifference = -existingVote.VoteKPIComments.Count,
-                ConstituencyId = existingVote.ConstituencyId,
-                ToRemove = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList()
-            });
-        return result;
-    }
+   
     private static ToAddRemove GetVoteDifference(V_Vote existingVote, V_Vote updatedVote)
     {
         if (existingVote == null || existingVote.VoteKPIRatingComments is null || existingVote.VoteKPIRatingComments.Count == 0)
@@ -271,6 +266,6 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
             return new ToAddRemove() { ToAdd = toAdd, ToRemove = toRemove };
         }
     }
-
+    */
 }
 #endif

@@ -15,9 +15,9 @@ namespace CleanArchitecture.Blazor.Domain.Entities;
 
 
 //dbtable2
-public class V_Vote //1 user 1 row
+public class V_Vote(int constituencyId, string userId) //1 user 1 row
 {
-    public V_Vote()
+    public V_Vote() : this(default, default)
     {
         Created = DateTime.Now;
     }
@@ -26,15 +26,15 @@ public class V_Vote //1 user 1 row
     //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]//this gives error so using fluentnt API .ValueGeneratedOnAdd();
     public int Id { get; set; }
     //remove id and maintain userid only
-
+    //or just keep id as counter,but always refer userid as key
     [Required]
-    public string UserId { get; set; }
+    public string UserId { get; set; } = userId;
 
     [ForeignKey(nameof(UserId))]
     public ApplicationUser? User { get; set; }
 
     [Required]
-    public int ConstituencyId { get; set; }
+    public int ConstituencyId { get; set; } = constituencyId;
 
     [ForeignKey(nameof(ConstituencyId))]
     public V_Constituency? Constituency { get; set; }
@@ -52,6 +52,11 @@ public class V_Vote //1 user 1 row
     //[Column(TypeName = "jsonb")] //this wont working mssql Adjust based on your database
     public string? VotesJsonAsString { get; set; }//here comments are not stored
 
+    public string? VotesJsonAsStringDelta { get; set; }//this is for the sake of update difference tracking tyo summary table
+
+    [NotMapped]
+    public (int constituencyId, List<VoteKPIRatingComment> kpiRating) VoteKPIRatingCommentsDelta { get; set; }
+
     public string? CommentsJsonAsString { get; set; }//lIST<KPI,COMMENT>
 
     //below propertiues will be used in Dtos,so here commenting
@@ -60,7 +65,7 @@ public class V_Vote //1 user 1 row
     [NotMapped]
     public List<VoteKPIComment> VoteKPIComments//for the sake of summary page,this will appear without any person name,so stays anonymous
     {
-        get => ((!string.IsNullOrEmpty(CommentsJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIComment>>(CommentsJsonAsString, out var result1)) ? result1 : null);
+        get => ((!string.IsNullOrEmpty(CommentsJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIComment>>(CommentsJsonAsString, out var result1)) ? result1 : []);
         set
         {
             if (value != null)
@@ -80,19 +85,23 @@ public class V_Vote //1 user 1 row
         //get => ((!string.IsNullOrEmpty(VotesJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIRatingComments>>(VotesJsonAsString, out var result)) ? result : null);
         get
         {
-            if (string.IsNullOrEmpty(VotesJsonAsString)) return null;
+            if (string.IsNullOrEmpty(VotesJsonAsString)) return [];
             var temp1 = ((!string.IsNullOrEmpty(VotesJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIRatingComment>>(VotesJsonAsString, out var result)) ? result : null);
-            if (!string.IsNullOrEmpty(VotesJsonAsString) &&
-                    (string.IsNullOrEmpty(CommentsJsonAsString) || VoteKPIComments.Count == 0))
+            if (temp1 != null)
+            {
+                if (!string.IsNullOrEmpty(VotesJsonAsString) &&
+                        (string.IsNullOrEmpty(CommentsJsonAsString) || VoteKPIComments.Count == 0))
+                    return temp1;
+                else
+                    foreach (var item in VoteKPIComments)
+                    {
+                        var toAddComments = temp1.Where(x => x.KPI == item.KPI).First();
+                        if (toAddComments != null)
+                            toAddComments.Comment = item.Comment;
+                    }
                 return temp1;
-            else
-                foreach (var item in VoteKPIComments)
-                {
-                    var toAddComments = temp1.Where(x => x.KPI == item.KPI).First();
-                    if (toAddComments != null)
-                        toAddComments.Comment = item.Comment;
-                }
-            return temp1;
+            }
+            return [];
         }
         set
         {
@@ -102,7 +111,7 @@ public class V_Vote //1 user 1 row
                 //for firsttime had to take all kpis so passing
                 VotesJsonAsString = JsonSerializer.Serialize(value.Where(c => Id > 0 ? c.Rating != null : c.KPI > 0).ToList(), JsonExtensions.IgnoreNullSerializationOptions);
 
-                var commentsList = value.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment() { KPI = x.KPI, Comment = x.Comment }).ToList();
+                var commentsList = value.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment)).ToList();
                 if (commentsList != null && commentsList.Count > 0)
                 {
                     CommentsJsonAsString = JsonSerializer.Serialize(commentsList, JsonExtensions.IgnoreNullSerializationOptions);

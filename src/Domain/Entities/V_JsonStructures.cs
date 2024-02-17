@@ -61,10 +61,10 @@ public class VoteKPIRatingComment
 
 
 //currently not used,will do later
-public class VoteKPIComment
+public class VoteKPIComment(int kpi, string comment)
 {
-    public int KPI { get; set; }
-    public string Comment { get; set; }//this supposed to be like List<KPI-comment>
+    public int KPI { get; set; } = kpi;
+    public string Comment { get; set; } = comment;//this supposed to be like List<KPI-comment>
 }
 
 public class VoteSummary_KPIVote
@@ -99,8 +99,8 @@ public class VoteSummary_KPIVote
             return 0; // or any default value
         }
 
-        int totalVotes = 0;
-        int totalWeightedVotes = 0;
+        var totalVotes = 0;
+        var totalWeightedVotes = 0;
 
         foreach (var item in RatingTypeCountsList)
         {

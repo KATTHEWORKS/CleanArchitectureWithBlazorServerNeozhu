@@ -14,7 +14,7 @@ public class V_KPI(int id, string nameShort, byte systemType = 1)
         NameFull = nameFull; Description = description;
         //other fields are passed to primary constructor
     }
-    public V_KPI(int id, byte systemType = 1) : this(id, nameShort: default, systemType)
+    public V_KPI(int id, byte systemType = 1) : this(id, nameShort: id.ToString(), systemType)
     {
         var match = Standard.Find(x => x.Id == id);
         if (match != null)
@@ -72,7 +72,7 @@ public class V_KPI(int id, string nameShort, byte systemType = 1)
         //return existing.OrderBy(x => x.Rating).ThenBy(x => x.KPI).ToList();
         return [.. existing.OrderByDescending(x => x.Rating).ThenBy(x => x.KPI)];
     }
-    public static V_KPI Get(int id, byte systemType = 1)
+    public static V_KPI? Get(int id, byte systemType = 1)
     {
         return Standard.Find(x => x.Id == id && x.SystemType == systemType);
     }

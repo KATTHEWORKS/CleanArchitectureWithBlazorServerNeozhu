@@ -49,6 +49,9 @@ public class V_Constituency(string stateName, string constituency)//target Topic
 
     public string? Note { get; set; }//extra comment
 
+    public int ReadCount { get; set; } = 0;
+    public int WriteCount { get; set; } = 0;
+
     public virtual V_VoteSummary? Summary { get; set; }//; = new();
 
 }
