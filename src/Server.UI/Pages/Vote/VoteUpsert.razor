@@ -54,7 +54,7 @@
                 }
             else
                 {
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddMyVote">@(ConstituencyId == existingVote.ConstituencyId ? "Update" : "Add") My Vote</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddMyVote">@(existingVote != null && ConstituencyId == existingVote.ConstituencyId ? "Update" : "Add") My Vote</MudButton>
                 }
             }
         else @* anonymous *@
