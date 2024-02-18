@@ -68,6 +68,8 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         //if same constituency exists then go for update
         //if different contt exists then delete & add here
 
+        //todo need to confirm this,if ok do same in UI also on any change immediately 
+        vote.Rating = (sbyte)(vote.VoteKPIRatingComments.Sum(x => x.Rating) / vote.VoteKPIRatingComments.Count(x => x.Rating != null));
         vote.VoteKPIComments = vote.VoteKPIRatingComments?.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment!)).ToList();
         if (vote.VoteKPIComments != null && vote.VoteKPIComments.Count > 0)
             vote.VoteKPIRatingComments?.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).ForEach(k =>
@@ -151,6 +153,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
 
         _context.V_Votes.Remove(existingVote);
         var result = (await _context.SaveChangesAsync()) > 0;
+        //ideally not to do this
         if (existingVote.VoteKPIRatingComments.Count > 0)
             await _summaryServices.Update(new ToAddRemove()
             {

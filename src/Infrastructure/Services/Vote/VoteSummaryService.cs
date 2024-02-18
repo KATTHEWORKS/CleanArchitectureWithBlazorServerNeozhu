@@ -28,6 +28,99 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
 
     private const string VoteSummaryCacheKey = "all-Summary";
 
+    public async Task LoadSummaryFromAllVotesFirstTime()
+    //first time or weekly once to reload complete summary db ondemand only with backup
+    {//very costly heavy operation
+        var allVotes = await context.V_Votes.ToListAsync();
+        //improve this whole logic based on fetching constituency wise votes ,while fetching itself write to result set and make a sigle call to summary db... prefarrably delta db...once ready shift all to main table...using some switch in between
+        foreach (var vote in allVotes)
+        {
+
+            var existing = await ReadByConstituencyId(vote.ConstituencyId);
+
+            if (existing == null)//case1
+            {
+                var temp = new List<VoteSummary_KPIVote>();
+                vote.VoteKPIRatingComments.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
+                var new1 = new V_VoteSummary()
+                {
+                    ConstituencyId = vote.ConstituencyId,
+                    KPIVotes = temp,
+                    CommentsCount = vote.VoteKPIComments.Count == 0 ? 0 : 1
+                    //,AggregateVote  had top check whether its added to db by generating or not
+                };
+                await context.V_VoteSummarys.AddAsync(new1);
+                //return (await context.SaveChangesAsync()) > 0;
+                continue;
+            }
+            else//case2 paqrticular MP details existing,now adding particular user vote counts only
+            {
+                if (vote.VoteKPIComments.Count > 0)
+                    existing.CommentsCount += 1;
+
+                vote.VoteKPIRatingComments.ForEach((Action<VoteKPIRatingComment>)(k =>
+                {
+                    //MP details exists but again 2 case
+                    //case2.1 kpi details existing for mp
+                    var kpiDetailsExisiting = existing.KPIVotes.FirstOrDefault<VoteSummary_KPIVote>(x => x.KPI == k.KPI);
+                    if (kpiDetailsExisiting is null)
+                    {
+                        var newSummary = new VoteSummary_KPIVote()
+                        {
+                            KPI = k.KPI,
+                            RatingTypeCountsList = [new((sbyte)k.Rating, 1)]
+
+                        };
+                        existing.KPIVotes.Add(newSummary);
+                    }
+                    else
+                    {
+                        var existingRatingType = kpiDetailsExisiting.RatingTypeCountsList.Find((Predicate<VoteSummary_KPIVote.RatingTypeCounts>)(x => x.RatingTypeByte == k.Rating));
+                        if (existingRatingType is not null)
+                        {
+                            existingRatingType.Count += 1;
+                        }
+                        else//its null so not existing RatingTypeCountsList for particular 
+                        {
+                            if (k.Rating is not null)
+                                kpiDetailsExisiting.RatingTypeCountsList.Add(new VoteSummary_KPIVote.RatingTypeCounts(k.Rating ?? (sbyte)RatingEnum.OkOk, 1));
+                        }
+                    }
+
+                }));
+
+                var result = context.V_VoteSummarys.Update(existing);
+                await context.SaveChangesAsync();
+                continue;
+            }
+        }
+    }
+
+    public async Task LoadDeltaDifferenceToSummary()
+    //this executes for every frequency of 10 minues ones
+    {
+        //1.take last update time of summary & get least time among all(-5 minutes threshould)
+        //2.fetch all records later than that summary leasttime
+        //created>summTime or modified>sumtime or delta!=null
+        //3.get difference with delta and attach to db
+        //4.add those to db
+        //5.update back the step2 records delta(id & string both) as null
+
+        //step1
+        var lastCreated = await context.V_VoteSummarys.MaxAsync(x => x.Created);
+        var lastModified = await context.V_VoteSummarys.MaxAsync(x => x.Modified);
+
+        lastCreated = lastCreated.AddMinutes(-5);
+        if (lastModified != null)
+            lastModified = lastModified.Value.AddMinutes(-5);
+
+        var leastTime = lastCreated < lastModified ? lastCreated : lastModified;
+        //step2
+        var deltaToLoad = await context.V_Votes.Where(x => x.Created > leastTime || x.Modified > leastTime || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
+
+
+    }
+
     //this can be cached at client side and refresh their itself after every 15 minuts from client side interval as well
     public async Task<List<V_VoteSummary>> All()
     {
