@@ -135,9 +135,4 @@ public static class ClaimsPrincipalExtensions
         return claimsPrincipal.Claims.Where(x => x.Type == ClaimTypes.Role).Select(x => x.Value).ToArray();
     }
 
-    public static V_Vote GetMyVote(this ClaimsPrincipal claimsPrincipal)
-    {
-        return JsonExtensions.TryDeserialize(claimsPrincipal.FindFirstValue(ApplicationClaimTypes.MyVote), out V_Vote result)
-            ? result : null;
-    }
 }

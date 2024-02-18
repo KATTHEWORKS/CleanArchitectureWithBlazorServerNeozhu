@@ -2,17 +2,8 @@
 #define VOTING_SYSTEM
 
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using CleanArchitecture.Blazor.Infrastructure.Common.Extensions;
 using FluentEmail.Core;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.IdentityModel.Tokens;
 using static CleanArchitecture.Blazor.Domain.Entities.V_VoteSummary;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services.Vote;
@@ -43,6 +34,13 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         var res = await _context.V_Votes.AsNoTracking()
             .FirstOrDefaultAsync(x => x.UserId == userId);
         //.FirstAsync(x => x.UserId == userId);//fails if not found
+
+        if (res!=null && res.VoteKPIComments!=null &&  res.VoteKPIComments.Count > 0)
+        {
+            res.VoteKPIComments = [];
+            res.VoteKPIComments.ForEach(x => { res.VoteKPIRatingComments!.Find(k => k.KPI == x.KPI).Comment = x.Comment; });
+        }
+           
         return res;
     }
 

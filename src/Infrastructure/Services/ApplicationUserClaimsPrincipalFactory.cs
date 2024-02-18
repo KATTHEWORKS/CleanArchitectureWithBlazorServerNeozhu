@@ -3,14 +3,9 @@
 
 using CleanArchitecture.Blazor.Domain.Identity;
 using CleanArchitecture.Blazor.Infrastructure.Constants.ClaimTypes;
-using System.Text.Json;
 using Newtonsoft.Json;
 using CleanArchitecture.Blazor.Infrastructure.Extensions;
-using CleanArchitecture.Blazor.Domain.Enums;
-using PublicCommon;
 using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant;
-using CleanArchitecture.Blazor.Infrastructure.Services.MultiTenant;
-using Microsoft.AspNetCore.Identity;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services;
 #nullable disable
@@ -95,17 +90,6 @@ public class ApplicationUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<
                 new Claim(ApplicationClaimTypes.SuperiorId, user.SuperiorId)
             });
 
-        if (user.MyVote != null)
-        {
-            if (user.MyVote.VoteKPIComments.Count > 0)
-            {
-                user.MyVote.VoteKPIComments.ForEach(x => { user.MyVote.VoteKPIRatingComments.Find(k => k.KPI == x.KPI).Comment = x.Comment; });
-            }
-            ((ClaimsIdentity)principal.Identity)?.AddClaims(new[]
-           {
-                new Claim(ApplicationClaimTypes.MyVote, JsonConvert.SerializeObject(user.MyVote))
-            });
-        }
         return principal;
     }
 }

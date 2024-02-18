@@ -162,17 +162,7 @@
                     // }
                     // else
                     // {
-                    var myVote = await VoteServices.ReadByUserId(user.Id);//currently fetches only one vote
-                    if (myVote is not null && myVote.Id > 0)
-                        {
-                        if (myVote.VoteKPIComments.Count > 0)
-                            {
-                            myVote.VoteKPIComments.ForEach(x => { myVote.VoteKPIRatingComments.Find(k => k.KPI == x.KPI).Comment = x.Comment; });
-                            }
-                            //todo this is setting here but not setting in claims could be some issue at passsing ,need to check
-                        user.MyVote = myVote;
-                        }
-
+                    
                     var accessToken = await TokenProvider.Login(user);
                     var claims = await TokenProvider.ParseClaimsFromJwt(accessToken);
                     ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(claims);
