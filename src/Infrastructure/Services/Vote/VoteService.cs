@@ -31,16 +31,16 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
     {
         if (userId.IsNullOrEmptyAndTrimSelf())
             return null;
-        var res = await _context.V_Votes.AsNoTracking()
+        var res = await _context.V_Votes.AsNoTracking()//add selection of specific columns rather all
             .FirstOrDefaultAsync(x => x.UserId == userId);
         //.FirstAsync(x => x.UserId == userId);//fails if not found
 
-        if (res!=null && res.VoteKPIComments!=null &&  res.VoteKPIComments.Count > 0)
+        if (res != null && res.VoteKPIComments != null && res.VoteKPIComments.Count > 0)
         {
-            res.VoteKPIComments = [];
             res.VoteKPIComments.ForEach(x => { res.VoteKPIRatingComments!.Find(k => k.KPI == x.KPI).Comment = x.Comment; });
+            res.VoteKPIComments = [];
         }
-           
+
         return res;
     }
 

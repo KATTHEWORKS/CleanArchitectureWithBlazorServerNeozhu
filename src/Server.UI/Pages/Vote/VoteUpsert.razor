@@ -76,11 +76,11 @@
     [Parameter]
     public bool IsToAdd { get; set; }
 
-    
+
     private const byte SystemType = 1;//for MP its 1
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
-    
+
     @inject IAppCache Cache;
     private TimeSpan RefreshInterval => TimeSpan.FromHours(24);
     private LazyCacheEntryOptions Options => new LazyCacheEntryOptions().SetAbsoluteExpiration(RefreshInterval, ExpirationMode.LazyExpiration);
@@ -107,9 +107,10 @@
 
         if (!string.IsNullOrEmpty(userId))//means state exists but not sure of authenticated or not
             {
-                //currently fetches only one vote
+            //currently fetches only one vote
+            Cache.Remove(keyMyVote);
             existingVote = await Cache.GetOrAddAsync(keyMyVote, async () => await VoteServices.ReadByUserId(userId), Options);
-            
+
             // var existing = await VoteServices.ReadByUserId(userId, ConstituencyId);
             //this allows for multiple constituency voting
             //below full can be at clientside only
@@ -164,6 +165,7 @@
             var result = await VoteServices.AddOrUpdate(newUpdatedVote);
             if (result != null)
                 {
+                IsToAdd = false;
                 Cache.Remove(keyMyVote);
                 Navigation.NavigateTo($"{ConstituencyId}");
                 //await logout.Execute(force: true);//add more messaage as
