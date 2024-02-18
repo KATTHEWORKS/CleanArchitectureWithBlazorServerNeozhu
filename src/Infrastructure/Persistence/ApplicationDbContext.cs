@@ -9,6 +9,8 @@ using System.Reflection.Emit;
 using Microsoft.EntityFrameworkCore;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using CleanArchitecture.Blazor.Domain.Identity;
+using System.Text.Json;
+using CleanArchitecture.Blazor.Domain.Entities;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence;
 
@@ -79,14 +81,32 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         builder.Entity<V_Vote>().Property(b => b.Id).ValueGeneratedOnAdd();
         builder.Entity<V_Vote>().Property(b => b.Created).HasDefaultValueSql("getdate()");
 
-        builder.Entity<V_Vote>().OwnsOne(b => b.VoteKPIRatingComments, ownedNavigationBuilder =>
-        {
-            ownedNavigationBuilder.ToJson();
-        });
-        builder.Entity<V_Vote>().OwnsOne(b => b.VoteKPIComments, ownedNavigationBuilder =>
-        {
-            ownedNavigationBuilder.ToJson();
-        });
+        //builder.Entity<V_Vote>().OwnsMany(b => b.VoteKPIRatingComments, ownedNavigationBuilder =>
+        // { ownedNavigationBuilder.ToJson(); }
+        //);
+        //builder.Entity<V_Vote>().OwnsMany(b => b.VoteKPIComments, ownedNavigationBuilder =>
+        //    ownedNavigationBuilder.ToJson()
+        //);
+        builder.Entity<V_Vote>()
+         .Property(v => v.VoteKPIRatingComments)
+         .HasConversion(
+             v => JsonSerializer.Serialize(v.Where(c =>c.Rating != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
+             v => JsonSerializer.Deserialize<List<VoteKPIRatingComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+         );
+        builder.Entity<V_Vote>()
+         .Property(v => v.VoteKPIComments)
+         .HasConversion(
+             v => JsonSerializer.Serialize(v.Where(c => c.Comment != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
+             v => JsonSerializer.Deserialize<List<VoteKPIComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+         );
+        //builder.Entity<V_Vote>()
+        //    .Property(v => v.VoteKPIRatingComments)
+        //    .HasConversion(
+        //        v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
+        //        v => JsonConvert.DeserializeObject<List<VoteKpi>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+        //    );
+
+
 
         //builder.Entity<V_Vote>().OwnsOne(b => b.VoteKPIRatingCommentsDelta, ownedNavigationBuilder =>
         //{
@@ -102,9 +122,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         builder.Entity<V_VoteSummary>().Property(b => b.Created).HasDefaultValueSql("getdate()");
 
         builder.Entity<V_VoteSummary>()
-            .HasOne(x => x.Constituency)
-            .WithOne(c => c.Summary)
-            .HasForeignKey<V_VoteSummary>(x => x.ConstituencyId);
+                .HasOne(x => x.Constituency)
+                .WithOne(c => c.Summary)
+                .HasForeignKey<V_VoteSummary>(x => x.ConstituencyId);
 #else
         builder.Ignore<V_Vote>();
         builder.Ignore<V_Constituency>();

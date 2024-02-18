@@ -95,7 +95,8 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         var addedVote = await _context.V_Votes.AddAsync(vote);
 
         var result = await _context.SaveChangesAsync();
-        await _summaryServices.AddForNewVote(addedVote.Entity);
+        //await _summaryServices.AddForNewVote(addedVote.Entity);
+        //dont call summary for every vote,instead load summary for every 15 min once either call based or trigger based
         return addedVote.Entity;
     }
     private async Task<List<V_Vote>> ReadByUserIdAll(string userId)
