@@ -117,10 +117,11 @@
         {
         // List the URIs of pages that should be accessible anonymously
         var anonymousPages = new List<string> { "welcome", "vote","rating" };
-        var anonymousPagesPrefix = "rating/";//for vote/id
+        //var anonymousPagesPrefix = "rating/";//for vote/id
 
         // Check if the current URI is in the list of anonymous pages
         uri = uri.Replace(Navigation.BaseUri, string.Empty);
-        return anonymousPages.Contains(uri.ToLower()) || uri.StartsWith(anonymousPagesPrefix);
+       // return string.IsNullOrEmpty(uri)|| anonymousPages.Contains(uri.ToLower()) || uri.StartsWith(anonymousPagesPrefix);
+        return string.IsNullOrEmpty(uri) || anonymousPages.Contains(uri.ToLower()) || int.TryParse(uri,out int conId);
         }
 }

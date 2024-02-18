@@ -71,6 +71,15 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         //if different contt exists then delete & add here
 
         vote.VoteKPIComments = vote.VoteKPIRatingComments?.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment!)).ToList();
+        if (vote.VoteKPIComments != null && vote.VoteKPIComments.Count > 0)
+            vote.VoteKPIRatingComments?.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).ForEach(k =>
+            {
+                //vote.VoteKPIComments.Add(new VoteKPIComment(k.KPI, k.Comment!));//this is not required,its already done
+                k.Comment = null;
+            });
+        //todo can add Modified condition to track
+        //todo check if no change then dont call save
+        //even this is required on front end screen also with some intelligence like space check and all
 
         //TODO dont go for deletion instead always go for update only except if multiple row exists
         if (existing is not null && existing.Count > 0)//means something already exists
@@ -85,17 +94,30 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
             {
                 existingVote.VoteKPIRatingCommentsDelta = existingVote.VoteKPIRatingComments;
                 existingVote.ConstituencyIdDelta = existingVote.ConstituencyId;
+
+                var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
+                .ExecuteUpdateAsync(x => x
+                .SetProperty(u => u.Modified, DateTime.Now)
+                .SetProperty(u => u.VoteKPIRatingCommentsDelta, existingVote.VoteKPIRatingCommentsDelta)
+                .SetProperty(u => u.ConstituencyIdDelta, existingVote.ConstituencyIdDelta)
+                .SetProperty(u => u.VoteKPIComments, vote.VoteKPIComments)
+                .SetProperty(u => u.ConstituencyId, vote.ConstituencyId)
+                .SetProperty(u => u.Rating, vote.Rating)//HAD TO CACLULATE here before saving or on display also but had to make sure
+                .SetProperty(u => u.VoteKPIRatingComments, vote.VoteKPIRatingComments)
+                );
             }
-            var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
-            .ExecuteUpdateAsync(x => x
-            .SetProperty(u => u.Modified, DateTime.Now)
-            .SetProperty(u => u.VoteKPIRatingCommentsDelta, existingVote.VoteKPIRatingCommentsDelta)
-            .SetProperty(u => u.ConstituencyIdDelta, existingVote.ConstituencyIdDelta)
-            .SetProperty(u => u.VoteKPIComments, vote.VoteKPIComments)
-            .SetProperty(u => u.ConstituencyId, vote.ConstituencyId)
-            .SetProperty(u => u.Rating, vote.Rating)//HAD TO CACLULATE here before saving or on display also but had to make sure
-            .SetProperty(u => u.VoteKPIRatingComments, vote.VoteKPIRatingComments)
-            );
+            else
+            {
+                var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
+                   .ExecuteUpdateAsync(x => x
+                   .SetProperty(u => u.Modified, DateTime.Now)
+                   .SetProperty(u => u.VoteKPIComments, vote.VoteKPIComments)
+                   .SetProperty(u => u.ConstituencyId, vote.ConstituencyId)
+                   .SetProperty(u => u.Rating, vote.Rating)//HAD TO CACLULATE here before saving or on display also but had to make sure
+                   .SetProperty(u => u.VoteKPIRatingComments, vote.VoteKPIRatingComments)
+                   );
+            }
+
             return vote;
 
         }

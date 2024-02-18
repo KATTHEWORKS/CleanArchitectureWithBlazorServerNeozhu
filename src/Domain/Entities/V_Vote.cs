@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -65,7 +66,7 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
     //at viewmodel had to parse all bytes into string by (KPIEnum)value
 
     public List<VoteKPIComment>? VoteKPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
-
+    //public bool IsCommentExists() => VoteKPIRatingComments.Any(x => !string.IsNullOrEmpty(x.Comment) && x.Comment.Length > 3);
     //since comments of others also visible to all in summary page but not votes usually
     public List<VoteKPIRatingComment>? VoteKPIRatingComments { get; set; }//mostly for self
 

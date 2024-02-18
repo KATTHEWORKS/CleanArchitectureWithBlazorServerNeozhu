@@ -13,7 +13,7 @@ public static class JsonExtensions
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-    public static bool TryDeserialize<T>(string json, out T result)
+    public static bool TryDeserialize<T>(string json, out T result, JsonSerializerOptions options = null)
     {
         try
         {
@@ -22,7 +22,7 @@ public static class JsonExtensions
                 result = default;
                 return false;
             }
-            result = JsonSerializer.Deserialize<T>(json);
+            result = JsonSerializer.Deserialize<T>(json, options == null ? IgnoreNullSerializationOptions : options);
             return true;
         }
         //catch (JsonException)
@@ -37,5 +37,29 @@ public static class JsonExtensions
             return false;
         }
     }
+    //public static bool TryDeserialize<T>(string json, out T result)
+    //{
+    //    try
+    //    {
+    //        if (string.IsNullOrEmpty(json))
+    //        {
+    //            result = default;
+    //            return false;
+    //        }
+    //        result = JsonSerializer.Deserialize<T>(json);
+    //        return true;
+    //    }
+    //    //catch (JsonException)
+    //    //{
+    //    //    result = default;
+    //    //    return false;
+    //    //}
+    //    catch (Exception e)
+    //    {
+    //        Console.WriteLine(e.ToString());
+    //        result = default;
+    //        return false;
+    //    }
+    //}
 }
 

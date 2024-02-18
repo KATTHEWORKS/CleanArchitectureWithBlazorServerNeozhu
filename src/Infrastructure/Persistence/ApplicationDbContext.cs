@@ -97,11 +97,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
              v => JsonSerializer.Serialize(v.Where(c => c.Comment != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
              v => JsonSerializer.Deserialize<List<VoteKPIComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
          );
+        var delta = new List<VoteKPIRatingComment>();
         builder.Entity<V_Vote>()
          .Property(v => v.VoteKPIRatingCommentsDelta)
          .HasConversion(
              v => JsonSerializer.Serialize(v, JsonExtensions.IgnoreNullSerializationOptions),
-             v => JsonSerializer.Deserialize<List<VoteKPIRatingComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+             v => (JsonExtensions.TryDeserialize<List<VoteKPIRatingComment>>(v, out delta, JsonExtensions.IgnoreNullSerializationOptions)
+             ? delta : new List<VoteKPIRatingComment>())
          );
 
         //for updatetime had to use triggers
