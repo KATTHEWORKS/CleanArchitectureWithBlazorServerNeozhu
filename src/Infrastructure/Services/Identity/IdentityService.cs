@@ -25,7 +25,7 @@ public class IdentityService : IIdentityService
 {
     private readonly CustomUserManager _userManager;
     private readonly CustomRoleManager _roleManager;
-    private readonly AppConfigurationSettings _appConfig;
+    private readonly IApplicationSettings _appConfig;
     private readonly IUserClaimsPrincipalFactory<ApplicationUser> _userClaimsPrincipalFactory;
     private readonly IAuthorizationService _authorizationService;
     private readonly IAppCache _cache;

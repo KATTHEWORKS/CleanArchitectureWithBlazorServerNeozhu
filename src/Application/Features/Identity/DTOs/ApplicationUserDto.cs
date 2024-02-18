@@ -120,7 +120,7 @@ public class ApplicationUserDto
     {
         public ApplicationUserDtoValidator()
         {
-            RuleFor(v => v.TenantId)
+            RuleFor(v => v.DefaultTenantId)
                 .MaximumLength(256)
                 .NotEmpty();
             RuleFor(v => v.Provider)
