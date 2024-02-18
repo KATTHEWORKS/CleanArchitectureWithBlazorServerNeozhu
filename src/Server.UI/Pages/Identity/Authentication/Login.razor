@@ -30,44 +30,44 @@
 @inject CleanArchitecture.Blazor.Infrastructure.Services.Vote.IVoteService VoteServices
 <PageTitle>@_title</PageTitle>
 
-    <AuthorizeView>
-        <NotAuthorized Context="auth">
-            <MudForm Model="@_model" @ref="@_form" @bind-IsValid="@_success" ValidationDelay="0" Validation="@(Validator.ValidateValue(_model))">
-                <MudText Typo="Typo.h4" GutterBottom="true">@L["Sign In"]</MudText>
-                <MudText>
-                    @L["Don't have an account?"] <MudLink Href="/pages/authentication/register">@L["Sign Up"]</MudLink>
-                </MudText>
-                <MudTextField T="string"
-                              @bind-Value="_model.UserName" For="@(() => _model.UserName)"
-                              Label="@L["Username"]"
+<AuthorizeView>
+    <NotAuthorized Context="auth">
+        <MudForm Model="@_model" @ref="@_form" @bind-IsValid="@_success" ValidationDelay="0" Validation="@(Validator.ValidateValue(_model))">
+            <MudText Typo="Typo.h4" GutterBottom="true">@L["Sign In"]</MudText>
+            <MudText>
+                @L["Don't have an account?"] <MudLink Href="/pages/authentication/register">@L["Sign Up"]</MudLink>
+            </MudText>
+            <MudTextField T="string"
+                          @bind-Value="_model.UserName" For="@(() => _model.UserName)"
+                          Label="@L["Username"]"
+                          Variant="Variant.Outlined"
+                          Required="true"
+                          OnlyValidateIfDirty="true"
+                          Immediate="true"
+                          Class="my-6">
+            </MudTextField>
+
+            <MudPasswordField @bind-Value="_model.Password"
+                              For="@(() => _model.Password)"
+                              Label="@L["Password"]"
+                              PasswordMode="true"
                               Variant="Variant.Outlined"
-                              Required="true"
-                              OnlyValidateIfDirty="true"
-                              Immediate="true"
-                              Class="my-6">
-                </MudTextField>
+                              Required="true">
+            </MudPasswordField>
 
-                <MudPasswordField @bind-Value="_model.Password"
-                                  For="@(() => _model.Password)"
-                                  Label="@L["Password"]"
-                                  PasswordMode="true"
-                                  Variant="Variant.Outlined"
-                                  Required="true">
-                </MudPasswordField>
+            <div Class="d-flex justify-space-between align-center">
+                <MudCheckBox For="@(() => _model.RememberMe)" @bind-Checked="_model.RememberMe" Label="@L["Remember me?"]" Color="Color.Primary" Class="ml-n1 my-3"></MudCheckBox>
+                <MudLink Href="/pages/authentication/forgot-password">@L["Forgot password?"]</MudLink>
+            </div>
 
-                <div Class="d-flex justify-space-between align-center">
-                    <MudCheckBox For="@(() => _model.RememberMe)" @bind-Checked="_model.RememberMe" Label="@L["Remember me?"]" Color="Color.Primary" Class="ml-n1 my-3"></MudCheckBox>
-                    <MudLink Href="/pages/authentication/forgot-password">@L["Forgot password?"]</MudLink>
-                </div>
-
-                <MudButton Variant="Variant.Filled"
-                           Color="Color.Primary"
-                           Size="Size.Large"
-                           Disabled="@(_loading)"
-                           ButtonType="ButtonType.Button"
-                           OnClick="@(OnSubmit)"
-                           FullWidth="true">
-                    @if (_loading)
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Size="Size.Large"
+                       Disabled="@(_loading)"
+                       ButtonType="ButtonType.Button"
+                       OnClick="@(OnSubmit)"
+                       FullWidth="true">
+                @if (_loading)
                     {
                     <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
                     <MudText Class="ms-2"> @ConstantString.Loading</MudText>
@@ -93,10 +93,10 @@
     <Authorized>
         <RedirectToHome></RedirectToHome>
         <MudAlert Severity="Severity.Info" Class="mt-8 mud-width-full" Style="max-width:500px;">@L["You are already logged in."]</MudAlert>
-        </Authorized>
-    </AuthorizeView>
+    </Authorized>
+</AuthorizeView>
 
-    @code {
+@code {
 
     private string _title = "Sign In";
     private MudForm? _form;
@@ -113,14 +113,14 @@
             Password = UserName.DefaultPassword,//"Password123!",
             RememberMe = true
             };
-    private string returnUrl="";
+    private string returnUrl = "";
     protected override async Task OnInitializedAsync()
         {
         await base.OnInitializedAsync();
         _title = L["Sign In"];
         var uri = new Uri(NavigationManager.Uri);
         var queryString = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        returnUrl = queryString["returnUrl"]??"";
+        returnUrl = queryString["returnUrl"] ?? "";
         // if (!string.IsNullOrEmpty(returnUrl))//not requried
         //     returnUrl = returnUrl.Replace(NavigationManager.BaseUri, string.Empty);
         //UserManager = ScopedServices.GetRequiredService<CustomUserManager>();
@@ -164,7 +164,14 @@
                     // {
                     var myVote = await VoteServices.ReadByUserId(user.Id);//currently fetches only one vote
                     if (myVote is not null && myVote.Id > 0)
+                        {
+                        if (myVote.VoteKPIComments.Count > 0)
+                            {
+                            myVote.VoteKPIComments.ForEach(x => { myVote.VoteKPIRatingComments.Find(k => k.KPI == x.KPI).Comment = x.Comment; });
+                            }
+                            //todo this is setting here but not setting in claims could be some issue at passsing ,need to check
                         user.MyVote = myVote;
+                        }
 
                     var accessToken = await TokenProvider.Login(user);
                     var claims = await TokenProvider.ParseClaimsFromJwt(accessToken);

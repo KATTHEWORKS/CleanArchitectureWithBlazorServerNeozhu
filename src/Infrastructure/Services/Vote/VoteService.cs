@@ -70,6 +70,8 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         //if same constituency exists then go for update
         //if different contt exists then delete & add here
 
+        vote.VoteKPIComments = vote.VoteKPIRatingComments?.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment!)).ToList();
+
         //TODO dont go for deletion instead always go for update only except if multiple row exists
         if (existing is not null && existing.Count > 0)//means something already exists
         {

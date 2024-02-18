@@ -84,13 +84,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         //builder.Entity<V_Vote>().OwnsMany(b => b.VoteKPIRatingComments, ownedNavigationBuilder =>
         // { ownedNavigationBuilder.ToJson(); }
         //);
-        //builder.Entity<V_Vote>().OwnsMany(b => b.VoteKPIComments, ownedNavigationBuilder =>
-        //    ownedNavigationBuilder.ToJson()
-        //);
+        //above wont work so trying like below
         builder.Entity<V_Vote>()
          .Property(v => v.VoteKPIRatingComments)
          .HasConversion(
-             v => JsonSerializer.Serialize(v.Where(c =>c.Rating != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
+             v => JsonSerializer.Serialize(v.Where(c => c.Rating != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
              v => JsonSerializer.Deserialize<List<VoteKPIRatingComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
          );
         builder.Entity<V_Vote>()
@@ -99,22 +97,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
              v => JsonSerializer.Serialize(v.Where(c => c.Comment != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
              v => JsonSerializer.Deserialize<List<VoteKPIComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
          );
-        //builder.Entity<V_Vote>()
-        //    .Property(v => v.VoteKPIRatingComments)
-        //    .HasConversion(
-        //        v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
-        //        v => JsonConvert.DeserializeObject<List<VoteKpi>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
-        //    );
-
-
-
-        //builder.Entity<V_Vote>().OwnsOne(b => b.VoteKPIRatingCommentsDelta, ownedNavigationBuilder =>
-        //{
-        //    ownedNavigationBuilder.ToJson();
-        //});
-
-
-
         //for updatetime had to use triggers
 
         builder.Entity<V_VoteSummary>().HasKey(x => x.ConstituencyId);

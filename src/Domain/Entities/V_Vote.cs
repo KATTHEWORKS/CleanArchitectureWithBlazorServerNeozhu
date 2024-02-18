@@ -62,48 +62,12 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
     //below propertiues will be used in Dtos,so here commenting
 
     //at viewmodel had to parse all bytes into string by (KPIEnum)value
-    //[NotMapped]
+   
     public List<VoteKPIComment>? VoteKPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
 
     //since comments of others also visible to all in summary page but not votes usually
-    //[NotMapped]
     public List<VoteKPIRatingComment>? VoteKPIRatingComments { get; set; }//mostly for self
-    //{
-    //    get
-    //    {
-    //        return VoteKPIRatingComments ?? [];
-    //    }
-    //    set
-    //    {
-    //        if (value != null)
-    //        {
-    //            VoteKPIComments = value.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment)).ToList();
-    //        }
-    //    }
-
-    //    //this comprises of vote & comments both 
-    //    //so for summary page this should not be loaded
-    //    //madhu continue here to address tweak
-
-
-    //    //get => JsonSerializer.Deserialize<List<VoteKPIRatingComments>>(VotesJsonAsString);
-    //    //get => ((!string.IsNullOrEmpty(VotesJsonAsString) && JsonExtensions.TryDeserialize<List<VoteKPIRatingComments>>(VotesJsonAsString, out var result)) ? result : null);
-    //    get
-    //    {
-    //        return VoteKPIRatingComments ?? [];
-    //    }
-    //    set
-    //    {
-    //        if (value != null)
-    //        {
-    //            //VotesJsonAsString = JsonSerializer.Serialize(value);
-    //            //for firsttime had to take all kpis so passing
-    //            //VotesJsonAsString = JsonSerializer.Serialize(value.Where(c => Id > 0 ? c.Rating != null : c.KPI > 0).ToList(), JsonExtensions.IgnoreNullSerializationOptions);
-
-    //            VoteKPIComments = value.Where(c => c.Rating != null && !string.IsNullOrEmpty(c.Comment)).Select(x => new VoteKPIComment(x.KPI, x.Comment)).ToList();
-    //        }
-    //    }
-    //}
+   
 }
 
 //in case of voe deletion that should delete commentSuppor count also
