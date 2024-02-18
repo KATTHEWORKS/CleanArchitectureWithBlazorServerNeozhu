@@ -76,6 +76,7 @@
     [Parameter]
     public bool IsToAdd { get; set; }
 
+    @inject ILogOut logout;
     private const byte SystemType = 1;//for MP its 1
     [CascadingParameter]
     private Task<AuthenticationState>? AuthState { get; set; }
@@ -103,7 +104,7 @@
             {
 
             existingVote = state.User.GetMyVote();
-           
+
             // var existing = await VoteServices.ReadByUserId(userId, ConstituencyId);
             //this allows for multiple constituency voting
             //below full can be at clientside only
@@ -141,6 +142,9 @@
         }
     protected async Task OnSubmit()
         {
+        if (AuthState == null) return;
+        var state = await AuthState;
+        if (state == null) return;
         //todo need to validate is constId valid or not
         if (newUpdatedVote != null && newUpdatedVote.ConstituencyId > 0)
             {
@@ -153,6 +157,10 @@
                     // about created or modified need to check more
                     }).ToList();
             var result = await VoteServices.AddOrUpdate(newUpdatedVote);
+            if (result != null)
+                {
+                await logout.Execute(force:true);//add more messaage as 
+                }
             }
         }
 
