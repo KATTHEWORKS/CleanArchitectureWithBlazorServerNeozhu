@@ -97,6 +97,10 @@ public class ApplicationUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<
 
         if (user.MyVote != null)
         {
+            if (user.MyVote.VoteKPIComments.Count > 0)
+            {
+                user.MyVote.VoteKPIComments.ForEach(x => { user.MyVote.VoteKPIRatingComments.Find(k => k.KPI == x.KPI).Comment = x.Comment; });
+            }
             ((ClaimsIdentity)principal.Identity)?.AddClaims(new[]
            {
                 new Claim(ApplicationClaimTypes.MyVote, JsonConvert.SerializeObject(user.MyVote))

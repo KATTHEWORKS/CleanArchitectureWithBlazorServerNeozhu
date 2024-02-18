@@ -103,11 +103,7 @@
             {
 
             existingVote = state.User.GetMyVote();
-            if (existingVote.VoteKPIComments.Count > 0)
-                {
-                existingVote.VoteKPIComments.ForEach(x => { existingVote.VoteKPIRatingComments.Find(k => k.KPI == x.KPI).Comment = x.Comment; });
-                }
-            //todo this is setting here but not setting in claims could be some issue at passsing ,need to check
+           
             // var existing = await VoteServices.ReadByUserId(userId, ConstituencyId);
             //this allows for multiple constituency voting
             //below full can be at clientside only

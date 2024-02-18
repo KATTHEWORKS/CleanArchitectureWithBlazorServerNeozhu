@@ -44,7 +44,7 @@ public class VoteKPIRatingComment
     public V_KPI? V_KPI { get; set; }//this is only for UI purpose nothing else
     public sbyte? Rating { get; set; } //-2-3
 
-    [JsonIgnore]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public string? Comment { get; set; }//moved to other ,only used for carrying from frontend screen
 
     public DateTime Created { get; protected set; }
