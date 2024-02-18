@@ -1,5 +1,5 @@
 ﻿@page "/"
-@page "/{ConstituencyIdSelected:int?}"
+@page "/{ConstituencyIdSelected:int?}/{IsToAdd:bool?}"
 @* @page "/rating/{ConstituencyIdSelected:int?}" *@
 @* @page "/rating/{StateSelected:string?}/{ConstituencyIdSelected:int?}" *@
 @* @page "/rating" *@
@@ -47,7 +47,7 @@
             </MudItem>
         </MudGrid>
     </MudPaper>
-    <VoteUpsert ConstituencyId="@ConstituencyIdSelected" IsToAdd="false"></VoteUpsert>
+    <VoteUpsert ConstituencyId="@ConstituencyIdSelected" IsToAdd="@IsToAdd"></VoteUpsert>
     @if (VotesCount == 0 && ConstituencyIdSelected > 0)
         {
         <Label> Still No one voted for this constituency</Label>
@@ -87,6 +87,9 @@
 
     [Parameter]
     public int ConstituencyIdSelected { get; set; }
+
+    [Parameter]
+    public bool? IsToAdd { get; set; }
 
     int VotesCount = 0;
 
