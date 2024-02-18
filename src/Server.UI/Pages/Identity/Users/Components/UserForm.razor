@@ -13,7 +13,7 @@
 
 @using CleanArchitecture.Blazor.Domain.Common.Enums
 @using CleanArchitecture.Blazor.Domain.Identity
-
+@using CleanArchitecture.Blazor.Application.Common.Interfaces.MultiTenant
 @inherits MudComponentBase
 @inject IValidationService Validator
 @inject IUploadService UploadService
@@ -55,6 +55,9 @@
             <MudTextField For="@(() => Model.Provider)" @bind-Value="Model.Provider" Label="@L["Provider"]" Variant="Variant.Text"></MudTextField>
         </MudItem>
         <MudItem xs="12" sm="6">
+            <MudTextField For="@(() => Model.UserName)" @bind-Value="Model.UserName" Label="@L["User Name"]" Variant="Variant.Text" Required="true" RequiredError="@L["User Name is required."]"></MudTextField>
+        </MudItem>
+        <MudItem xs="12" sm="6">
             <PickSuperiorIdAutocomplete For="@(() => Model.SuperiorId)"
                                         OwnerName="@Model.UserName"
                                         Clearable="true"
@@ -63,44 +66,11 @@
             </PickSuperiorIdAutocomplete>
 
         </MudItem>
-        @if (Model.Provider == "Local")
-            {
-            <MudItem xs="12" sm="6">
-                <MudTextField For="@(() => Model.UserName)" @bind-Value="Model.UserName" Label="@L["User Name"]" Variant="Variant.Text"></MudTextField>
-            </MudItem>
-
-            @if (string.IsNullOrEmpty(Model.Id))
-                {
-                <MudItem xs="12" sm="6">
-                    <MudPasswordField Immediate="true"
-                                      Label="@L["Password"]"
-                                      @bind-Value="Model.Password"
-                                      For="@(() => Model.Password)"
-                                      Variant="Variant.Text"
-                                      PasswordMode="true"
-                                      Required="true"
-                                      RequiredError="@L["password is required!"]"
-                                      Class="mt-4" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudPasswordField Immediate="true"
-                                      Label="@L["Confirm Password"]"
-                                      @bind-Value="Model.ConfirmPassword"
-                                      For="@(() => Model.ConfirmPassword)"
-                                      Variant="Variant.Text"
-                                      PasswordMode="true"
-                                      Required="true"
-                                      RequiredError="@L["confirm password is required!"]"
-                                      Class="mt-4" />
-                </MudItem>
-                }
-
-            }
         <MudItem xs="12" sm="6">
             <MudTextField For="@(() => Model.DisplayName)" @bind-Value="Model.DisplayName" Label="@L["Display Name"]" Variant="Variant.Text"></MudTextField>
         </MudItem>
         <MudItem xs="12" sm="6">
-            <MudTextField For="@(() => Model.Email)" @bind-Value="Model.Email" Label="@L["E-mail"]" Variant="Variant.Text"></MudTextField>
+            <MudTextField For="@(() => Model.Email)" @bind-Value="Model.Email" Label="@L["E-mail"]" Variant="Variant.Text" Required="true" RequiredError="@L["E-mail is required."]"></MudTextField>
         </MudItem>
         <MudItem xs="12" sm="6">
             <MudTextField For="@(() => Model.PhoneNumber)" @bind-Value="Model.PhoneNumber" Label="@L["Phone Number"]" Variant="Variant.Text"></MudTextField>
@@ -172,7 +142,6 @@
 
 
     private MudForm? _form = default!;
-    private readonly ApplicationUserDtoValidator _modelValidator = new();
     private List<CheckItem> Roles { get; set; } = new();
     private List<TenantDto> Tenants { get; set; } = new();
 

@@ -34,7 +34,7 @@ public class IdentityService : IIdentityService
 
     public IdentityService(
         IServiceScopeFactory scopeFactory,
-        AppConfigurationSettings appConfig,
+        IApplicationSettings appConfig,
         IAppCache cache,
         IMapper mapper,
         IStringLocalizer<IdentityService> localizer)
