@@ -55,19 +55,20 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
     //public string? VotesJsonAsStringDelta { get; set; }//this is for the sake of update difference tracking tyo summary table
 
     //[NotMapped]
-    //public (int constituencyId, List<VoteKPIRatingComment> kpiRating) VoteKPIRatingCommentsDelta { get; set; }
+    public List<VoteKPIRatingComment>? VoteKPIRatingCommentsDelta { get; set; }
+    public int? ConstituencyIdDelta { get; set; }
 
     //public string? CommentsJsonAsString { get; set; }//lIST<KPI,COMMENT>
 
     //below propertiues will be used in Dtos,so here commenting
 
     //at viewmodel had to parse all bytes into string by (KPIEnum)value
-   
+
     public List<VoteKPIComment>? VoteKPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
 
     //since comments of others also visible to all in summary page but not votes usually
     public List<VoteKPIRatingComment>? VoteKPIRatingComments { get; set; }//mostly for self
-   
+
 }
 
 //in case of voe deletion that should delete commentSuppor count also

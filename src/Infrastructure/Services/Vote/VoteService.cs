@@ -66,7 +66,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
 
         //make sure only 1 updatedVote exists,if anything else remove previous or block itself to add on screen... but currently allowing multiple votes
 
-        var existing = await ReadByUserIdAll(vote.UserId);
+        var existing = await ReadByUserIdAll(vote.UserId);//this can be bypasssed based on cache considering for improvements
         //if same constituency exists then go for update
         //if different contt exists then delete & add here
 
@@ -80,11 +80,17 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
                 var deleted = await _context.V_Votes.Where(x => x.UserId == vote.UserId).Skip(1).ExecuteDeleteAsync();
             }
             var existingVote = existing.First();
+
+            if (existingVote.VoteKPIRatingComments != null && existingVote.VoteKPIRatingCommentsDelta == null)
+            {
+                existingVote.VoteKPIRatingCommentsDelta = existingVote.VoteKPIRatingComments;
+                existingVote.ConstituencyIdDelta = existingVote.ConstituencyId;
+            }
             var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
             .ExecuteUpdateAsync(x => x
             .SetProperty(u => u.Modified, DateTime.Now)
-            //.SetProperty(u => u.VotesJsonAsStringDelta,
-            //c => string.IsNullOrEmpty(c.VotesJsonAsStringDelta) ? c.CommentsJsonAsString : c.VotesJsonAsStringDelta)
+            .SetProperty(u => u.VoteKPIRatingCommentsDelta, existingVote.VoteKPIRatingCommentsDelta)
+            .SetProperty(u => u.ConstituencyIdDelta, existingVote.ConstituencyIdDelta)
             .SetProperty(u => u.VoteKPIComments, vote.VoteKPIComments)
             .SetProperty(u => u.ConstituencyId, vote.ConstituencyId)
             .SetProperty(u => u.Rating, vote.Rating)//HAD TO CACLULATE here before saving or on display also but had to make sure

@@ -20,7 +20,7 @@ public class V_VoteSummary//each location one row as summary
     {
         Created = DateTime.Now;
     }
-  
+
     //[Key]
     public int ConstituencyId { get; set; }
 
@@ -30,10 +30,9 @@ public class V_VoteSummary//each location one row as summary
     public int CommentsCount { get; set; }
 
     [Required]
-    public int VotesCount { get; set; }
+    public int VotesCount { get { return KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)); } }
 
-    //[Column(TypeName = "jsonb")] //this wont working mssql Adjust based on your database
-    public string KPIVotesAsJsonString { get; set; }
+
 
     [Required]
     public DateTime Created { get; protected set; }
@@ -45,20 +44,21 @@ public class V_VoteSummary//each location one row as summary
         Modified = DateTime.UtcNow;
     }
     //below propertiues will be used in Dtos,so here commenting
-
-    [NotMapped]
-    public List<VoteSummary_KPIVote> KPIVotes
-    {
-        //get => JsonSerializer.Deserialize<KPIVotes>(KPIVotesAsJsonString);
-        get => JsonExtensions.TryDeserialize<List<VoteSummary_KPIVote>>(KPIVotesAsJsonString, out var result) ? result : [];
-        set
-        {
-            //KPIVotesAsJsonString = JsonSerializer.Serialize(value);
-            KPIVotesAsJsonString = JsonSerializer.Serialize(value, JsonExtensions.IgnoreNullSerializationOptions);
-            VotesCount = value.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count));
-            //CommentCountForMpId //this cant be added here,instead at services
-        }
-    }
+    //[Column(TypeName = "jsonb")] //this wont working mssql Adjust based on your database
+    //public string KPIVotesAsJsonString { get; set; }
+    //[NotMapped]
+    public List<VoteSummary_KPIVote> KPIVotes { get; set; }
+    //{
+    //    //get => JsonSerializer.Deserialize<KPIVotes>(KPIVotesAsJsonString);
+    //    get => JsonExtensions.TryDeserialize<List<VoteSummary_KPIVote>>(KPIVotesAsJsonString, out var result) ? result : [];
+    //    set
+    //    {
+    //        //KPIVotesAsJsonString = JsonSerializer.Serialize(value);
+    //        KPIVotesAsJsonString = JsonSerializer.Serialize(value, JsonExtensions.IgnoreNullSerializationOptions);
+    //        VotesCount = value.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count));
+    //        //CommentCountForMpId //this cant be added here,instead at services
+    //    }
+    //}
     //this is for total aggregate of all KPI values
     public float AggregateVote => CalculateAggregateVote();//if this created db column then below is not required
     //public float AggregateVote { get { return CalculateAggregateVote(); } }
