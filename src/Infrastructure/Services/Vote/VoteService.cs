@@ -234,70 +234,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         return expr;
     }
    
-    private static ToAddRemove GetVoteDifference(V_Vote existingVote, V_Vote updatedVote)
-    {
-        if (existingVote == null || existingVote.VoteKPIRatingComments is null || existingVote.VoteKPIRatingComments.Count == 0)
-            return new ToAddRemove() { ToAdd = updatedVote?.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList() };//to add
-        if (updatedVote == null || updatedVote.VoteKPIRatingComments.Count == 0)
-            //return existingVote.VoteKPIRatingComments;//to remove
-            return new ToAddRemove() { ToRemove = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList() };
-        if (existingVote.VoteKPIRatingComments.Count == 0 && updatedVote.VoteKPIRatingComments.Count == 0)
-        {
-            //then no summary change just return from here;
-            return null;
-        }
-        else
-        {
-            var existingKpis = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList();
-            var newKpis = updatedVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList();
-            if (existingKpis == newKpis) return null;
-
-            var toRemoveItems = existingKpis.Except(newKpis);//this wont work bcz of equality comparer addiotional handling required & had to compare rating also,still we can test
-
-            var toAdd = new List<(int KPI, sbyte? Rating)>();
-            var toRemove = new List<(int KPI, sbyte? Rating)>();
-
-            var commonExists = existingKpis.Select(x => x.KPI).Intersect(newKpis.Select(y => y.KPI));
-
-            if (commonExists.Any())
-                existingKpis.ForEach(e =>
-                {
-                    var sameKpi = newKpis.Find(n => n.KPI == e.KPI);
-                    if (sameKpi.Rating != null)
-                    {
-                        if (sameKpi.Rating == e.Rating)//then no change leave this kpi skip
-                            newKpis.Remove(sameKpi);
-                        else  //here rating difference is there
-                        {
-                            sameKpi.Rating -= e.Rating;
-                            toAdd.Add(sameKpi);
-                            newKpis.Remove(sameKpi);
-                            //    //to current kpi add this rating value as summary update
-                            //    //old was 1  newRating 2 then now new-old=2-1=1 had to be added 
-                            //    //old was -1  newRating 1 then now new-old=1-(-1)=2 had to be added 
-                            //    //old was 1  newRating -1 then now new-old=-1-1=-2 had to be added 
-                        }
-                    }
-                    //else if (newKpis.Any(n => n.KPI == e.KPI))
-                    //{
-                    //    //add these kpi-rating values
-                    //    var nn = newKpis.First(n => n.KPI == e.KPI);
-                    //    nn.Rating -= e.Rating;
-                    //    toAdd.Add(nn);
-
-                    //}
-                    else //means user removed particular KPI rating now,so had to remove
-                    {
-                        toRemove.Add(e);
-                    }
-                });
-            if (newKpis != null && newKpis.Count > 0)
-            {
-                toAdd.AddRange(newKpis);
-            }
-            return new ToAddRemove() { ToAdd = toAdd, ToRemove = toRemove };
-        }
-    }
+   
     */
 }
 #endif
