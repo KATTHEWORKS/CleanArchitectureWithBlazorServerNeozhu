@@ -103,9 +103,10 @@ public class VoteSummary_KPIVote
             return 0; // or any default value //todo need to think what could be, but mostly this wont come any t
         }
 
-        //todo can make different value for each vote later case
+        //todo can make different value for each kpi type later case
+        var kpiValue = 1;//if kpi 1 value is more then more it value like 3 ,if less then make it like 0.5
         var totalVotes = RatingTypeCountsList.Sum(r => r.Count);
-        var weightSum = RatingTypeCountsList.Sum(r => r.RatingTypeByte * r.Count);
+        var weightSum = RatingTypeCountsList.Sum(r => r.RatingTypeByte * r.Count)*kpiValue;
         var aggregateKPIVote = totalVotes != 0 ? (sbyte)Math.Min(3, Math.Max(-2, weightSum / totalVotes)) : (sbyte)0;
         return aggregateKPIVote;
     }
