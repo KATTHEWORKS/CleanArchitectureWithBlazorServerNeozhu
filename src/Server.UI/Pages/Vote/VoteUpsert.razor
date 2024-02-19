@@ -7,7 +7,7 @@
         @if (AuthState != null && newUpdatedVote != null)//means loggedin
             {
             @*   <MudTypography Variant="TypographyVariant.H5">Vote for Your Constituency</MudTypography> *@
-            @if (IsToAdd==true)
+            @if (IsToAdd == true)
                 {
                 if (existingVote != null)
                     {
@@ -35,7 +35,7 @@
                             <MudGrid>
                                 <MudItem xs="12" sm="6">
                                     <MudTypography Variant="TypographyVariant.H6">@kkk.Id-@kkk.NameShort</MudTypography>
-                                    <MudSelect T="sbyte?" @bind-Value="keyPoint.Rating" Variant="Variant.Filled" Label="Rating">
+                                    <MudSelect T="sbyte?" @bind-Value="keyPoint.Rating" Variant="Variant.Filled" Label="Rating" >
                                         @foreach (var rate in Enum.GetValues<RatingEnum>())
                                             {
                                             <MudSelectItem T="sbyte?" Value="(sbyte?)rate">@rate</MudSelectItem>
@@ -49,6 +49,9 @@
                         </MudPaper>
                         }
                     }
+                <div>
+                    Overall Rating: @newUpdatedVote.Rating
+                </div>
                 <!-- Submit Button -->
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnSubmit">Submit Vote</MudButton>
                 }
@@ -133,6 +136,8 @@
 
             TempVoteKPIRatingComments =
        V_KPI.MergeWithExistingVoteKPIRatingCommentList(newUpdatedVote.VoteKPIRatingComments, SystemType);
+            if (newUpdatedVote.Rating == 0)
+                CalculateMyAggregateRatingOfConstituency();
             //on page load assign all and on save save whichever is having value
 
             //above full can be at clientside only
@@ -160,6 +165,7 @@
                     Rating = x.Rating
                     // about created or modified need to check more
                     }).ToList();
+            CalculateMyAggregateRatingOfConstituency();
             var result = await VoteServices.AddOrUpdate(newUpdatedVote);
             if (result != null)
                 {
@@ -170,7 +176,13 @@
                 }
             }
         }
-
+    void CalculateMyAggregateRatingOfConstituency()
+        {
+        if (TempVoteKPIRatingComments == null || !TempVoteKPIRatingComments.Any(x => x.Rating != null)) return; // or any default value //todo need to think what could be, but mostly this wont come any time
+        var sumOfAggregateKPIs = TempVoteKPIRatingComments.Where(x => x.Rating != null).Sum(x => x.Rating) ?? 0;
+        var totalCount = TempVoteKPIRatingComments.Count(x => x.Rating != null);
+        newUpdatedVote.Rating = totalCount != 0 ? (sbyte)Math.Min(3, Math.Max(-2, (float)sumOfAggregateKPIs / totalCount)) : (sbyte)0;
+        }
     protected async Task AddMyVote()
         {
         if (!string.IsNullOrEmpty(userId) && ConstituencyId > 0)
