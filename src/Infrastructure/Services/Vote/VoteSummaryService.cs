@@ -27,11 +27,16 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     //private readonly IApplicationDbContext _context = context;
 
     private const string VoteSummaryCacheKey = "all-Summary";
-
+    private const string VoteSummaryLoadTimeCacheKey = "all-Summary-loadedTime";
+    private static DateTime lastLoadedOn = DateTime.Now;
+    private static bool DeltaLoadingInProgress = false;
+    private static bool IsFirsttime = false;
     public async Task LoadSummaryFromAllVotesFirstTime()
     //first time or weekly once to reload complete summary db ondemand only with backup
     {//very costly heavy operation
+        DeltaLoadingInProgress = true;
         var allVotes = await context.V_Votes.ToListAsync();
+        lastLoadedOn = DateTime.Now;
         //improve this whole logic based on fetching constituency wise votes ,while fetching itself write to result set and make a sigle call to summary db... prefarrably delta db...once ready shift all to main table...using some switch in between
         foreach (var vote in allVotes)
         {
@@ -94,6 +99,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 continue;
             }
         }
+
     }
 
     public async Task LoadDeltaDifferenceToSummary()
@@ -106,6 +112,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //4.add those to db
         //5.update back the step2 records delta(id & string both) as null
 
+        DeltaLoadingInProgress = true;
         //step1
         var lastCreated = await context.V_VoteSummarys.MaxAsync(x => x.Created);
         var lastModified = await context.V_VoteSummarys.MaxAsync(x => x.Modified);
@@ -117,7 +124,9 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         var leastTime = lastCreated < lastModified ? lastCreated : lastModified;
         //step2
         var deltaToLoad = await context.V_Votes.Where(x => x.Created > leastTime || x.Modified > leastTime || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
+        lastLoadedOn = DateTime.Now;
 
+        //step3- etting difference
 
     }
 
@@ -126,6 +135,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     {
         if (cache is not null && context is not null)
         {
+            await RefreshDb();
             //todo had to add logic of reading from vote db and converting into summary
             return await cache.GetOrAddAsync(VoteSummaryCacheKey,
                 async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.ToListAsync() : [], TimeSpan.FromMinutes(14));
@@ -134,11 +144,23 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         return [];
     }
 
+    private async Task RefreshDb()
+    {
+        if (lastLoadedOn.Subtract(DateTime.Now).TotalMinutes > 15 && DeltaLoadingInProgress == false)
+        {
+            if (IsFirsttime)
+                await LoadSummaryFromAllVotesFirstTime();
+            else
+                await LoadDeltaDifferenceToSummary();
+        }
+    }
+
     //for self read all properties
     //ideally 1 user can vote at one place only 
     //later we can allow for multiple
     public async Task<V_VoteSummary> ReadByConstituencyId(int constituencyId)
     {
+        _ = RefreshDb();//fire & forget
         var res = await context.V_VoteSummarys.Where(x => x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
         return res;
     }
