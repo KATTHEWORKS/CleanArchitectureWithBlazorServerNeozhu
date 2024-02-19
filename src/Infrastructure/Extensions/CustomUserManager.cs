@@ -357,7 +357,7 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
         if (user == null || user.DefaultTenantId.IsNullOrEmptyAndTrimSelf() || !Guid.TryParse(user.DefaultTenantId, out Guid tenantId)
             || user.Id.IsNullOrEmptyAndTrimSelf() || !Guid.TryParse(user.Id, out Guid id)) return null;
 
-        if (roleNames == null || roleNames.Count() == 0)//means all roles removed
+        if (roleNames == null || !roleNames.Any())//means all roles removed
         {
             var existingAllInCurrentTenant = _dbContext.UserRoleTenants.Include(x => x.Role).Where(role => role.UserId == user.Id && role.TenantId == user.DefaultTenantId).ToList();
             if (existingAllInCurrentTenant != null && existingAllInCurrentTenant.Count > 0)

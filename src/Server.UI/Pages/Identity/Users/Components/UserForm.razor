@@ -168,7 +168,7 @@
         if (StaticData.Roles != null && StaticData.Roles.Any())
             {
             StaticData.RolesOfTenantType(currentTenant.Type).ForEach(x => Roles.Add(new CheckItem { Key = x.Name!, Value = false }));
-            if (Model.AssignedRoles != null && Model.AssignedRoles.Intersect(Roles.Select(x => x.Key)).Count() > 0)
+            if (Model.AssignedRoles != null && Model.AssignedRoles.Intersect(Roles.Select(x => x.Key)).Any())
                 {
                 Model.AssignedRoles.Intersect(Roles.Select(x => x.Key)).ToList().ForEach(a => { Roles.Find(r => r.Key == a).Value = true; });
                 Roles = Roles.OrderByDescending(x => x.Value).ToList();

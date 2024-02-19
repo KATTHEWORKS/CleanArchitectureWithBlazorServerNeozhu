@@ -28,81 +28,105 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
 
     private const string VoteSummaryCacheKey = "all-Summary";
     private const string VoteSummaryLoadTimeCacheKey = "all-Summary-loadedTime";
-    private static DateTime lastLoadedOn = DateTime.Now;
+    private static DateTime lastLoadedOn = DateTime.Now.AddHours(-2);
     private static bool DeltaLoadingInProgress = false;
     private static bool IsFirsttime = false;
-    public async Task LoadSummaryFromAllVotesFirstTime()
+    private async Task LoadSummaryFromAllVotesFirstTime()
     //first time or weekly once to reload complete summary db ondemand only with backup
     {//very costly heavy operation
         DeltaLoadingInProgress = true;
-        var allVotes = await context.V_Votes.ToListAsync();
+        var allVotes = await context.V_Votes.GroupBy(x => x.ConstituencyId).ToListAsync();
         lastLoadedOn = DateTime.Now;
         //improve this whole logic based on fetching constituency wise votes ,while fetching itself write to result set and make a sigle call to summary db... prefarrably delta db...once ready shift all to main table...using some switch in between
-        foreach (var vote in allVotes)
+
+        var totalChangesCount = 0;
+        foreach (var votes in allVotes)
         {
-
-            var existing = await ReadByConstituencyId(vote.ConstituencyId);
-
-            if (existing == null)//case1
+            var isFirstTime = false;
+            var existing = await ReadByConstituencyId(votes.Key);
+            foreach (var vote in votes)//running for 1 constituency at one time
             {
-                var temp = new List<VoteSummary_KPIVote>();
-                vote.VoteKPIRatingComments.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
-                var new1 = new V_VoteSummary()
+                if (existing == null)//case1
                 {
-                    ConstituencyId = vote.ConstituencyId,
-                    KPIVotes = temp,
-                    CommentsCount = vote.VoteKPIComments.Count == 0 ? 0 : 1
-                    //,AggregateVote  had top check whether its added to db by generating or not
-                };
-                await context.V_VoteSummarys.AddAsync(new1);
-                //return (await context.SaveChangesAsync()) > 0;
-                continue;
+                    isFirstTime = true;
+                    var temp = new List<VoteSummary_KPIVote>();
+                    vote.VoteKPIRatingComments.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
+                    var new1 = new V_VoteSummary()
+                    {
+                        ConstituencyId = vote.ConstituencyId,
+                        KPIVotes = temp,
+                        CommentsCount = vote.VoteKPIComments.Count == 0 ? 0 : 1
+                        //,AggregateVote  had top check whether its added to db by generating or not
+                    };
+                    //await context.V_VoteSummarys.AddAsync(new1);
+                    //instead of writing to db everytime updating existing value itslef and finally updatedb
+                    existing = new1;
+                    //return (await context.SaveChangesAsync()) > 0;
+                    continue;
+                }
+                else//case2 paqrticular MP details existing,now adding particular user vote counts only
+                {
+                    if (vote.VoteKPIComments.Count > 0)
+                        existing.CommentsCount += 1;
+
+                    vote.VoteKPIRatingComments.ForEach((Action<VoteKPIRatingComment>)(k =>
+                    {
+                        //MP details exists but again 2 case
+                        //case2.1 kpi details existing for mp
+                        var kpiDetailsExisiting = existing.KPIVotes.FirstOrDefault<VoteSummary_KPIVote>(x => x.KPI == k.KPI);
+                        if (kpiDetailsExisiting is null)
+                        {
+                            var newSummary = new VoteSummary_KPIVote()
+                            {
+                                KPI = k.KPI,
+                                RatingTypeCountsList = [new((sbyte)k.Rating, 1)]
+
+                            };
+                            existing.KPIVotes.Add(newSummary);
+                        }
+                        else
+                        {
+                            var existingRatingType = kpiDetailsExisiting.RatingTypeCountsList.Find((Predicate<VoteSummary_KPIVote.RatingTypeCounts>)(x => x.RatingTypeByte == k.Rating));
+                            if (existingRatingType is not null)
+                            {
+                                existingRatingType.Count += 1;
+                            }
+                            else//its null so not existing RatingTypeCountsList for particular 
+                            {
+                                if (k.Rating is not null)
+                                    kpiDetailsExisiting.RatingTypeCountsList.Add(new VoteSummary_KPIVote.RatingTypeCounts(k.Rating ?? (sbyte)RatingEnum.OkOk, 1));
+                            }
+                        }
+
+                    }));
+
+                    //var result = context.V_VoteSummarys.Update(existing);
+                    //await context.SaveChangesAsync();
+                    //instead of writing to db everytime updating existing value itslef and finally updatedb
+                    continue;
+                }
+
             }
-            else//case2 paqrticular MP details existing,now adding particular user vote counts only
+            if (isFirstTime)
             {
-                if (vote.VoteKPIComments.Count > 0)
-                    existing.CommentsCount += 1;
-
-                vote.VoteKPIRatingComments.ForEach((Action<VoteKPIRatingComment>)(k =>
-                {
-                    //MP details exists but again 2 case
-                    //case2.1 kpi details existing for mp
-                    var kpiDetailsExisiting = existing.KPIVotes.FirstOrDefault<VoteSummary_KPIVote>(x => x.KPI == k.KPI);
-                    if (kpiDetailsExisiting is null)
-                    {
-                        var newSummary = new VoteSummary_KPIVote()
-                        {
-                            KPI = k.KPI,
-                            RatingTypeCountsList = [new((sbyte)k.Rating, 1)]
-
-                        };
-                        existing.KPIVotes.Add(newSummary);
-                    }
-                    else
-                    {
-                        var existingRatingType = kpiDetailsExisiting.RatingTypeCountsList.Find((Predicate<VoteSummary_KPIVote.RatingTypeCounts>)(x => x.RatingTypeByte == k.Rating));
-                        if (existingRatingType is not null)
-                        {
-                            existingRatingType.Count += 1;
-                        }
-                        else//its null so not existing RatingTypeCountsList for particular 
-                        {
-                            if (k.Rating is not null)
-                                kpiDetailsExisiting.RatingTypeCountsList.Add(new VoteSummary_KPIVote.RatingTypeCounts(k.Rating ?? (sbyte)RatingEnum.OkOk, 1));
-                        }
-                    }
-
-                }));
-
+                var res = await context.V_VoteSummarys.AddAsync(existing);
+            }
+            else
+            {
                 var result = context.V_VoteSummarys.Update(existing);
-                await context.SaveChangesAsync();
-                continue;
+            }
+            var finalCountOf1Constituency = await context.SaveChangesAsync();
+            if (finalCountOf1Constituency>0)
+            {
+                totalChangesCount += finalCountOf1Constituency;
             }
         }
 
+
+
     }
 
-    public async Task LoadDeltaDifferenceToSummary()
+    private async Task LoadDeltaDifferenceToSummary()
     //this executes for every frequency of 10 minues ones
     {
         //1.take last update time of summary & get least time among all(-5 minutes threshould)
@@ -146,12 +170,21 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
 
     private async Task RefreshDb()
     {
-        if (lastLoadedOn.Subtract(DateTime.Now).TotalMinutes > 15 && DeltaLoadingInProgress == false)
+        try
         {
-            if (IsFirsttime)
-                await LoadSummaryFromAllVotesFirstTime();
-            else
-                await LoadDeltaDifferenceToSummary();
+            if (DateTime.Now.Subtract(lastLoadedOn).TotalMinutes > 15 && DeltaLoadingInProgress == false)
+            {
+                if (await context.V_VoteSummarys.AnyAsync())//not first time
+                    await LoadDeltaDifferenceToSummary();
+                else //firsttime
+                    await LoadSummaryFromAllVotesFirstTime();
+
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw;
         }
     }
 
@@ -292,7 +325,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         }
     }
 
-    madhu continue here
+    //madhu continue here
     private static ToAddRemove GetVoteDifference(V_Vote existingVote, V_Vote updatedVote)
     {
         if (existingVote == null || existingVote.VoteKPIRatingComments is null || existingVote.VoteKPIRatingComments.Count == 0)
