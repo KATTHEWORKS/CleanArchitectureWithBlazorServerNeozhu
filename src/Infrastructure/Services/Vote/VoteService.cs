@@ -158,7 +158,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
             await _summaryServices.Update(new ToAddRemove()
             {
                 CommentCountDifference = -existingVote.VoteKPIComments.Count,
-                ConstituencyId = existingVote.ConstituencyId,
+                ConstituencyIdToRemove = existingVote.ConstituencyId,
                 ToRemove = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList()
             });
         return result;

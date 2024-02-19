@@ -72,9 +72,11 @@ public class V_VoteSummary//each location one row as summary
     }
     public class ToAddRemove
     {
-        public int ConstituencyId { get; set; }
+
         public int? CommentCountDifference { get; set; }
         public List<(int KPI, sbyte? Rating)>? ToAdd { get; set; }
+        public int ConstituencyIdToAdd { get; set; }
         public List<(int KPI, sbyte? Rating)>? ToRemove { get; set; }
+        public int ConstituencyIdToRemove { get; set; }
     }
 }

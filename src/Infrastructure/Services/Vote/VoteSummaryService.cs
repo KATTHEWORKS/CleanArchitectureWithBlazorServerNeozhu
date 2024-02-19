@@ -116,7 +116,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 var result = context.V_VoteSummarys.Update(existing);
             }
             var finalCountOf1Constituency = await context.SaveChangesAsync();
-            if (finalCountOf1Constituency>0)
+            if (finalCountOf1Constituency > 0)
             {
                 totalChangesCount += finalCountOf1Constituency;
             }
@@ -147,11 +147,42 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
 
         var leastTime = lastCreated < lastModified ? lastCreated : lastModified;
         //step2
-        var deltaToLoad = await context.V_Votes.Where(x => x.Created > leastTime || x.Modified > leastTime || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
+        var deltaVotesToLoad = await context.V_Votes.Where(x => x.Created > leastTime || x.Modified > leastTime || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
         lastLoadedOn = DateTime.Now;
 
-        //step3- etting difference
+        //step3- getting difference
+        var deletasToAddRemove = new List<ToAddRemove>();
+        foreach (var vote in deltaVotesToLoad)
+        {
+            deletasToAddRemove.Add(GetDeltaDifference(vote));
+        }
 
+        //step4
+        //insert all toadd for consid
+        //remove all toadd for constid
+
+        //step5 update delta as null 
+
+        //temp & quick is update all delta as null by asssuming all executed now
+
+        int? nl = 0;
+        if (nl != 5)
+            nl = null;
+        var nlss = new List<VoteKPIRatingComment>();
+        if (nl != 5)
+            nlss = null;
+        var rest = await context.V_Votes.Where(x => x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null)
+              .ExecuteUpdateAsync(x => x
+                .SetProperty(u => u.ConstituencyIdDelta, nl)
+                .SetProperty(u => u.VoteKPIRatingCommentsDelta, nlss)
+                );
+        //for best case go on each
+        //reason is in between execution time delta will be missed at some extenct
+
+        //foreach (var vote in deltaVotesToLoad)
+        //{
+        //    context.V_Votes.executeu
+        //}
     }
 
     //this can be cached at client side and refresh their itself after every 15 minuts from client side interval as well
@@ -267,65 +298,183 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
 
     }
 
+    madhu continue here for updating dii to summary
     public async Task<bool> Update(ToAddRemove diff)
     {
         if (diff == null) return false;
-        var existing = await ReadByConstituencyId(diff.ConstituencyId);
-        if (existing == null)
-        {//assuming this case wont appear anytime still //todo had to verify
-            var temp = new List<VoteSummary_KPIVote>();
-            if (diff.ToAdd is not null)
-            {
-                diff.ToAdd.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating!, 1)] }));
-                var new1 = new V_VoteSummary()
-                {
-                    ConstituencyId = diff.ConstituencyId,
-                    KPIVotes = temp,
-                    CommentsCount = diff.CommentCountDifference > 0 ? 1 : 0
-                    //,AggregateVote  had top check whether its added to db by generating or not
-                };
-                await context.V_VoteSummarys.AddAsync(new1);
-                return (await context.SaveChangesAsync()) > 0;
-            }
-            return false;
-        }
-        else
+
+        //2 cases 
+        //case1 same constituency id for both add/remove
+        //case2 different constituencyid for add remove
+
+        //case1 same const id to add or remove
+        if (diff.ConstituencyIdToAdd == diff.ConstituencyIdToRemove)
         {
-            if (diff.CommentCountDifference > 0)
-                existing.CommentsCount += diff.CommentCountDifference ?? 0;
-            diff.ToAdd?.ForEach(a =>
-            {
-                var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
-                if (existingKpi is not null)
+            var existing = await ReadByConstituencyId(diff.ConstituencyIdToAdd);
+            if (existing == null)
+            {//assuming this case wont appear anytime still //todo had to verify
+                var temp = new List<VoteSummary_KPIVote>();
+                if (diff.ToAdd is not null)
                 {
-                    var toAdd = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
-                    if (toAdd is not null)
-                        toAdd.Count += 1;
-                    //TODO if not exisitn then had to add
-                }
-            });
-            diff.ToRemove?.ForEach(a =>
-            {
-                var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
-                if (existingKpi is not null)
-                {
-                    var toRemove = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
-                    if (toRemove is not null)
+                    diff.ToAdd.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating!, 1)] }));
+                    var new1 = new V_VoteSummary()
                     {
-                        toRemove.Count -= 1;
-                        if (toRemove.Count < 0)
-                        {
-                            //TODO in that case it can be removed but still leaving to know for tracking purpose
-                        }
-                    }
+                        ConstituencyId = diff.ConstituencyIdToAdd,
+                        KPIVotes = temp,
+                        CommentsCount = diff.CommentCountDifference > 0 ? 1 : 0
+                        //,AggregateVote  had top check whether its added to db by generating or not
+                    };
+                    await context.V_VoteSummarys.AddAsync(new1);
+                    return (await context.SaveChangesAsync()) > 0;
                 }
-            });
-            var result = context.V_VoteSummarys.Update(existing);
-            return (await context.SaveChangesAsync()) > 0;
+                return false;
+            }
+            else
+            {
+                if (diff.CommentCountDifference > 0)
+                    existing.CommentsCount += diff.CommentCountDifference ?? 0;
+                diff.ToAdd?.ForEach(a =>
+                {
+                    var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
+                    if (existingKpi is not null)
+                    {
+                        var toAdd = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
+                        if (toAdd is not null)
+                            toAdd.Count += 1;
+                        //TODO if not exisitn then had to add
+                    }
+                });
+                //if same constituency then same logic
+                //else different constitunecy then different
+
+                if (diff.ConstituencyIdToAdd == diff.ConstituencyIdToRemove)
+                {
+                    diff.ToRemove?.ForEach(a =>
+                    {
+                        var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
+                        if (existingKpi is not null)
+                        {
+                            var toRemove = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
+                            if (toRemove is not null)
+                            {
+                                toRemove.Count -= 1;
+                                if (toRemove.Count < 0)
+                                {
+                                    //TODO in that case it can be removed but still leaving to know for tracking purpose
+                                }
+                            }
+                        }
+                    });
+                }
+                var result = context.V_VoteSummarys.Update(existing);
+                //return (await context.SaveChangesAsync()) > 0;
+
+                if (diff.ConstituencyIdToAdd != diff.ConstituencyIdToRemove && diff.ConstituencyIdToRemove > 0)
+                {
+                    var existingToRemove = await ReadByConstituencyId(diff.ConstituencyIdToAdd);
+                    //call removal
+                }
+            }
         }
+        else //different const id 
+        { }
     }
 
     //madhu continue here
+    private static ToAddRemove GetDeltaDifference(V_Vote vote)
+    {//this is for the case of having delta kpi only ,not for fresh i.e FirstTime() sewparate method 
+        if (vote.ConstituencyIdDelta == null || vote.VoteKPIRatingCommentsDelta == null
+            || (vote.VoteKPIRatingComments.Count == 0 && vote.VoteKPIRatingCommentsDelta.Count == 0)) return null;
+        ToAddRemove toAddRemove = new ToAddRemove();
+
+        if (vote.ConstituencyId != vote.ConstituencyIdDelta)//different constituency
+        {
+            toAddRemove.ConstituencyIdToRemove = vote.ConstituencyIdDelta ?? 0;
+            toAddRemove.ToRemove = vote.VoteKPIRatingCommentsDelta.Select(x => (x.KPI, x.Rating)).ToList();
+
+            toAddRemove.ConstituencyIdToAdd = vote.ConstituencyId;
+            toAddRemove.ToAdd = vote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList();
+        }
+        else//below section is for same constituncy
+        {
+            toAddRemove.ConstituencyIdToAdd = vote.ConstituencyId;
+            toAddRemove.ConstituencyIdToRemove = vote.ConstituencyId;
+            //if (vote.VoteKPIRatingComments.Count == 0 && vote.VoteKPIRatingCommentsDelta.Count == 0)
+            //{//already covered at top
+            //    //then no summary change just return from here;
+            //    return null;
+            //}
+            //else 
+            if (vote.VoteKPIRatingComments.Count == 0 && vote.VoteKPIRatingCommentsDelta.Count > 0)
+            { //means nothing present ,only old exists...so has to remove now
+
+                //mostly this case wont come ,because now no deletion of kpi
+                toAddRemove.ConstituencyIdToRemove = vote.ConstituencyIdDelta ?? 0;
+                toAddRemove.ToRemove = vote.VoteKPIRatingCommentsDelta.Select(x => (x.KPI, x.Rating)).ToList();
+                //nothing to add,just removing 
+            }
+            else if (vote.VoteKPIRatingComments.Count > 0 && vote.VoteKPIRatingCommentsDelta.Count == 0)
+            {//means nothing in old ,so now add all to summary 
+                toAddRemove.ConstituencyIdToAdd = vote.ConstituencyId;
+                toAddRemove.ToAdd = vote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList();
+                //nothing to remove or nothing on even different constituency id nothing to bother
+            }
+            else //means old has some data & present also has some data
+            {//had to do difference... mostly this is common scenario
+
+                var oldDeltaKpis = vote.VoteKPIRatingCommentsDelta.Select(x => (x.KPI, x.Rating)).ToList();
+                var presentKpis = vote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList();
+                if (oldDeltaKpis == presentKpis) return null;
+
+                var toRemoveItems = oldDeltaKpis.Except(presentKpis);//this wont work bcz of equality comparer addiotional handling required & had to compare rating also,still we can test
+
+                var toAdd = new List<(int KPI, sbyte? Rating)>();
+                var toRemove = new List<(int KPI, sbyte? Rating)>();
+
+                var commonExists = oldDeltaKpis.Select(x => x.KPI).Intersect(presentKpis.Select(y => y.KPI));
+
+                if (commonExists.Any())
+                    oldDeltaKpis.ForEach(e =>
+                    {
+                        var sameKpi = presentKpis.Find(n => n.KPI == e.KPI);
+                        if (sameKpi.Rating != null)
+                        {
+                            if (sameKpi.Rating == e.Rating)//then no change leave this kpi skip
+                                presentKpis.Remove(sameKpi);
+                            else  //here rating difference is there
+                            {
+                                sameKpi.Rating -= e.Rating;
+                                toAdd.Add(sameKpi);
+                                presentKpis.Remove(sameKpi);
+                                //    //to current kpi add this rating value as summary update
+                                //    //old was 1  newRating 2 then now new-old=2-1=1 had to be added 
+                                //    //old was -1  newRating 1 then now new-old=1-(-1)=2 had to be added 
+                                //    //old was 1  newRating -1 then now new-old=-1-1=-2 had to be added 
+                            }
+                        }
+                        //else if (newKpis.Any(n => n.KPI == e.KPI))
+                        //{
+                        //    //add these kpi-rating values
+                        //    var nn = newKpis.First(n => n.KPI == e.KPI);
+                        //    nn.Rating -= e.Rating;
+                        //    toAdd.Add(nn);
+
+                        //}
+                        else //means user removed particular KPI rating now,so had to remove
+                        {
+                            toRemove.Add(e);//mostly this wont happen as of now no removal
+                        }
+                    });
+                if (presentKpis != null && presentKpis.Count > 0)
+                {
+                    toAdd.AddRange(presentKpis);
+                }
+                toAddRemove.ToAdd = toAdd;
+                toAddRemove.ToRemove = toRemove;
+            }
+        }
+        return toAddRemove;
+    }
     private static ToAddRemove GetVoteDifference(V_Vote existingVote, V_Vote updatedVote)
     {
         if (existingVote == null || existingVote.VoteKPIRatingComments is null || existingVote.VoteKPIRatingComments.Count == 0)
