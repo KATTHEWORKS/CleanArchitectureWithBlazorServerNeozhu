@@ -94,34 +94,20 @@ public class VoteSummary_KPIVote
     public List<RatingTypeCounts> RatingTypeCountsList { get; set; }//(0=>1000,1=>24,2=>4,4=>15,5=>100)
 
     //this is for particular KPI average
-    public float AggregateKPIVote => CalculateKPIAggregateVote();
+    public sbyte AggregateRatingOfKPI => CalculateAggregateRatingOfKPI();
 
-    private float CalculateKPIAggregateVote()
+    private sbyte CalculateAggregateRatingOfKPI()
     {
         if (RatingTypeCountsList == null || RatingTypeCountsList.Count == 0)
         {
-            return 0; // or any default value
+            return 0; // or any default value //todo need to think what could be, but mostly this wont come any t
         }
 
-        var totalVotes = 0;
-        var totalWeightedVotes = 0;
-
-        foreach (var item in RatingTypeCountsList)
-        {
-            totalVotes += item.Count;
-            // totalWeightedVotes += ratingType * votes;
-            totalWeightedVotes += GetEachVoteValue(item.RatingTypeByte) * item.Count;
-        }
-
-        static int GetEachVoteValue(sbyte ratingType)
-        {
-            //here mostly always 1 is value but changes in summary level
-            // Your logic to map ratingType to actual vote value
-            // Example: switch (ratingType) { case 0: return 100; case 1: return 50; ... }
-
-            return 1; // Default value, update based on your logic
-        }
-        return (float)totalWeightedVotes / totalVotes;
+        //todo can make different value for each vote later case
+        var totalVotes = RatingTypeCountsList.Sum(r => r.Count);
+        var weightSum = RatingTypeCountsList.Sum(r => r.RatingTypeByte * r.Count);
+        var aggregateKPIVote = totalVotes != 0 ? (sbyte)Math.Min(3, Math.Max(-2, weightSum / totalVotes)) : (sbyte)0;
+        return aggregateKPIVote;
     }
 
     //only top5 common comments... need to find some logic

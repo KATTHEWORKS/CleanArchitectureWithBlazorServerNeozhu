@@ -40,7 +40,7 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
     [ForeignKey(nameof(ConstituencyId))]
     public V_Constituency? Constituency { get; set; }
 
-    [Required] //RatingEnum
+    [Required] //overall rating
     public sbyte Rating { get; set; }    //this has to be autogerated only then it makes great value for all,but curently not done anything for that
 
     [Required]

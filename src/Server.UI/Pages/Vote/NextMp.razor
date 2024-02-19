@@ -70,7 +70,7 @@
 
                     @if (VotesCount > 0)
                         {
-                        <MudTd>@rating.AggregateKPIVote</MudTd>
+                        <MudTd>@rating.AggregateRatingOfKPI</MudTd>
                         }
                     @*  <MudTd>@rating.KeyPoint.Description</MudTd> *@
                     }
@@ -94,7 +94,7 @@
     int VotesCount = 0;
 
     List<VoteSummary_KPIVote> kPIVotes = new();
-    
+
     //to select on dropdown
     List<string> states { get; set; } = [];//this shows always all states make it on clientside cache even for offline
     List<V_Constituency> constituencies { get; set; } = [];//this shows only for particular state unless first time when no selection
@@ -119,7 +119,7 @@
         {
         VotesCount = 0;
         //todo this can be cached or whatever from DownloadSummaryLocally()
-        if (ConstituencyIdSelected > 0 && allConstituencies.Exists(c=>c.Id== ConstituencyIdSelected))
+        if (ConstituencyIdSelected > 0 && allConstituencies.Exists(c => c.Id == ConstituencyIdSelected))
             {
             var v_VoteSummary = await VoteSummaryServices.ReadByConstituencyId(ConstituencyIdSelected);
             // Implement your service method to fetch
@@ -127,13 +127,21 @@
                 {
                 VotesCount = v_VoteSummary.VotesCount;
                 kPIVotes = v_VoteSummary.KPIVotes;
+                // foreach (var f in kPIVotes)
+                // // kPIVotes.ForEach(f =>
+                //     {
+                //         var totalVotes = f.RatingTypeCountsList.Sum(r => r.Count);
+                //         var weightSum = f.RatingTypeCountsList.Sum(r => r.RatingTypeByte * r.Count);
+                //         f.AggregateKPIVote = totalVotes != 0 ? ((float)weightSum / totalVotes) : 0;
+                //         f.AggregateKPIVote = Math.Min(3, Math.Max(-2, f.AggregateKPIVote));
+                //     }
                 }
             else
                 kPIVotes = null;
 
             //ratings
             }
-        if (kPIVotes == null || kPIVotes.Count == 0)
+        if (kPIVotes == null || !kPIVotes.Any())
             {
             //load default kpi data
             kPIVotes = V_KPI.Standard.Select(x => new VoteSummary_KPIVote() { KPI = x.Id }).ToList();
@@ -150,7 +158,7 @@
         if (states == null || states.Count == 0 || allConstituencies == null || allConstituencies.Count == 0)
             await LoadAllStateAndConstituencies();
 
-        if (allConstituencies is not null && allConstituencies.Count > 0 )
+        if (allConstituencies is not null && allConstituencies.Count > 0)
             {
             if (ConstituencyIdSelected > 0 && allConstituencies.Exists(c => c.Id == ConstituencyIdSelected))
                 {

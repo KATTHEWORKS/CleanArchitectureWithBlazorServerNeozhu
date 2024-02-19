@@ -60,32 +60,15 @@ public class V_VoteSummary//each location one row as summary
     //    }
     //}
     //this is for total aggregate of all KPI values
-    public float AggregateVote => CalculateAggregateVote();//if this created db column then below is not required
-    //public float AggregateVote { get { return CalculateAggregateVote(); } }
+    public sbyte AggregateRatingOfConstituency => CalculateAggregateRatingOfConstituency();//if this created db column then below is not required
+    ////public float AggregateVote { get { return CalculateAggregateVote(); } }
 
-    private float CalculateAggregateVote()
+    private sbyte CalculateAggregateRatingOfConstituency()
     {
-        if (KPIVotes == null || KPIVotes.Count == 0)
-        {
-            return 0; // or any default value
-        }
-
-        float totalWeight = 0;
-
-        foreach (var item in KPIVotes)
-        {
-            totalWeight += GetParticularEachKpiValue(item.KPI) * item.AggregateKPIVote;
-        }
-
-        static int GetParticularEachKpiValue(int kpi)
-        {
-            //here mostly value changes for each type of KPI ,but inside CalculateKPIAggregateVote() mostly always 1
-            // Your logic to map ratingType to actual vote value
-            // Example: switch (ratingType) { case 0: return 100; case 1: return 50; ... }
-
-            return 1; // Default value, update based on your logic
-        }
-        return (float)totalWeight / KPIVotes.Count;
+        if (KPIVotes == null || KPIVotes.Count == 0) return 0; // or any default value //todo need to think what could be, but mostly this wont come any time
+        var sumOfAggregateKPIs = KPIVotes.Sum(x => x.AggregateRatingOfKPI);
+        var totalCount = KPIVotes.Count;
+        return totalCount != 0 ? (sbyte)Math.Min(3, Math.Max(-2, sumOfAggregateKPIs / totalCount)) : (sbyte)0;
     }
     public class ToAddRemove
     {
