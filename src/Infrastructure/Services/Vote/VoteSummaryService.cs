@@ -45,7 +45,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             await RefreshDb();
             //todo had to add logic of reading from vote db and converting into summary
             return await cache.GetOrAddAsync(VoteSummaryCacheKey,
-                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.ToListAsync() : [], TimeSpan.FromMinutes(14));
+                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
 
         }
         return [];
@@ -100,12 +100,13 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 {
                     isFirstTime = true;
                     var temp = new List<VoteSummary_KPIVote>();
-                    vote.VoteKPIRatingComments.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
+                    if (vote.VoteKPIRatingComments != null && vote.VoteKPIRatingComments.Count > 0)
+                        vote.VoteKPIRatingComments.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
                     var new1 = new V_VoteSummary()
                     {
                         ConstituencyId = vote.ConstituencyId,
                         KPIVotes = temp,
-                        CommentsCount = vote.VoteKPIComments.Count == 0 ? 0 : 1
+                        CommentsCount = (vote.VoteKPIComments == null || vote.VoteKPIComments.Count == 0 ? 0 : 1)
                         //,AggregateVote  had top check whether its added to db by generating or not
                     };
                     //await context.V_VoteSummarys.AddAsync(new1);
@@ -115,10 +116,11 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 }
                 else//case2 paqrticular MP details existing,now adding particular user vote counts only
                 {
-                    if (vote.VoteKPIComments.Count > 0)
+                    if (vote.VoteKPIComments != null && vote.VoteKPIComments.Count > 0)
                         existing.CommentsCount += 1;
 
-                    vote.VoteKPIRatingComments.ForEach((Action<VoteKPIRatingComment>)(k =>
+                    if (vote.VoteKPIRatingComments != null && vote.VoteKPIRatingComments.Count > 0)
+                        vote.VoteKPIRatingComments.ForEach((Action<VoteKPIRatingComment>)(k =>
                     {
                         //MP details exists but again 2 case
                         //case2.1 kpi details existing for mp
@@ -183,6 +185,18 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //5.update back the step2 records delta(id & string both) as null
 
         DeltaLoadingInProgress = true;
+
+        //TODO had to add trnasaction & rollback,since IApplciationDbcontext using so need some more ground work
+        //using (var transaction = await context..Database.BeginTransactionAsync())
+        //{
+        //    try {
+        //        await transaction.CommitAsync();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        await transaction.RollbackAsync();
+        //    }
+        //}
         //step1
         var lastCreated = await context.V_VoteSummarys.MaxAsync(x => x.Created);
         var lastModified = await context.V_VoteSummarys.MaxAsync(x => x.Modified);
