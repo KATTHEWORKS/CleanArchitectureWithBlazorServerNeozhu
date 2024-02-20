@@ -13,6 +13,8 @@ namespace CleanArchitecture.Blazor.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+    Task AddEntityAsync<TEntity>(TEntity entity) where TEntity : class;
+    void UpdateEntity<TEntity>(TEntity entity) where TEntity : class;
     //DatabaseFacade Database { get; set; }
     //EntityEntry<TEntity> Entry<TEntity>(TEntity entity);
     DbSet<ApplicationUser> Users { get; set; }

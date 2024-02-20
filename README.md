@@ -3,6 +3,7 @@
 [![Build](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/dotnet.yml/badge.svg)](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/dotnet.yml)
 [![CodeQL](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/codeql-analysis.yml)
 [![Nuget](https://img.shields.io/nuget/v/CleanArchitecture.Blazor.Solution.Template?label=NuGet)](https://www.nuget.org/packages/CleanArchitecture.Blazor.Solution.Template)
+[![Docker Image CI](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/docker-image.yml/badge.svg)](https://github.com/neozhu/CleanArchitectureWithBlazorServer/actions/workflows/docker-image.yml)
 [![Nuget](https://img.shields.io/nuget/dt/CleanArchitecture.Blazor.Solution.Template?label=Downloads)](https://www.nuget.org/packages/CleanArchitecture.Blazor.Solution.Template)
 
 This is a repository for creating a Blazor Server application following the principles of Clean Architecture. It has a
@@ -23,6 +24,32 @@ Blazor technology.
 - Docker
 - .NET 8.0
 - Unit Test
+
+## Docker Container
+```bash
+# Docker Pull Command
+docker pull dockerksjscn/cleanarchitectureblazorserver:last
+```
+
+```bash
+# Docker Run
+# default container port:8080
+
+# default without database
+docker run -p 8080:8080 -e UseInMemoryDatabase=true -e ASPNETCORE_ENVIRONMENT=Development dockerksjscn/cleanarchitectureblazorserver:last
+
+# set database connection
+# set SMPT Server
+docker run -d -p 8080:8080 -e UseInMemoryDatabase=false \
+-e ASPNETCORE_ENVIRONMENT=Development \
+-e DatabaseSettings__DBProvider=mssql \
+-e DatabaseSettings__ConnectionString=Server=10.33.1.xxx;Database=BlazorDashboardDb;User Id=sa;Password=***;MultipleActiveResultSets=true;Encrypt=false;TrustServerCertificate=false \
+-e SmtpClientOptions__User=*** \
+-e SmtpClientOptions__Port=25 \
+-e SmtpClientOptions__Server=*** \
+-e SmtpClientOptions__Password=*** \
+dockerksjscn/cleanarchitectureblazorserver:last
+```
 
 ![image](https://user-images.githubusercontent.com/1549611/183799080-380e1f01-ef80-4568-80d2-517514aa59e5.png)
 

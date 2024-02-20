@@ -27,6 +27,18 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
 
     }
+    public async Task AddEntityAsync<TEntity>(TEntity entity) where TEntity : class
+    {
+        Entry(entity).State = EntityState.Detached;
+        Entry(entity).State = EntityState.Added;
+        await AddAsync(entity);
+    }
+    public void UpdateEntity<TEntity>(TEntity entity) where TEntity : class
+    {
+        Attach(entity);
+        Entry(entity).State = EntityState.Modified;
+        Update(entity);
+    }
     public DbSet<UserRoleTenant> UserRoleTenants { get; set; }
 
     public DbSet<Tenant> Tenants { get; set; }

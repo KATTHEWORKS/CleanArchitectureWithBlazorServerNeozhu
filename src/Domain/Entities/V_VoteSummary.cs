@@ -41,7 +41,7 @@ public class V_VoteSummary//each location one row as summary
 
     public void UpdateModified()
     {
-        Modified = DateTime.UtcNow;
+        Modified = DateTime.Now;
     }
     //below propertiues will be used in Dtos,so here commenting
     //[Column(TypeName = "jsonb")] //this wont working mssql Adjust based on your database

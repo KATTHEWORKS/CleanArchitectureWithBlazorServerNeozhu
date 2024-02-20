@@ -81,7 +81,7 @@ public class VoteSummary_KPIVote
         {
 
         }
-        public RatingTypeCounts(sbyte ratingTypeByte, int voteCount)
+        public RatingTypeCounts(sbyte ratingTypeByte, int voteCount=1)
         {
             RatingTypeByte = ratingTypeByte;
             Count = voteCount;

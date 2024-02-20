@@ -1,4 +1,5 @@
-﻿<MudAppBar Class=""
+﻿@inject IStringLocalizer<HeaderMenu> L
+<MudAppBar Class=""
            Elevation="0"
            Style="background: --mud-palette-appbar-background">
     @if (!IsAnonymousPage)
@@ -19,7 +20,7 @@
         @if (!IsAnonymousPage)
             {
             <MudTooltip Arrow="true"
-                        Text="Search (Cmd + K)">
+                        Text="@L["Search (Cmd + K)"]">
                 <MudIconButton Color="Color.Default"
                                Edge="Edge.Start"
                                Icon="@Icons.Material.Filled.Search"
@@ -28,7 +29,7 @@
             }
         <MudSpacer />
         @* <MudTooltip Arrow="true"
-        Text="Navigate to GitHub">
+        Text="@L["Navigate to GitHub"]">
         <MudIconButton Class="mx-1"
         Color="Color.Default"
         Icon="@Icons.Custom.Brands.GitHub"
@@ -37,7 +38,7 @@
         </MudTooltip> *@
         <LanguageSelector />
         <NotificationMenu />
-        <MudTooltip Text="@(RightToLeft ? "Toggle right-to-left" : "Toggle left-to-right")">
+        <MudTooltip Text="@(RightToLeft ? L["Toggle right-to-left"] : L["Toggle left-to-right"])">
             <MudIconButton Class="mx-1"
                            Icon="@(RightToLeft ? Icons.Material.Filled.FormatTextdirectionLToR : Icons.Material.Filled.FormatTextdirectionRToL)"
                            Color="Color.Default"
@@ -46,7 +47,7 @@
     </MudHidden>
     <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
         <MudTooltip Arrow="true"
-                    Text="Search (Cmd + K)">
+                    Text="@L["Search (Cmd + K)"]">
             <MudIconButton Color="Color.Default"
                            Edge="Edge.Start"
                            Icon="@Icons.Material.Filled.Search"
@@ -72,7 +73,7 @@
         }
     <MudDivider Class="mx-3 my-5" DividerType="DividerType.Middle" Vertical="true" FlexItem="true"></MudDivider>
     <MudText Color="@Color.Primary" Typo="Typo.h6">
-        <b>@ApplicationSettings.Company</b>
+        <b>@L[ApplicationSettings.Company]</b>
     </MudText>
 </MudAppBar>
 
