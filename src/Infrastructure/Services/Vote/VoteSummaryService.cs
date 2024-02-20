@@ -9,17 +9,17 @@ using System.Text;
 using System.Threading.Tasks;
 using CleanArchitecture.Blazor.Domain.Common.Enums;
 using CleanArchitecture.Blazor.Domain.Entities;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using LazyCache;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using static CleanArchitecture.Blazor.Domain.Entities.V_VoteSummary;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services.Vote;
 
 public interface IVoteSummaryService
 {
-    Task<bool> AddForNewVote(V_Vote vote);
     Task<V_VoteSummary> ReadByConstituencyId(int constituencyId);
     Task<V_VoteSummary> ReadBySummaryId(int id);
-    Task<bool> Update(ToAddRemove diff);
 }
 #if VOTING_SYSTEM
 public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) : IVoteSummaryService
@@ -31,6 +31,36 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     private static DateTime lastLoadedOn = DateTime.Now.AddHours(-2);
     private static bool DeltaLoadingInProgress = false;
     private static bool IsFirsttime = false;
+
+    public async Task<V_VoteSummary> ReadByConstituencyId(int constituencyId)
+    {
+        _ = RefreshDb();//fire & forget
+        var res = await context.V_VoteSummarys.Where(x => x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
+        return res;
+    }
+
+    public async Task<V_VoteSummary> ReadBySummaryId(int id)
+    {
+        var res = await context.V_VoteSummarys.FindAsync(id);
+        return res;
+    }
+    public async Task<List<V_VoteSummary>> All()
+    {
+        if (cache is not null && context is not null)
+        {
+            await RefreshDb();
+            //todo had to add logic of reading from vote db and converting into summary
+            return await cache.GetOrAddAsync(VoteSummaryCacheKey,
+                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.ToListAsync() : [], TimeSpan.FromMinutes(14));
+
+        }
+        return [];
+    }
+
+
+
+
+    //summary loadings
     private async Task LoadSummaryFromAllVotesFirstTime()
     //first time or weekly once to reload complete summary db ondemand only with backup
     {//very costly heavy operation
@@ -140,29 +170,47 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //step1
         var lastCreated = await context.V_VoteSummarys.MaxAsync(x => x.Created);
         var lastModified = await context.V_VoteSummarys.MaxAsync(x => x.Modified);
-
+        //todo improve make single db call to extract both created or modified data like GREATEST()
         lastCreated = lastCreated.AddMinutes(-5);
-        if (lastModified != null)
-            lastModified = lastModified.Value.AddMinutes(-5);
+        var timeToFilter = lastModified == null ? lastCreated : (lastCreated > lastModified ? lastCreated : lastModified);
 
-        var leastTime = lastCreated < lastModified ? lastCreated : lastModified;
         //step2
-        var deltaVotesToLoad = await context.V_Votes.Where(x => x.Created > leastTime || x.Modified > leastTime || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
+        var deltaVotesToLoad = await context.V_Votes.Where(x => x.Created > timeToFilter || x.Modified > timeToFilter || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
         lastLoadedOn = DateTime.Now;
 
         //step3- getting difference
-        var deletasToAddRemove = new List<ToAddRemove>();
+        var deltasToAddRemove = new List<ToAddRemove>();
         foreach (var vote in deltaVotesToLoad)
         {
-            deletasToAddRemove.Add(GetDeltaDifference(vote));
+            deltasToAddRemove.Add(GetDeltaDifference(vote));
         }
 
         //step4
-        //insert all toadd for consid
-        //remove all toadd for constid
+        //group all toadd/remove to 1-1 single list by constituencyid grouping
+        // Union of ConstituencyIds
+        var allConstituencyIds = deltasToAddRemove.SelectMany(d => new[] { d.ConstituencyIdToAdd, d.ConstituencyIdToRemove }).Distinct();
+
+        //Group the items by ConstituencyId
+        var groupedItems = allConstituencyIds.Select(id =>
+        {
+            var toAdd = deltasToAddRemove.Where(d => d.ConstituencyIdToAdd == id).SelectMany(d => d.ToAdd ?? Enumerable.Empty<(int, sbyte?)>()).ToList();
+            var toRemove = deltasToAddRemove.Where(d => d.ConstituencyIdToRemove == id).SelectMany(d => d.ToRemove ?? Enumerable.Empty<(int, sbyte?)>()).ToList();
+            return new ToAddRemove
+            {
+                ConstituencyIdToAdd = id,
+                ConstituencyIdToRemove = id,
+                ToAdd = toAdd.Count != 0 ? toAdd : null,
+                ToRemove = toRemove.Count != 0 ? toRemove : null
+            };
+        }).ToList();
+        //UpdateEntyInDb by inserting & removing
+        foreach (var toAddRemoveOf1Constituency in groupedItems)
+        {
+            var isAllFine = await UpdateEntyInDb(toAddRemoveOf1Constituency, saveChangesToDbCall: false);
+        }
+        var resultCount = await context.SaveChangesAsync();
 
         //step5 update delta as null 
-
         //temp & quick is update all delta as null by asssuming all executed now
 
         int? nl = 0;
@@ -186,18 +234,6 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     }
 
     //this can be cached at client side and refresh their itself after every 15 minuts from client side interval as well
-    public async Task<List<V_VoteSummary>> All()
-    {
-        if (cache is not null && context is not null)
-        {
-            await RefreshDb();
-            //todo had to add logic of reading from vote db and converting into summary
-            return await cache.GetOrAddAsync(VoteSummaryCacheKey,
-                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.ToListAsync() : [], TimeSpan.FromMinutes(14));
-
-        }
-        return [];
-    }
 
     private async Task RefreshDb()
     {
@@ -222,162 +258,118 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     //for self read all properties
     //ideally 1 user can vote at one place only 
     //later we can allow for multiple
-    public async Task<V_VoteSummary> ReadByConstituencyId(int constituencyId)
+
+    //madhu continue here for updating dii to summary
+    public async Task<bool> UpdateEntyInDb(ToAddRemove diff, bool saveChangesToDbCall = false)
     {
-        _ = RefreshDb();//fire & forget
-        var res = await context.V_VoteSummarys.Where(x => x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
-        return res;
-    }
-
-    public async Task<V_VoteSummary> ReadBySummaryId(int id)
-    {
-        var res = await context.V_VoteSummarys.FindAsync(id);
-        return res;
-    }
-    public async Task<bool> AddForNewVote(V_Vote vote)
-    {
-        //means user first time adding,2 cases
-        //case1: partiucular MP earlier not existing
-        //case2: particular MP existing ,so go for update votes
-
-        var existing = await ReadByConstituencyId(vote.ConstituencyId);
-
-        if (existing == null)//case1
-        {
-            var temp = new List<VoteSummary_KPIVote>();
-            vote.VoteKPIRatingComments.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
-            var new1 = new V_VoteSummary()
-            {
-                ConstituencyId = vote.ConstituencyId,
-                KPIVotes = temp,
-                CommentsCount = vote.VoteKPIComments.Count == 0 ? 0 : 1
-                //,AggregateVote  had top check whether its added to db by generating or not
-            };
-            await context.V_VoteSummarys.AddAsync(new1);
-            return (await context.SaveChangesAsync()) > 0;
-        }
-        else//case2 paqrticular MP details existing,now adding particular user vote counts only
-        {
-            if (vote.VoteKPIComments.Count > 0)
-                existing.CommentsCount += 1;
-
-            vote.VoteKPIRatingComments.ForEach((Action<VoteKPIRatingComment>)(k =>
-            {
-                //MP details exists but again 2 case
-                //case2.1 kpi details existing for mp
-                var kpiDetailsExisiting = existing.KPIVotes.FirstOrDefault<VoteSummary_KPIVote>(x => x.KPI == k.KPI);
-                if (kpiDetailsExisiting is null)
-                {
-                    var newSummary = new VoteSummary_KPIVote()
-                    {
-                        KPI = k.KPI,
-                        RatingTypeCountsList = [new((sbyte)k.Rating, 1)]
-
-                    };
-                    existing.KPIVotes.Add(newSummary);
-                }
-                else
-                {
-                    var existingRatingType = kpiDetailsExisiting.RatingTypeCountsList.Find((Predicate<VoteSummary_KPIVote.RatingTypeCounts>)(x => x.RatingTypeByte == k.Rating));
-                    if (existingRatingType is not null)
-                    {
-                        existingRatingType.Count += 1;
-                    }
-                    else//its null so not existing RatingTypeCountsList for particular 
-                    {
-                        if (k.Rating is not null)
-                            kpiDetailsExisiting.RatingTypeCountsList.Add(new VoteSummary_KPIVote.RatingTypeCounts(k.Rating ?? (sbyte)RatingEnum.OkOk, 1));
-                    }
-                }
-
-            }));
-
-            var result = context.V_VoteSummarys.Update(existing);
-            return (await context.SaveChangesAsync()) > 0;
-        }
-
-    }
-
-    madhu continue here for updating dii to summary
-    public async Task<bool> Update(ToAddRemove diff)
-    {
+        var resultCount = 0;
+        EntityEntry<V_VoteSummary> entityEntry;
         if (diff == null) return false;
-
-        //2 cases 
-        //case1 same constituency id for both add/remove
-        //case2 different constituencyid for add remove
-
-        //case1 same const id to add or remove
-        if (diff.ConstituencyIdToAdd == diff.ConstituencyIdToRemove)
+        try
         {
+            //2 cases 
+            //case1 same constituency id for both add/remove
+            //case2 different constituencyid for add remove
+            //case2 scenario wont handled here,so always for this method will recieved of same constituencyid only
+
             var existing = await ReadByConstituencyId(diff.ConstituencyIdToAdd);
-            if (existing == null)
-            {//assuming this case wont appear anytime still //todo had to verify
-                var temp = new List<VoteSummary_KPIVote>();
-                if (diff.ToAdd is not null)
-                {
-                    diff.ToAdd.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating!, 1)] }));
-                    var new1 = new V_VoteSummary()
-                    {
-                        ConstituencyId = diff.ConstituencyIdToAdd,
-                        KPIVotes = temp,
-                        CommentsCount = diff.CommentCountDifference > 0 ? 1 : 0
-                        //,AggregateVote  had top check whether its added to db by generating or not
-                    };
-                    await context.V_VoteSummarys.AddAsync(new1);
-                    return (await context.SaveChangesAsync()) > 0;
-                }
-                return false;
-            }
-            else
+            //case1 same const id to add or remove
+            if (diff.ConstituencyIdToAdd == diff.ConstituencyIdToRemove || diff.ConstituencyIdToRemove == 0)
             {
-                if (diff.CommentCountDifference > 0)
-                    existing.CommentsCount += diff.CommentCountDifference ?? 0;
-                diff.ToAdd?.ForEach(a =>
-                {
-                    var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
-                    if (existingKpi is not null)
+                if (existing == null)// constituencySummary data not exists,go for insert
+                {//assuming this case wont appear anytime still //todo had to verify
+                    //since insertion nothing to bother about toRemove items
+                    var temp = new List<VoteSummary_KPIVote>();
+                    if (diff.ToAdd is not null)
                     {
-                        var toAdd = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
-                        if (toAdd is not null)
-                            toAdd.Count += 1;
-                        //TODO if not exisitn then had to add
-                    }
-                });
-                //if same constituency then same logic
-                //else different constitunecy then different
-
-                if (diff.ConstituencyIdToAdd == diff.ConstituencyIdToRemove)
-                {
-                    diff.ToRemove?.ForEach(a =>
-                    {
-                        var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
-                        if (existingKpi is not null)
+                        diff.ToAdd.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating!, 1)] }));
+                        var new1 = new V_VoteSummary()
                         {
-                            var toRemove = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
-                            if (toRemove is not null)
-                            {
-                                toRemove.Count -= 1;
-                                if (toRemove.Count < 0)
-                                {
-                                    //TODO in that case it can be removed but still leaving to know for tracking purpose
-                                }
-                            }
-                        }
-                    });
+                            ConstituencyId = diff.ConstituencyIdToAdd,
+                            KPIVotes = temp,
+                            CommentsCount = diff.CommentCountDifference > 0 ? 1 : 0
+                            //,AggregateVote  had top check whether its added to db by generating or not
+                        };
+                        entityEntry = await context.V_VoteSummarys.AddAsync(new1);
+                    }
                 }
-                var result = context.V_VoteSummarys.Update(existing);
-                //return (await context.SaveChangesAsync()) > 0;
-
-                if (diff.ConstituencyIdToAdd != diff.ConstituencyIdToRemove && diff.ConstituencyIdToRemove > 0)
+                else//constituencySummary data already exist,go for update
                 {
-                    var existingToRemove = await ReadByConstituencyId(diff.ConstituencyIdToAdd);
-                    //call removal
+                    if (diff.CommentCountDifference > 0)
+                        existing.CommentsCount += diff.CommentCountDifference ?? 0;
+
+                    ToAddToExistingSummary(diff, existing);
+                    //if same constituency then same logic
+                    //else different constitunecy then different
+
+                    ToRemoveFromExistingSummary(diff, existing);
+
+                    entityEntry = context.V_VoteSummarys.Update(existing);
+                    //return (await context.SaveChangesAsync()) > 0;
                 }
             }
+            else //different const id 
+            {
+                Console.WriteLine("This situation should not come in the method,as its not addressed");
+
+                ToAddToExistingSummary(diff, existing);
+                entityEntry = context.V_VoteSummarys.Update(existing);
+                var existingToRemove = await ReadByConstituencyId(diff.ConstituencyIdToRemove);
+                //call removal
+                ToRemoveFromExistingSummary(diff, existingToRemove);
+                var entityEntryRemoved = context.V_VoteSummarys.Update(existingToRemove);
+            }
+            if (saveChangesToDbCall)
+                resultCount += await context.SaveChangesAsync();
+            return true;
         }
-        else //different const id 
-        { }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            return false;
+        }
+    }
+
+    private static void ToAddToExistingSummary(ToAddRemove diff, V_VoteSummary existing)
+    {
+        if (diff.ConstituencyIdToAdd > 0 && diff.ToAdd != null && diff.ToAdd.Count > 0)
+        {
+            diff.ToAdd?.ForEach(a =>
+        {
+            var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
+            if (existingKpi is not null)
+            {
+                var toAdd = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
+                if (toAdd is not null)
+                    toAdd.Count += 1;
+                //TODO if not existing then had to add
+            }
+        });
+        }
+    }
+
+    private static void ToRemoveFromExistingSummary(ToAddRemove diff, V_VoteSummary existing)
+    {//this is when user changed constituency to other constituency
+        if (diff.ConstituencyIdToRemove > 0 && diff.ToRemove != null && diff.ToRemove.Count > 0)
+        {
+            diff.ToRemove?.ForEach(a =>
+        {
+            var existingKpi = existing.KPIVotes.Find(e => e.KPI == a.KPI);
+            if (existingKpi is not null)
+            {
+                var toRemove = existingKpi.RatingTypeCountsList.Find(k => k.RatingTypeByte == a.Rating);
+                if (toRemove is not null)
+                {
+                    toRemove.Count -= 1;
+                    if (toRemove.Count < 0)
+                    {
+                        Console.WriteLine("//TODO in that case it can be removed but still leaving to know for tracking purpose");
+
+                    }
+                }
+            }
+        });
+        }
     }
 
     //madhu continue here
@@ -475,6 +467,11 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         }
         return toAddRemove;
     }
+
+
+
+
+    //mostly this will not be using anymore
     private static ToAddRemove GetVoteDifference(V_Vote existingVote, V_Vote updatedVote)
     {
         if (existingVote == null || existingVote.VoteKPIRatingComments is null || existingVote.VoteKPIRatingComments.Count == 0)
@@ -538,6 +535,71 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             }
             return new ToAddRemove() { ToAdd = toAdd, ToRemove = toRemove };
         }
+    }
+
+    //mostly this will not be using anymore
+    public async Task<bool> AddForNewVote(V_Vote vote)
+    {
+        //means user first time adding,2 cases
+        //case1: partiucular MP earlier not existing
+        //case2: particular MP existing ,so go for update votes
+
+        var existing = await ReadByConstituencyId(vote.ConstituencyId);
+
+        if (existing == null)//case1
+        {
+            var temp = new List<VoteSummary_KPIVote>();
+            vote.VoteKPIRatingComments.ForEach(k => temp.Add(new VoteSummary_KPIVote() { KPI = k.KPI, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
+            var new1 = new V_VoteSummary()
+            {
+                ConstituencyId = vote.ConstituencyId,
+                KPIVotes = temp,
+                CommentsCount = vote.VoteKPIComments.Count == 0 ? 0 : 1
+                //,AggregateVote  had top check whether its added to db by generating or not
+            };
+            await context.V_VoteSummarys.AddAsync(new1);
+            return (await context.SaveChangesAsync()) > 0;
+        }
+        else//case2 paqrticular MP details existing,now adding particular user vote counts only
+        {
+            if (vote.VoteKPIComments.Count > 0)
+                existing.CommentsCount += 1;
+
+            vote.VoteKPIRatingComments.ForEach((Action<VoteKPIRatingComment>)(k =>
+            {
+                //MP details exists but again 2 case
+                //case2.1 kpi details existing for mp
+                var kpiDetailsExisiting = existing.KPIVotes.FirstOrDefault<VoteSummary_KPIVote>(x => x.KPI == k.KPI);
+                if (kpiDetailsExisiting is null)
+                {
+                    var newSummary = new VoteSummary_KPIVote()
+                    {
+                        KPI = k.KPI,
+                        RatingTypeCountsList = [new((sbyte)k.Rating, 1)]
+
+                    };
+                    existing.KPIVotes.Add(newSummary);
+                }
+                else
+                {
+                    var existingRatingType = kpiDetailsExisiting.RatingTypeCountsList.Find((Predicate<VoteSummary_KPIVote.RatingTypeCounts>)(x => x.RatingTypeByte == k.Rating));
+                    if (existingRatingType is not null)
+                    {
+                        existingRatingType.Count += 1;
+                    }
+                    else//its null so not existing RatingTypeCountsList for particular 
+                    {
+                        if (k.Rating is not null)
+                            kpiDetailsExisiting.RatingTypeCountsList.Add(new VoteSummary_KPIVote.RatingTypeCounts(k.Rating ?? (sbyte)RatingEnum.OkOk, 1));
+                    }
+                }
+
+            }));
+
+            var result = context.V_VoteSummarys.Update(existing);
+            return (await context.SaveChangesAsync()) > 0;
+        }
+
     }
 
     //this is for the sake of making 1 db call for existing constituency to different update case 

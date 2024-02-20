@@ -11,7 +11,7 @@ namespace CleanArchitecture.Blazor.Infrastructure.Services.Vote;
 public interface IVoteService
 {
     Task<V_Vote?> AddOrUpdate(V_Vote vote);
-    Task<bool> Delete(int id);
+    Task<int> DeleteOfUser(string userId);//avoid from frontend
     Task<V_Vote?> ReadByUserId(string userId);
     Task<V_Vote?> ReadByUserId(string userId, int constituencyId);
     Task<V_Vote?> ReadByVoteId(int id);
@@ -137,31 +137,33 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         return res;
     }
 
-    private async Task<int> DeleteOfUser(string userId)
-    {
-        return await _context.V_Votes.Where(x => x.UserId == userId).ExecuteDeleteAsync();
-    }
-    //public async Task<int> Delete(int id)
-    //{
-    //    return await _context.V_Votes.Where(x => x.Id == id).ExecuteDeleteAsync();
-    //    //here comments count or vote count not changing
-    //}
-    public async Task<bool> Delete(int id)//avoid this from frontend
-    {
-        var existingVote = _context.V_Votes.Find(id);
-        if (existingVote == null) return false;
 
-        _context.V_Votes.Remove(existingVote);
-        var result = (await _context.SaveChangesAsync()) > 0;
-        //ideally not to do this
-        if (existingVote.VoteKPIRatingComments.Count > 0)
-            await _summaryServices.Update(new ToAddRemove()
-            {
-                CommentCountDifference = -existingVote.VoteKPIComments.Count,
-                ConstituencyIdToRemove = existingVote.ConstituencyId,
-                ToRemove = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList()
-            });
-        return result;
+    public async Task<int> DeleteOfUser(string userId)//avoid this from frontend
+    {
+        if (await _context.V_Votes.AnyAsync(x => x.UserId == userId))
+        {
+            //instead of hard delete,just marking value as null by moving to delta for later removal case
+            // _context.V_Votes.Remove(existingVote);
+
+            var result = await _context.V_Votes.Where(x => x.UserId == userId).ExecuteUpdateAsync(x =>
+            x.SetProperty(y => y.ConstituencyIdDelta, z => z.ConstituencyId)
+            .SetProperty(y => y.ConstituencyId, 0)
+            .SetProperty(y => y.VoteKPIRatingCommentsDelta, z => z.VoteKPIRatingComments)
+            .SetProperty(y => y.VoteKPIRatingComments, new List<VoteKPIRatingComment>())
+            );
+
+            //var result = (await _context.SaveChangesAsync()) > 0;
+            ////ideally not to do this
+            //if (existingVote.VoteKPIRatingComments.Count > 0)
+            //    await _summaryServices.Update(new ToAddRemove()
+            //    {
+            //        CommentCountDifference = -existingVote.VoteKPIComments.Count,
+            //        ConstituencyIdToRemove = existingVote.ConstituencyId,
+            //        ToRemove = existingVote.VoteKPIRatingComments.Select(x => (x.KPI, x.Rating)).ToList()
+            //    });
+            return result;
+        }
+        return 0;
     }
     /*
     private async Task<V_Vote> Update(V_Vote updatedVote, V_Vote existingVote)
