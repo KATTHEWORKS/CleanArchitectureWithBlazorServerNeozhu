@@ -126,7 +126,7 @@ public class MenuService : IMenuService
                         },
                         new()
                         {
-                            Title = "Log",
+                            Title = "Logs",
                             Href = "/system/logs",
                             PageStatus = PageStatus.Completed
                         },
