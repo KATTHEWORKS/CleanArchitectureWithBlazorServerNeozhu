@@ -29,7 +29,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     private const string VoteSummaryCacheKey = "all-Summary";
     private static DateTime lastLoadedOn = DateTime.Now.AddHours(-2);
     private static bool DeltaLoadingInProgress = false;
-    private const int RefreshFrequncyInMinutes = 2;
+    private const int RefreshFrequncyInMinutes = 1;
     //private const string VoteSummaryLoadTimeCacheKey = "all-Summary-loadedTime";
     //private static bool IsFirsttime = false;
 
@@ -65,11 +65,13 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                     result += "Updated:" + await LoadSummaryFromAllVotesFirstTime();
                 lastLoadedOn = DateTime.Now;
                 result += " at " + lastLoadedOn.ToString();
+                DeltaLoadingInProgress = false;
                 Console.WriteLine(result);
             }
         }
         catch (Exception e)
         {
+            DeltaLoadingInProgress = false;
             Console.WriteLine(e.ToString());
             throw;
         }
@@ -80,6 +82,11 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     {//very costly heavy operation
         DeltaLoadingInProgress = true;
         var constituencyVotes = await context.V_Votes.GroupBy(x => x.ConstituencyId).ToListAsync();
+        if (constituencyVotes == null || constituencyVotes.Count == 0)
+        {
+            DeltaLoadingInProgress = false;
+            return 0;
+        }
         //improve this whole logic based on fetching constituency wise votes ,while fetching itself write to result set and make a sigle call to summary db... prefarrably delta db...once ready shift all to main table...using some switch in between
 
         var totalChangesCount = 0;
@@ -161,6 +168,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 totalChangesCount += finalCountOf1Constituency;
             }
         }
+        DeltaLoadingInProgress = false;
         return totalChangesCount;
     }
 
@@ -179,19 +187,26 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         var lastCreated = await context.V_VoteSummarys.MaxAsync(x => x.Created);
         var lastModified = await context.V_VoteSummarys.MaxAsync(x => x.Modified);
         //todo improve make single db call to extract both created or modified data like GREATEST()
-        lastCreated = lastCreated.AddMinutes(-5);
+        lastCreated = lastCreated.AddMinutes(-(RefreshFrequncyInMinutes - 1));
         var timeToFilter = lastModified == null ? lastCreated : (lastCreated > lastModified ? lastCreated : lastModified);
 
         //step2
         var deltaVotesToLoad = await context.V_Votes.Where(x => x.Created > timeToFilter || x.Modified > timeToFilter || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
 
+        if (deltaVotesToLoad == null || deltaVotesToLoad.Count == 0)
+        {
+            DeltaLoadingInProgress = true;
+            return 0;
+        }
         //step3- getting difference
         var deltasToAddRemove = new List<ToAddRemove>();
         foreach (var vote in deltaVotesToLoad)
         {
-            deltasToAddRemove.Add(GetDeltaDifference(vote));
+            var res = GetDeltaDifference(vote);
+            if (res != null)
+                deltasToAddRemove.Add(res);
         }
-
+        if (deltasToAddRemove.Count == 0) { DeltaLoadingInProgress = true; return 0; }
         //step4
         //group all toadd/remove to 1-1 single list by constituencyid grouping
         // Union of ConstituencyIds
@@ -236,6 +251,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //{
         //    context.V_Votes.executeu
         //}
+        DeltaLoadingInProgress = false;
         return result;
     }
 
