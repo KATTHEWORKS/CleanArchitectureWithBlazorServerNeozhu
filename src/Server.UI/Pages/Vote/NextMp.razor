@@ -187,7 +187,7 @@
         ConstituencyIdSelected = 0;
         await LoadStateAndConstituencies();
         await LoadKpiVotes();
-
+        IsToAdd = false;
         // StateHasChanged(); // Refresh UI
         }
 
@@ -196,6 +196,7 @@
         ConstituencyIdSelected = constituencyIdSelected;
         await LoadStateAndConstituencies();
         await LoadKpiVotes();
+        IsToAdd = false;
         }
 
     public void Dispose()
