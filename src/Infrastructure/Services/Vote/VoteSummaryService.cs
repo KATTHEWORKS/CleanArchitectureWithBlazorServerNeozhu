@@ -45,7 +45,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             await RefreshDb();
             //todo had to add logic of reading from vote db and converting into summary
             return await cache.GetOrAddAsync(VoteSummaryCacheKey,
-                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
+                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.AsNoTracking().ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
 
         }
         return [];
@@ -198,14 +198,14 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //    }
         //}
         //step1
-        var lastCreated = await context.V_VoteSummarys.MaxAsync(x => x.Created);
-        var lastModified = await context.V_VoteSummarys.MaxAsync(x => x.Modified);
+        var lastCreated = await context.V_VoteSummarys.AsNoTracking().MaxAsync(x => x.Created);
+        var lastModified = await context.V_VoteSummarys.AsNoTracking().MaxAsync(x => x.Modified);
         //todo improve make single db call to extract both created or modified data like GREATEST()
         lastCreated = lastCreated.AddMinutes(-(RefreshFrequncyInMinutes - 1));
         var timeToFilter = lastModified == null ? lastCreated : (lastCreated > lastModified ? lastCreated : lastModified);
 
         //step2
-        var deltaVotesToLoad = await context.V_Votes.Where(x => x.Created > timeToFilter || x.Modified > timeToFilter || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
+        var deltaVotesToLoad = await context.V_Votes.AsNoTracking().Where(x => x.Created > timeToFilter || x.Modified > timeToFilter || x.ConstituencyIdDelta != null || x.VoteKPIRatingCommentsDelta != null).ToListAsync();
 
         if (deltaVotesToLoad == null || deltaVotesToLoad.Count == 0)
         {

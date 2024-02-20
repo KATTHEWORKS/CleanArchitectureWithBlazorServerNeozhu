@@ -60,7 +60,7 @@ public class ConstituencyService : IConstituencyService
         if (_cache is not null && _context is not null)
         {
             DataSourceDistrictwise = _cache.GetOrAdd(ConstituenciesCacheKey,
-                () => _context.V_Constituencies!.Any() ? _context.V_Constituencies!.ToList() : null);
+                () => _context.V_Constituencies!.Any() ? _context.V_Constituencies!.AsNoTracking().ToList() : null);
             if (DataSourceDistrictwise != null && DataSourceDistrictwise.Count > 0)
             {
                 DataSourceStatewise = DataSourceDistrictwise.GroupBy(x => x.StateName).Select(g => new StateWithConstituencies { StateName = g.Key, Constituencies = [.. g] }).ToList();

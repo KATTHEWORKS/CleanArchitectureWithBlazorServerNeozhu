@@ -13,8 +13,8 @@ public interface IVoteService
     Task<V_Vote?> AddOrUpdate(V_Vote vote);
     Task<int> DeleteOfUser(string userId);//avoid from frontend
     Task<V_Vote?> ReadByUserId(string userId);
-    Task<V_Vote?> ReadByUserId(string userId, int constituencyId);
-    Task<V_Vote?> ReadByVoteId(int id);
+    //Task<V_Vote?> ReadByUserId(string userId, int constituencyId);
+    //Task<V_Vote?> ReadByVoteId(int id);
 
 }
 #if VOTING_SYSTEM
@@ -41,21 +41,6 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
             res.VoteKPIComments = [];
         }
 
-        return res;
-    }
-
-
-    public async Task<V_Vote?> ReadByUserId(string userId, int constituencyId)
-    {
-        if (userId.IsNullOrEmptyAndTrimSelf() || constituencyId == 0)
-            return null;
-        var res = await _context.V_Votes.AsNoTracking()
-            .Where(x => x.UserId == userId && x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
-        return res;
-    }
-    public async Task<V_Vote?> ReadByVoteId(int id)
-    {
-        var res = await _context.V_Votes.FindAsync(id);
         return res;
     }
     public async Task<V_Vote?> AddOrUpdate(V_Vote vote)
@@ -129,6 +114,24 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         //dont call summary for every vote,instead load summary for every 15 min once either call based or trigger based
         return addedVote.Entity;
     }
+
+
+    //since now 1 user-1vote so mostly this is not required
+    //public async Task<V_Vote?> ReadByUserId(string userId, int constituencyId)
+    //{
+    //    if (userId.IsNullOrEmptyAndTrimSelf() || constituencyId == 0)
+    //        return null;
+    //    var res = await _context.V_Votes.AsNoTracking()
+    //        .Where(x => x.UserId == userId && x.ConstituencyId == constituencyId).FirstOrDefaultAsync();
+    //    return res;
+    //}
+    //public async Task<V_Vote?> ReadByVoteId(int id)
+    //{
+    //    var res = await _context.V_Votes.FindAsync(id);
+    //    return res;
+    //}
+
+    //this is only for internal purpose with tracking
     private async Task<List<V_Vote>> ReadByUserIdAll(string userId)
     {
         if (userId.IsNullOrEmptyAndTrimSelf())
