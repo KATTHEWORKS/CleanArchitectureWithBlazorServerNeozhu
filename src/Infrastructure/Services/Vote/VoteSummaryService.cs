@@ -266,13 +266,16 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     {
         var resultCount = 0;
         EntityEntry<V_VoteSummary> entityEntry;
-        if (diff == null) return false;
+        if (diff == null || (diff.ConstituencyIdToAdd == 0 && diff.ConstituencyIdToRemove == 0)) return false;
         try
         {
             //2 cases 
             //case1 same constituency id for both add/remove
             //case2 different constituencyid for add remove
             //case2 scenario wont handled here,so always for this method will recieved of same constituencyid only
+
+            diff.ConstituencyIdToAdd = diff.ConstituencyIdToAdd > 0 ? diff.ConstituencyIdToAdd : diff.ConstituencyIdToRemove;
+            //above line bcz some times only removal ,no adding
 
             var existing = await ReadByConstituencyId(diff.ConstituencyIdToAdd);
             //case1 same const id to add or remove
