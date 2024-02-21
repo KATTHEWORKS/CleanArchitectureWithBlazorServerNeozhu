@@ -11,6 +11,11 @@
     <PropertyGroup Label="Override Stack trace file locations">
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Features\VotingSystem\VoteSummaries\Commands\Import\ImportVoteSummariesCommand.cs" />
+      <Compile Remove="Features\VotingSystem\VoteSummaries\Commands\Import\ImportVoteSummariesCommandValidator.cs" />
+    </ItemGroup>
     
     <ItemGroup>
         <PackageReference Include="Ardalis.Specification" Version="8.0.0" />
@@ -33,5 +38,8 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Features\VotingSystem\VoteSummaries\Commands\Import\" />
     </ItemGroup>
 </Project>
