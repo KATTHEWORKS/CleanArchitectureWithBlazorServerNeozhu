@@ -12,6 +12,7 @@ using CleanArchitecture.Blazor.Domain.Entities;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using LazyCache;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.Extensions.DependencyInjection;
 using RazorLight.Extensions;
 using static CleanArchitecture.Blazor.Domain.Entities.V_VoteSummary;
 
@@ -21,6 +22,7 @@ public interface IVoteSummaryService
 {
     Task<V_VoteSummary?> ReadByConstituencyId(int constituencyId);
     Task<List<V_VoteSummary>> All();
+    Task RefreshSummary();
 }
 #if VOTING_SYSTEM
 public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) : IVoteSummaryService
@@ -43,8 +45,6 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
     {
         if (cache is not null && context is not null)
         {
-            await RefreshDb();
-
             if (DeltaLoadingInProgress)
             {
                 var r = await cache.GetAsync<List<V_VoteSummary>>(VoteSummaryCacheKey);
@@ -57,14 +57,15 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             }
 
             //todo had to add logic of reading from vote db and converting into summary
-            return await cache.GetOrAddAsync(VoteSummaryCacheKey,
-                async () => await context.V_VoteSummarys!.AsNoTracking().AnyAsync() ? await context.V_VoteSummarys.AsNoTracking().ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
+            //return await cache.GetOrAddAsync(VoteSummaryCacheKey,
+            //    async () => await context.V_VoteSummarys!.AsNoTracking().AnyAsync() ? await context.V_VoteSummarys.AsNoTracking().ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
+            return await context.V_VoteSummarys!.AsNoTracking().AnyAsync() ? await context.V_VoteSummarys.AsNoTracking().ToListAsync() : [];
 
         }
         return [];
     }
 
-    private async Task RefreshDb()
+    public async Task RefreshSummary()
     {
         try
         {
@@ -72,7 +73,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             {
                 var result = "";
                 if (await context.V_VoteSummarys.AsNoTracking().AnyAsync())//not first time
-                    result += "Added:" + await LoadDeltaDifferenceToSummary();
+                    result += "Delta loading:" + await LoadDeltaDifferenceToSummary();
 
                 else //firsttime
                     result += "Updated:" + await LoadSummaryFromAllVotesFirstTime();

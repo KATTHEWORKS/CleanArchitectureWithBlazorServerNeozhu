@@ -18,9 +18,8 @@ public interface IVoteService
 
 }
 #if VOTING_SYSTEM
-public class VoteService(IApplicationDbContext context, IVoteSummaryService summaryService) : IVoteService
+public class VoteService(IApplicationDbContext context) : IVoteService
 {
-    private readonly IApplicationDbContext _context = context;
     // private readonly IVoteSummaryService _summaryServices = summaryService;
     //for self read all properties
     //ideally 1 user can updatedVote at one place only 
@@ -31,7 +30,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
     {
         if (userId.IsNullOrEmptyAndTrimSelf())
             return null;
-        var res = await _context.V_Votes.AsNoTracking()//add selection of specific columns rather all
+        var res = await context.V_Votes.AsNoTracking()//add selection of specific columns rather all
             .FirstOrDefaultAsync(x => x.UserId == userId);
         //.FirstAsync(x => x.UserId == userId);//fails if not found
 
@@ -71,7 +70,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
         {
             if (existing.Count > 1)
             {    //delete all except first
-                var deleted = await _context.V_Votes.Where(x => x.UserId == vote.UserId).Skip(1).ExecuteDeleteAsync();
+                var deleted = await context.V_Votes.Where(x => x.UserId == vote.UserId).Skip(1).ExecuteDeleteAsync();
             }
             var existingVote = existing.First();
 
@@ -80,7 +79,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
                 existingVote.VoteKPIRatingCommentsDelta = existingVote.VoteKPIRatingComments;
                 existingVote.ConstituencyIdDelta = existingVote.ConstituencyId;
 
-                var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
+                var result1 = await context.V_Votes.Where(x => x.Id == existingVote.Id)
                 .ExecuteUpdateAsync(x => x
                 .SetProperty(u => u.Modified, DateTime.Now)
                 .SetProperty(u => u.VoteKPIRatingCommentsDelta, existingVote.VoteKPIRatingCommentsDelta)
@@ -93,7 +92,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
             }
             else
             {
-                var result1 = await _context.V_Votes.Where(x => x.Id == existingVote.Id)
+                var result1 = await context.V_Votes.Where(x => x.Id == existingVote.Id)
                    .ExecuteUpdateAsync(x => x
                    .SetProperty(u => u.Modified, DateTime.Now)
                    .SetProperty(u => u.VoteKPIComments, vote.VoteKPIComments)
@@ -107,9 +106,9 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
 
         }
         vote.Id = 0;//todo need to verify here
-        var addedVote = await _context.V_Votes.AddAsync(vote);
+        var addedVote = await context.V_Votes.AddAsync(vote);
 
-        var result = await _context.SaveChangesAsync();
+        var result = await context.SaveChangesAsync();
         //await _summaryServices.AddForNewVote(addedVote.Entity);
         //dont call summary for every vote,instead load summary for every 15 min once either call based or trigger based
         return addedVote.Entity;
@@ -136,19 +135,19 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
     {
         if (userId.IsNullOrEmptyAndTrimSelf())
             return [];
-        var res = await _context.V_Votes.AsNoTracking().Where(x => x.UserId == userId).ToListAsync();
+        var res = await context.V_Votes.AsNoTracking().Where(x => x.UserId == userId).ToListAsync();
         return res;
     }
 
 
     public async Task<int> DeleteOfUser(string userId)//avoid this from frontend
     {
-        if (await _context.V_Votes.AnyAsync(x => x.UserId == userId))
+        if (await context.V_Votes.AnyAsync(x => x.UserId == userId))
         {
             //instead of hard delete,just marking value as null by moving to delta for later removal case
             // _context.V_Votes.Remove(existingVote);
 
-            var result = await _context.V_Votes.Where(x => x.UserId == userId).ExecuteUpdateAsync(x =>
+            var result = await context.V_Votes.Where(x => x.UserId == userId).ExecuteUpdateAsync(x =>
             x.SetProperty(y => y.ConstituencyIdDelta, z => z.ConstituencyId)
             .SetProperty(y => y.ConstituencyId, 0)
             .SetProperty(y => y.VoteKPIRatingCommentsDelta, z => z.VoteKPIRatingComments)

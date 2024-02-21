@@ -126,18 +126,26 @@ public static class DependencyInjection
             {
                 options.UseInMemoryDatabase("BlazorDashboardDb");
                 options.EnableSensitiveDataLogging();
-            },ServiceLifetime.Transient,ServiceLifetime.Transient);
+            });
         }
         else
+        {
             services.AddDbContext<ApplicationDbContext>((p, m) =>
             {
                 var databaseSettings = p.GetRequiredService<IOptions<DatabaseSettings>>().Value;
                 m.AddInterceptors(p.GetServices<ISaveChangesInterceptor>());
                 m.UseDatabase(databaseSettings.DBProvider, databaseSettings.ConnectionString);
-            }, ServiceLifetime.Transient, ServiceLifetime.Transient);
+            });
+            //services.AddDbContextFactory<ApplicationDbContext>((p, m) =>
+            //{
+            //    var databaseSettings = p.GetRequiredService<IOptions<DatabaseSettings>>().Value;
+            //    m.AddInterceptors(p.GetServices<ISaveChangesInterceptor>());
+            //    m.UseDatabase(databaseSettings.DBProvider, databaseSettings.ConnectionString);
+            //}, ServiceLifetime.Transient, ServiceLifetime.Transient);
+        }
 
         services.AddScoped<IDbContextFactory<ApplicationDbContext>, BlazorContextFactory<ApplicationDbContext>>();
-        services.AddTransient<IApplicationDbContext>(provider =>
+        services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>().CreateDbContext());
         services.AddScoped<CustomUserManager>();
         services.AddScoped<CustomRoleManager>();

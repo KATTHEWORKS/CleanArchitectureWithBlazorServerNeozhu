@@ -85,7 +85,7 @@
     private Task<AuthenticationState>? AuthState { get; set; }
 
     @inject IAppCache Cache;
-    private TimeSpan RefreshInterval => TimeSpan.FromHours(24);
+    private TimeSpan RefreshInterval => TimeSpan.FromMinutes(2);
     private LazyCacheEntryOptions Options => new LazyCacheEntryOptions().SetAbsoluteExpiration(RefreshInterval, ExpirationMode.LazyExpiration);
     string keyMyVote = "keyMyVote"; //$"myvote-{dto.Id}";
 
