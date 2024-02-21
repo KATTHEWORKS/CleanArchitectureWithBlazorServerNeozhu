@@ -1,10 +1,19 @@
 #See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+# apt update and install fonts
+RUN echo "deb http://deb.debian.org/debian/ bookworm main contrib" > /etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian/ bookworm main contrib" >> /etc/apt/sources.list && \
+    echo "deb http://security.debian.org/ bookworm-security main contrib" >> /etc/apt/sources.list && \
+    echo "deb-src http://security.debian.org/ bookworm-security main contrib" >> /etc/apt/sources.list
+RUN sed -i'.bak' 's/$/ contrib/' /etc/apt/sources.list
+RUN apt-get update; apt-get install -y ttf-mscorefonts-installer fontconfig
+RUN apt-get install -y fonts-noto-cjk fontconfig
 USER app
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
+
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -20,7 +29,10 @@ COPY ["src/Domain/Domain.csproj", "src/Domain/"]
 COPY ["src/Infrastructure/Infrastructure.csproj", "src/Infrastructure/"]
 RUN dotnet restore "src/Server.UI/Server.UI.csproj"
 COPY . .
+
 WORKDIR "/src/src/Server.UI"
+RUN dotnet add package SkiaSharp.NativeAssets.Linux.NoDependencies
+RUN dotnet add package HarfBuzzSharp.NativeAssets.Linux
 RUN dotnet build "Server.UI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
