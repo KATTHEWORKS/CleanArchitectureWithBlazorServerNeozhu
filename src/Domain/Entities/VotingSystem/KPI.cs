@@ -64,13 +64,13 @@ public class KPI(int id, string nameShort, byte systemType = 1)
         if (existing == null || existing.Count == 0) return standardList;
         foreach (var item in standardList)
         {
-            if (!existing.Any(x => x.KPI == item.KPI))
+            if (!existing.Any(x => x.KPI_Id == item.KPI_Id))
             {
-                existing.Add(new KPIRatingComment(item.KPI));
+                existing.Add(new KPIRatingComment(item.KPI_Id));
             }
         }
         //return existing.OrderBy(x => x.Rating).ThenBy(x => x.KPI).ToList();
-        return [.. existing.OrderByDescending(x => x.Rating).ThenBy(x => x.KPI)];
+        return [.. existing.OrderByDescending(x => x.Rating).ThenBy(x => x.KPI_Id)];
     }
     public static KPI? Get(int id, byte systemType = 1)
     {

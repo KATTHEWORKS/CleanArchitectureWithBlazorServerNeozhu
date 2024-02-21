@@ -38,7 +38,7 @@ public class Vote(int constituencyId, string userId):BaseAuditableEntity //1 use
     public int ConstituencyId { get; set; } = constituencyId;
 
     [ForeignKey(nameof(ConstituencyId))]
-    public V_Constituency? Constituency { get; set; }
+    public Constituency? Constituency { get; set; }
 
     [Required] //overall rating
     public sbyte Rating { get; set; }    //this has to be autogerated only then it makes great value for all,but curently not done anything for that
@@ -53,7 +53,7 @@ public class Vote(int constituencyId, string userId):BaseAuditableEntity //1 use
     //public string? VotesJsonAsStringDelta { get; set; }//this is for the sake of update difference tracking tyo summary table
 
     //[NotMapped]
-    public List<VoteKPIRatingComment>? VoteKPIRatingCommentsDelta { get; set; }
+    public List<KPIRatingComment>? KPIRatingCommentsDelta { get; set; }
     public int? ConstituencyIdDelta { get; set; }
 
     //public string? CommentsJsonAsString { get; set; }//lIST<KPI,COMMENT>
@@ -62,15 +62,15 @@ public class Vote(int constituencyId, string userId):BaseAuditableEntity //1 use
 
     //at viewmodel had to parse all bytes into string by (KPIEnum)value
 
-    public List<VoteKPIComment>? VoteKPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
+    public List<KPIComment>? KPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
     //public bool IsCommentExists() => VoteKPIRatingComments.Any(x => !string.IsNullOrEmpty(x.Comment) && x.Comment.Length > 3);
     //since comments of others also visible to all in summary page but not votes usually
-    public List<VoteKPIRatingComment>? VoteKPIRatingComments { get; set; }//mostly for self
+    public List<KPIRatingComment>? KPIRatingComments { get; set; }//mostly for self
 
 }
 
 //in case of voe deletion that should delete commentSuppor count also
-public class V_CommentSupportOppose
+public class CommentSupportOppose
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -80,7 +80,7 @@ public class V_CommentSupportOppose
     public int Vote_Id { get; set; }
 
     [ForeignKey(nameof(Vote_Id))]
-    public V_Vote Vote { get; set; }
+    public Vote Vote { get; set; }
 
 
     [Required]
@@ -92,5 +92,5 @@ public class V_CommentSupportOppose
     //if nothing then remove the entry
 
     public DateTime Created { get; set; } = DateTime.Now;
-    public DateTime? Modified { get; set; }
+    public DateTime? LastModified { get; set; }
 }

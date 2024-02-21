@@ -30,7 +30,7 @@ public class VoteSummary:BaseAuditableEntity //each location one row as summary
     public int ConstituencyId { get; set; }
 
     [ForeignKey(nameof(ConstituencyId))]
-    public V_Constituency Constituency { get; set; }
+    public Constituency Constituency { get; set; }
     [Required]
     public int CommentsCount { get; set; }
 
@@ -45,7 +45,7 @@ public class VoteSummary:BaseAuditableEntity //each location one row as summary
     //[Column(TypeName = "jsonb")] //this wont working mssql Adjust based on your database
     //public string KPIVotesAsJsonString { get; set; }
     //[NotMapped]
-    public List<VoteSummary_KPIVote> KPIVotes { get; set; }
+    public List<KPIVote> KPIVotes { get; set; }
     //{
     //    //get => JsonSerializer.Deserialize<KPIVotes>(KPIVotesAsJsonString);
     //    get => JsonExtensions.TryDeserialize<List<VoteSummary_KPIVote>>(KPIVotesAsJsonString, out var result) ? result : [];

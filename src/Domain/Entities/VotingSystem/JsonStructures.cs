@@ -20,28 +20,28 @@ public class KPIRatingComment
     {
         Created = DateTime.Now;
         //below is not making any use bcz here KPI is 0 only always
-        if (KPI > 0 && V_KPI is null)
-            V_KPI = V_KPI.Get(KPI);
+        if (KPI_Id > 0 && KPI is null)
+            KPI = KPI.Get(KPI_Id);
     }
     public KPIRatingComment(int kpiId) : this()
     {  ////this is for d sake of UI auto generating list purpose
-        KPI = kpiId;
-        V_KPI = V_KPI.Get(kpiId);
+        KPI_Id = kpiId;
+        KPI = KPI.Get(kpiId);
     }
-    public KPIRatingComment(V_KPI v_KPI) : this()
+    public KPIRatingComment(KPI kpi) : this()
     {  ////this is for d sake of UI auto generating list purpose
-        KPI = v_KPI.Id;
-        V_KPI = v_KPI;
+        KPI_Id = kpi.Id;
+        KPI = kpi;
     }
     public KPIRatingComment(int kpiId, sbyte rating) : this(kpiId)
     {
         Rating = rating;
     }
     //if no value(null) at any place then dont store
-    public int KPI { get; set; }//KPIEnum this can be enum but due to expansion its not
+    public int KPI_Id { get; set; }//KPIEnum this can be enum but due to expansion its not
 
     [JsonIgnore]
-    public V_KPI? V_KPI { get; set; }//this is only for UI purpose nothing else
+    public KPI? KPI { get; set; }//this is only for UI purpose nothing else
     public sbyte? Rating { get; set; } //-2-3
 
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
@@ -71,27 +71,27 @@ public class KPIComment(int kpi, string comment)
     public string Comment { get; set; } = comment;//this supposed to be like List<KPI-comment>
 }
 
-public class Summary_KPIVote
+public class KPIVote
 {
 
-    public class RatingTypeCounts
+    public class RatingCounts
     {
         //old style, since primary constructors not supporting deserialization without default parameterless constructor
-        public RatingTypeCounts()
+        public RatingCounts()
         {
 
         }
-        public RatingTypeCounts(sbyte ratingTypeByte, int voteCount = 1)
+        public RatingCounts(sbyte rating, int voteCount = 1)
         {
-            RatingTypeByte = ratingTypeByte;
+            Rating = rating;
             Count = voteCount;
         }
-        public sbyte RatingTypeByte { get; set; }
+        public sbyte Rating { get; set; }
         public int Count { get; set; }
     }
     public int KPI { get; set; }
 
-    public List<RatingTypeCounts> RatingTypeCountsList { get; set; }//(0=>1000,1=>24,2=>4,4=>15,5=>100)
+    public List<RatingCounts> RatingTypeCountsList { get; set; } = new(); //(0=>1000,1=>24,2=>4,4=>15,5=>100)
 
     //this is for particular KPI average
     public sbyte AggregateRatingOfKPI => CalculateAggregateRatingOfKPI();
@@ -106,7 +106,7 @@ public class Summary_KPIVote
         //todo can make different value for each kpi type later case
         var kpiValue = 1;//if kpi 1 value is more then more it value like 3 ,if less then make it like 0.5
         var totalVotes = RatingTypeCountsList.Sum(r => r.Count);
-        var weightSum = RatingTypeCountsList.Sum(r => r.RatingTypeByte * r.Count) * kpiValue;
+        var weightSum = RatingTypeCountsList.Sum(r => r.Rating * r.Count) * kpiValue;
         var aggregateKPIVote = totalVotes != 0 ? (sbyte)Math.Min(3, Math.Max(-2, weightSum / totalVotes)) : (sbyte)0;
         return aggregateKPIVote;
     }

@@ -57,6 +57,6 @@ public class Constituency(string stateName, string constituency):BaseAuditableEn
     public int ReadCount { get; set; } = 0;
     public int WriteCount { get; set; } = 0;
 
-    public virtual V_VoteSummary? Summary { get; set; }//; = new();
+    public virtual VoteSummary? Summary { get; set; }//; = new();
 
 }

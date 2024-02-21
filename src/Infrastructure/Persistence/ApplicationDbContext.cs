@@ -159,6 +159,61 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         .OnDelete(DeleteBehavior.Restrict); // or DeleteBehavior.NoAction, depending on your requirements
 
 #if VOTING_SYSTEM
+        builder.Entity<Constituency>().Property(b => b.Id).ValueGeneratedOnAdd();
+        builder.Entity<Vote>().Property(b => b.Id).ValueGeneratedOnAdd();
+        builder.Entity<Vote>().Property(b => b.Created).HasDefaultValueSql("getdate()");
+        builder.Entity<Vote>()
+         .Property(v => v.KPIRatingComments)
+         .HasConversion(
+             v => JsonSerializer.Serialize(v.Where(c => c.Rating != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
+             v => JsonSerializer.Deserialize<List<KPIRatingComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+         );
+        builder.Entity<Vote>()
+         .Property(v => v.KPIComments)
+         .HasConversion(
+             v => JsonSerializer.Serialize(v.Where(c => c.Comment != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
+             v => JsonSerializer.Deserialize<List<KPIComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+         );
+        var delta0 = new List<KPIRatingComment>();
+        builder.Entity<Vote>()
+         .Property(v => v.KPIRatingCommentsDelta)
+         .HasConversion(
+             v => JsonSerializer.Serialize(v, JsonExtensions.IgnoreNullSerializationOptions),
+             v => (JsonExtensions.TryDeserialize<List<KPIRatingComment>>(v, out delta0, JsonExtensions.IgnoreNullSerializationOptions)
+             ? delta0 : new List<KPIRatingComment>())
+         );
+
+        //for updatetime had to use triggers
+
+        builder.Entity<VoteSummary>().HasKey(x => x.Id);
+        builder.Entity<VoteSummary>().Property(b => b.Id).ValueGeneratedOnAdd();
+
+        builder.Entity<VoteSummary>().Property(b => b.Created).HasDefaultValueSql("getdate()");
+
+        builder.Entity<VoteSummary>()
+                .HasOne(x => x.Constituency)
+                .WithOne(c => c.Summary)
+                .HasForeignKey<VoteSummary>(x => x.ConstituencyId);
+
+        builder.Entity<VoteSummary>()
+        .Property(v => v.KPIVotes)
+        .HasConversion(
+            v => JsonSerializer.Serialize(v, JsonExtensions.IgnoreNullSerializationOptions),
+            v => JsonSerializer.Deserialize<List<KPIVote>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+        );
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         builder.Entity<V_Constituency>().Property(b => b.Id).ValueGeneratedOnAdd();
 
