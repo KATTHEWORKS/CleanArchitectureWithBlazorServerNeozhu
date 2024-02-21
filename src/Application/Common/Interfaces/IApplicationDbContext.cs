@@ -5,6 +5,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
+using CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 using CleanArchitecture.Blazor.Domain.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -34,6 +35,9 @@ public interface IApplicationDbContext : IDbContext
     DbSet<Customer> Customers { get; set; }
 
 #if VOTING_SYSTEM
+    public DbSet<Constituency> Constituencies { get; set; }
+
+
     public DbSet<V_Constituency> V_Constituencies { get; set; }
     public DbSet<V_Vote> V_Votes { get; set; }
     public DbSet<V_VoteSummary> V_VoteSummarys { get; set; }

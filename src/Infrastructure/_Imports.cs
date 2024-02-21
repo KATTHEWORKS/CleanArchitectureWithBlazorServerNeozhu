@@ -19,4 +19,5 @@ global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 
 global using CleanArchitecture.Blazor.Application.Features.Identity.DTOs;
+global using CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 global using PublicCommon;

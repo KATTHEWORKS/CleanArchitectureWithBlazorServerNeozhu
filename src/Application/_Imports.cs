@@ -32,3 +32,4 @@ global using CleanArchitecture.Blazor.Application.Common.Security;
 global using CleanArchitecture.Blazor.Domain.Enums;
 global using CleanArchitecture.Blazor.Domain.Identity;
 global using PublicCommon;
+global using CleanArchitecture.Blazor.Domain.Entities.VotingSystem;

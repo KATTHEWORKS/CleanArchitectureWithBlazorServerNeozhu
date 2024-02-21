@@ -13,6 +13,7 @@ using System.Text.Json;
 using CleanArchitecture.Blazor.Domain.Entities;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence;
 
@@ -45,6 +46,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Product> Products { get; set; }
 
 #if VOTING_SYSTEM
+    public DbSet<Constituency> Constituencies { get; set; }
+    
+    
     public DbSet<V_Constituency> V_Constituencies { get; set; }
     public DbSet<V_Vote> V_Votes { get; set; }
     //public DbSet<V_CommentSupportOppose> V_CommentSupportOpposeCounts { get; set; }
