@@ -68,7 +68,13 @@
 @using System.Linq.Expressions
 @using Newtonsoft.Json
 @using System.Reflection
-
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes;
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Caching;
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands;
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.DTOs;
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.EventHandlers;
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries;
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Specifications;
 
 @inject IApplicationSettings ApplicationSettings
 @inject ISnackbar Snackbar

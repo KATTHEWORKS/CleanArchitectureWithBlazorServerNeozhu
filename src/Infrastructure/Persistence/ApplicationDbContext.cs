@@ -47,8 +47,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
 #if VOTING_SYSTEM
     public DbSet<Constituency> Constituencies { get; set; }
-    
-    
+    public DbSet<Vote> Votes { get; set; }
+
     public DbSet<V_Constituency> V_Constituencies { get; set; }
     public DbSet<V_Vote> V_Votes { get; set; }
     //public DbSet<V_CommentSupportOppose> V_CommentSupportOpposeCounts { get; set; }
