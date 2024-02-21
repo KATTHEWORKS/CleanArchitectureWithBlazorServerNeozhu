@@ -11,6 +11,8 @@ using CleanArchitecture.Blazor.Domain.Common.Entities;
 using CleanArchitecture.Blazor.Domain.Identity;
 using System.Text.Json;
 using CleanArchitecture.Blazor.Domain.Entities;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence;
 
@@ -27,18 +29,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
 
     }
-    public async Task AddEntityAsync<TEntity>(TEntity entity) where TEntity : class
-    {
-        Entry(entity).State = EntityState.Detached;
-        Entry(entity).State = EntityState.Added;
-        await AddAsync(entity);
-    }
-    public void UpdateEntity<TEntity>(TEntity entity) where TEntity : class
-    {
-        Attach(entity);
-        Entry(entity).State = EntityState.Modified;
-        Update(entity);
-    }
+    public DbContext Instance => this;
     public DbSet<UserRoleTenant> UserRoleTenants { get; set; }
 
     public DbSet<Tenant> Tenants { get; set; }
@@ -60,9 +51,86 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
     public DbSet<V_VoteSummary> V_VoteSummarys { get; set; }
 #endif
-    public async Task<int> SaveChangesAsync()
+
+    public async Task AddEntityAsync<TEntity>(TEntity entity) where TEntity : class
     {
-        return await base.SaveChangesAsync(CancellationToken.None);
+        Entry(entity).State = EntityState.Added;
+        await AddAsync(entity);
+    }
+    public void UpdateEntity<TEntity>(TEntity entity) where TEntity : class
+    {
+        Attach(entity);
+        Entry(entity).State = EntityState.Modified;
+        Update(entity);
+    }
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        //var entries = ChangeTracker
+        //.Entries()
+        //.Where(e => e.Entity is BaseEntity && (
+        //        e.State == EntityState.Added
+        //        || e.State == EntityState.Modified));
+
+        //foreach (var entityEntry in entries)
+        //{
+        //    ((BaseEntity)entityEntry.Entity).UpdatedDate = DateTime.Now;
+
+        //    if (entityEntry.State == EntityState.Added)
+        //    {
+        //        ((BaseEntity)entityEntry.Entity).CreatedDate = DateTime.Now;
+        //    }
+        //}
+
+        //return base.SaveChanges();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    // Additional methods
+    public override EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class
+    {
+        return base.Entry(entity);
+    }
+
+    public override DatabaseFacade Database => base.Database;
+  
+    public async Task BeginTransactionAsync()
+    {
+        if (Database.CurrentTransaction == null)
+        {
+            await Database.BeginTransactionAsync();
+        }
+        else
+        {
+            throw new InvalidOperationException("A transaction is already in progress.");
+        }
+    }
+    public async Task CommitTransactionAsync()
+    {
+        if (Database.CurrentTransaction != null)
+        {
+            await Database.CurrentTransaction.CommitAsync();
+        }
+        else
+        {
+            throw new InvalidOperationException("No transaction is in progress.");
+        }
+    }
+
+    public async Task RollbackTransactionAsync()
+    {
+        if (Database.CurrentTransaction != null)
+        {
+            await Database.CurrentTransaction.RollbackAsync();
+        }
+        else
+        {
+            throw new InvalidOperationException("No transaction is in progress.");
+        }
+    }
+
+    public bool ExistsLocally<T>(T entity) where T : class
+    {
+        return this.Set<T>().Local.Any(e => e == entity);
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -89,6 +157,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 #if VOTING_SYSTEM
 
         builder.Entity<V_Constituency>().Property(b => b.Id).ValueGeneratedOnAdd();
+
         //https://learn.microsoft.com/en-us/ef/core/modeling/generated-properties?tabs=fluent-api
         builder.Entity<V_Vote>().Property(b => b.Id).ValueGeneratedOnAdd();
         builder.Entity<V_Vote>().Property(b => b.Created).HasDefaultValueSql("getdate()");
@@ -120,8 +189,9 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
         //for updatetime had to use triggers
 
-        builder.Entity<V_VoteSummary>().HasKey(x => x.ConstituencyId);
-
+        builder.Entity<V_VoteSummary>().HasKey(x => x.Id);
+        builder.Entity<V_VoteSummary>().Property(b => b.Id).ValueGeneratedOnAdd();
+        
         builder.Entity<V_VoteSummary>().Property(b => b.Created).HasDefaultValueSql("getdate()");
 
         builder.Entity<V_VoteSummary>()

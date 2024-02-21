@@ -23,6 +23,10 @@ public class StateWithConstituencies
 //dbtable1
 public class V_Constituency(string stateName, string constituency)//target Topic/Focus details // for small voting case this can be enum but for V_Constituency
 {
+    public V_Constituency() : this(default, default)
+    {
+
+    }
     public V_Constituency(string stateName, string constituency, string existingMpName)
         : this(stateName, constituency)
     {
@@ -43,7 +47,7 @@ public class V_Constituency(string stateName, string constituency)//target Topic
     public string StateName { get; set; } = stateName;
 
     [Required]
-    public string Constituency { get; set; } = constituency;
+    public string Name { get; set; } = constituency;
     public string? ExistingMpName { get; set; }
     public string? AlternateMpNames { get; set; }
 

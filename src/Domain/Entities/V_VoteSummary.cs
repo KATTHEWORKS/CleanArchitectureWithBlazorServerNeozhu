@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using CleanArchitecture.Blazor.Domain.Identity;
+using Microsoft.EntityFrameworkCore;
 using PublicCommon;
 
 namespace CleanArchitecture.Blazor.Domain.Entities;
@@ -21,6 +22,9 @@ public class V_VoteSummary//each location one row as summary
         Created = DateTime.Now;
     }
 
+    [Key]
+    //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]//this gives error so using fluentnt API .ValueGeneratedOnAdd();
+    public int Id { get; set; }//dont remove id,even its not directly needed.avoids tracking issues
     //[Key]
     public int ConstituencyId { get; set; }
 

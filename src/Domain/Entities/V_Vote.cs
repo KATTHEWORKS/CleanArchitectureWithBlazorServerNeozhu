@@ -25,9 +25,8 @@ public class V_Vote(int constituencyId, string userId) //1 user 1 row
 
     [Key]
     //[DatabaseGenerated(DatabaseGeneratedOption.Computed)]//this gives error so using fluentnt API .ValueGeneratedOnAdd();
-    public int Id { get; set; }
-    //remove id and maintain userid only
-    //or just keep id as counter,but always refer userid as key
+    public int Id { get; set; }//dont remove id,even its not directly needed.avoids tracking issues
+   
     [Required]
     public string UserId { get; set; } = userId;
 

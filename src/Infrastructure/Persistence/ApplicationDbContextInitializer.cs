@@ -191,7 +191,7 @@ public class ApplicationDbContextInitializer
 
         V_Constituency AddConstituency(V_Constituency c)
         {
-            if (!_context.V_Constituencies.Any(x => x.Constituency == c.Constituency && x.StateName == c.StateName))
+            if (!_context.V_Constituencies.Any(x => x.Name == c.Name && x.StateName == c.StateName))
             {
                 _context.V_Constituencies.Add(c);
                 return c;

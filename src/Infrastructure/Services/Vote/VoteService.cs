@@ -21,7 +21,7 @@ public interface IVoteService
 public class VoteService(IApplicationDbContext context, IVoteSummaryService summaryService) : IVoteService
 {
     private readonly IApplicationDbContext _context = context;
-    private readonly IVoteSummaryService _summaryServices = summaryService;
+    // private readonly IVoteSummaryService _summaryServices = summaryService;
     //for self read all properties
     //ideally 1 user can updatedVote at one place only 
     //later we can allow for multiple
@@ -136,7 +136,7 @@ public class VoteService(IApplicationDbContext context, IVoteSummaryService summ
     {
         if (userId.IsNullOrEmptyAndTrimSelf())
             return [];
-        var res = await _context.V_Votes.Where(x => x.UserId == userId).ToListAsync();
+        var res = await _context.V_Votes.AsNoTracking().Where(x => x.UserId == userId).ToListAsync();
         return res;
     }
 

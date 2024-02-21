@@ -12,6 +12,7 @@ using CleanArchitecture.Blazor.Domain.Entities;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using LazyCache;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using RazorLight.Extensions;
 using static CleanArchitecture.Blazor.Domain.Entities.V_VoteSummary;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services.Vote;
@@ -43,6 +44,18 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         if (cache is not null && context is not null)
         {
             await RefreshDb();
+
+            if (DeltaLoadingInProgress)
+            {
+                var r = await cache.GetAsync<List<V_VoteSummary>>(VoteSummaryCacheKey);
+                if (r != null)
+                    return r;
+                else
+                {
+                    Console.WriteLine("had to wait,but some improvement needed");
+                }
+            }
+
             //todo had to add logic of reading from vote db and converting into summary
             return await cache.GetOrAddAsync(VoteSummaryCacheKey,
                 async () => await context.V_VoteSummarys!.AsNoTracking().AnyAsync() ? await context.V_VoteSummarys.AsNoTracking().ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
@@ -157,8 +170,8 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 }
             }
 
-            var existingEntity = await context.V_VoteSummarys.FirstOrDefaultAsync(v => v.ConstituencyId == existing.ConstituencyId);
-            if (existingEntity == null)
+            //var existingEntity = await context.V_VoteSummarys.FirstOrDefaultAsync(v => v.ConstituencyId == existing.ConstituencyId);
+            if (!context.ExistsLocally<V_VoteSummary>(existing) && existing.Id == 0)
             {
                 await context.AddEntityAsync<V_VoteSummary>(existing);
             }

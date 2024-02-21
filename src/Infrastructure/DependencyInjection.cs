@@ -121,18 +121,20 @@ public static class DependencyInjection
             .AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
 
         if (configuration.GetValue<bool>("UseInMemoryDatabase"))
+        {
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseInMemoryDatabase("BlazorDashboardDb");
                 options.EnableSensitiveDataLogging();
-            });
+            },ServiceLifetime.Transient,ServiceLifetime.Transient);
+        }
         else
             services.AddDbContext<ApplicationDbContext>((p, m) =>
             {
                 var databaseSettings = p.GetRequiredService<IOptions<DatabaseSettings>>().Value;
                 m.AddInterceptors(p.GetServices<ISaveChangesInterceptor>());
                 m.UseDatabase(databaseSettings.DBProvider, databaseSettings.ConnectionString);
-            });
+            }, ServiceLifetime.Transient, ServiceLifetime.Transient);
 
         services.AddScoped<IDbContextFactory<ApplicationDbContext>, BlazorContextFactory<ApplicationDbContext>>();
         services.AddTransient<IApplicationDbContext>(provider =>
