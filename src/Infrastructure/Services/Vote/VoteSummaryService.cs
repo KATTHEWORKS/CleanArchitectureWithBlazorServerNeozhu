@@ -45,7 +45,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             await RefreshDb();
             //todo had to add logic of reading from vote db and converting into summary
             return await cache.GetOrAddAsync(VoteSummaryCacheKey,
-                async () => await context.V_VoteSummarys!.AnyAsync() ? await context.V_VoteSummarys.AsNoTracking().ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
+                async () => await context.V_VoteSummarys!.AsNoTracking().AnyAsync() ? await context.V_VoteSummarys.AsNoTracking().ToListAsync() : [], TimeSpan.FromMinutes(RefreshFrequncyInMinutes * 2));
 
         }
         return [];
@@ -58,7 +58,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             if (DateTime.Now.Subtract(lastLoadedOn).TotalMinutes > RefreshFrequncyInMinutes && DeltaLoadingInProgress == false)
             {
                 var result = "";
-                if (await context.V_VoteSummarys.AnyAsync())//not first time
+                if (await context.V_VoteSummarys.AsNoTracking().AnyAsync())//not first time
                     result += "Added:" + await LoadDeltaDifferenceToSummary();
 
                 else //firsttime
