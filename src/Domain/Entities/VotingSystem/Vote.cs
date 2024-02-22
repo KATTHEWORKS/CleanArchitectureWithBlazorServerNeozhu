@@ -43,7 +43,7 @@ public class Vote(int constituencyId, string userId) : BaseAuditableEntity //1 u
     [Required] //overall rating
     public sbyte Rating { get; set; }    //this has to be autogerated only then it makes great value for all,but curently not done anything for that
 
-    public string OpenIssues { get; set; }
+    public string? OpenIssues { get; set; }
     public bool? WishToReElectMp { get; set; } = null;//yes/no/no answer
 
     public void UpdateModified()

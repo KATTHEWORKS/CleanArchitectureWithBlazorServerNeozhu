@@ -12,7 +12,7 @@ public class CreateConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
       [Description("Id")]
       public int Id { get; set; }
           [Description("State Name")]
-    public string? StateName {get;set;} 
+    public string? State {get;set;} 
     [Description("Name")]
     public string Name {get;set;} = String.Empty; 
     [Description("Existing Mp Name")]

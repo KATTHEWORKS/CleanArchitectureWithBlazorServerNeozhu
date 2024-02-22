@@ -59,7 +59,7 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
 { _localizer[_dto.GetMemberDescription(x=>x.ExistingMpTerms)], (row, item) => item.ExistingMpTerms = row[_localizer[_dto.GetMemberDescription(x=>x.ExistingMpTerms)]].ToString() },
 
 
-{ _localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)], (row, item) => item.MpNamesEarlierOthers = row[_localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)]].ToString() }, 
+{ _localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)], (row, item) => item.OtherPastMps = row[_localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)]].ToString() }, 
 
 //{ _localizer[_dto.GetMemberDescription(x=>x.ReadCount)], (row, item) => item.ReadCount = row[_localizer[_dto.GetMemberDescription(x=>x.ReadCount)]].ToString() }, 
 //{ _localizer[_dto.GetMemberDescription(x=>x.WriteCount)], (row, item) => item.WriteCount = row[_localizer[_dto.GetMemberDescription(x=>x.WriteCount)]].ToString() }, 
@@ -94,7 +94,7 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
                    _localizer[_dto.GetMemberDescription(x=>x.State)], 
 _localizer[_dto.GetMemberDescription(x=>x.Name)], 
 _localizer[_dto.GetMemberDescription(x=>x.MpNameExisting)], 
-_localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)], 
+_localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)], 
 _localizer[_dto.GetMemberDescription(x=>x.Description)], 
 _localizer[_dto.GetMemberDescription(x=>x.ReadCount)], 
 _localizer[_dto.GetMemberDescription(x=>x.VoteCount)], 

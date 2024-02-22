@@ -52,7 +52,7 @@ public class ExportConstituenciesQueryHandler :
 {_localizer[_dto.GetMemberDescription(x=>x.ExistingMpParty)],item => item.ExistingMpParty},
 {_localizer[_dto.GetMemberDescription(x=>x.ExistingMpTerms)],item => item.ExistingMpTerms},
 
-{_localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)],item => item.MpNamesEarlierOthers}, 
+{_localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)],item => item.OtherPastMps}, 
 
 {_localizer[_dto.GetMemberDescription(x=>x.ReadCount)],item => item.ReadCount}, 
 {_localizer[_dto.GetMemberDescription(x=>x.VoteCount)],item => item.VoteCount}, 

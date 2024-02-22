@@ -7,22 +7,38 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
 
 public class AddEditConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
 {
-      [Description("Id")]
-      public int Id { get; set; }
-          [Description("State Name")]
-    public string? StateName {get;set;} 
+    [Description("Id")]
+    public int Id { get; set; }
+
+    [Description("State Name")]
+    public string? State {get;set;} 
+    
     [Description("Name")]
-    public string Name {get;set;} = String.Empty; 
-    [Description("Existing Mp Name")]
-    public string? ExistingMpName {get;set;} 
-    [Description("Alternate Mp Names")]
-    public string? AlternateMpNames {get;set;} 
+    public string Name {get;set;} = String.Empty;
+
     [Description("Description")]
-    public string? Description {get;set;} 
-    [Description("Read Count")]
-    public int ReadCount {get;set;} 
-    [Description("Write Count")]
-    public int WriteCount {get;set;} 
+    public string? Description { get; set; }
+
+
+    [Description("Mp Name Existing")]
+    public string? MpNameExisting { get; set; }
+    [Description("Existing Mp Party")]
+    public string? ExistingMpParty { get; set; }
+
+    [Description("Existing Mp Terms")]
+    public string? ExistingMpTerms { get; set; }
+
+
+
+    [Description("Other Past Mps")]
+    public string? OtherPastMps {get;set; }  //name+party+terms
+
+    //[Description("Read Count")]
+    //public int ReadCount {get;set; } //how many users looking for this,can increase by 1 each time on cache & write once after certain time
+
+
+    //[Description("Write Count")]
+    //public int WriteCount {get;set;} 
 
 
       public string CacheKey => ConstituencyCacheKey.GetAllCacheKey;

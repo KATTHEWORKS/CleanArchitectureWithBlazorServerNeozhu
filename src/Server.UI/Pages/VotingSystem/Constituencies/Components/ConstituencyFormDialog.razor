@@ -12,26 +12,28 @@
             <MudGrid>
                 @*TODO: define mudform that should be edit fields, for example:*@
                 <MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.StateName)]" @bind-Value="model.StateName" For="@(() => model.StateName)" Required="false" RequiredError="@L["state name is required!"]"></MudTextField>
+                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.State)]" @bind-Value="model.State" For="@(() => model.State)" Required="false" RequiredError="@L["state name is required!"]"></MudTextField>
                 </MudItem> 
 <MudItem xs="12" md="6"> 
                         <MudTextField Label="@L[model.GetMemberDescription(x=>x.Name)]" @bind-Value="model.Name" For="@(() => model.Name)" Required="true" RequiredError="@L["name is required!"]"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.Description)]" Lines="3" For="@(() => model.Description)" @bind-Value="model.Description"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6"> 
+                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.MpNameExisting)]" @bind-Value="model.MpNameExisting" For="@(() => model.MpNameExisting)" Required="false" RequiredError="@L["existing mp name is required!"]"></MudTextField>
+                </MudItem>
+
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.ExistingMpParty)]" @bind-Value="model.ExistingMpParty" For="@(() => model.ExistingMpParty)" Min="0" Required="false" RequiredError="@L["read count is required!"]"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.ExistingMpTerms)]" @bind-Value="model.ExistingMpTerms" For="@(() => model.ExistingMpTerms)" Min="0" Required="false" RequiredError="@L["write count is required!"]"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6"> 
+                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.OtherPastMps)]" @bind-Value="model.OtherPastMps" For="@(() => model.OtherPastMps)" Required="false" RequiredError="@L["alternate mp names is required!"]"></MudTextField>
                 </MudItem> 
-<MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.ExistingMpName)]" @bind-Value="model.ExistingMpName" For="@(() => model.ExistingMpName)" Required="false" RequiredError="@L["existing mp name is required!"]"></MudTextField>
-                </MudItem> 
-<MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.AlternateMpNames)]" @bind-Value="model.AlternateMpNames" For="@(() => model.AlternateMpNames)" Required="false" RequiredError="@L["alternate mp names is required!"]"></MudTextField>
-                </MudItem> 
-<MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.Description)]" Lines="3" For="@(() => model.Description)" @bind-Value="model.Description"></MudTextField>
-                </MudItem> 
-<MudItem xs="12" md="6"> 
-                        <MudNumericField  Label="@L[model.GetMemberDescription(x=>x.ReadCount)]" @bind-Value="model.ReadCount" For="@(() => model.ReadCount)" Min="0" Required="false" RequiredError="@L["read count is required!"]"></MudNumericField >
-                </MudItem> 
-<MudItem xs="12" md="6"> 
-                        <MudNumericField  Label="@L[model.GetMemberDescription(x=>x.WriteCount)]" @bind-Value="model.WriteCount" For="@(() => model.WriteCount)" Min="0" Required="false" RequiredError="@L["write count is required!"]"></MudNumericField >
-                </MudItem> 
+
 
             </MudGrid>
         </MudForm>

@@ -10,15 +10,27 @@ public class AddEditVoteCommand: ICacheInvalidatorRequest<Result<int>>
 {
       [Description("Id")]
       public int Id { get; set; }
-          [Description("User Id")]
-    public string? UserId {get;set;} 
+    
+    [Description("User Id")]
+    public string? UserId { get; set; }//not in UI,set from logged in
+
     [Description("Constituency Id")]
-    public int ConstituencyId {get;set;} 
-    [Description("Constituency Id Delta")]
-    public int? ConstituencyIdDelta {get;set;} 
+    public int ConstituencyId { get; set; } //not in UI,set from selected constituency
+    
+    
+    [Description("Open Issues/Problems Needs to be addressed")]
+    public string? OpenIssues {get;set;}
+    //public sbyte Rating { get;set  }//auto-generate based on kpi values//make it readonly from user but 
+
+    [Description("Do you wish to Re-Elect Current MP again?")]
+    public bool? WishToReElectMp { get; set; } = null;//yes/no/no answer
 
 
-      public string CacheKey => VoteCacheKey.GetAllCacheKey;
+    public DateTime? Created { get; set; } = DateTime.Now;//for display only
+
+    public DateTime? LastModified { get; set; }//for display only
+
+    public string CacheKey => VoteCacheKey.GetAllCacheKey;
       public CancellationTokenSource? SharedExpiryTokenSource => VoteCacheKey.SharedExpiryTokenSource();
 
     private class Mapping : Profile

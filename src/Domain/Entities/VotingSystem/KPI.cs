@@ -11,7 +11,7 @@ public class KPI(int id, string nameShort, byte systemType = 1)
     public KPI(int id, string nameShort, string nameFull, string description, byte systemType = 1)
         : this(id, nameShort, systemType)
     {
-        NameFull = nameFull; Description = description;
+        SubTitle = nameFull; Description = description;
         //other fields are passed to primary constructor
     }
     public KPI(int id, byte systemType = 1) : this(id, nameShort: id.ToString(), systemType)
@@ -19,14 +19,14 @@ public class KPI(int id, string nameShort, byte systemType = 1)
         var match = Standard.Find(x => x.Id == id);
         if (match != null)
         {
-            NameFull = match.NameFull;
-            NameShort = match.NameShort;
+            SubTitle = match.SubTitle;
+            Name = match.Name;
             Description = match.Description;
         }
     }
     public int Id { get; set; } = id;
-    public string NameShort { get; set; } = nameShort;
-    public string NameFull { get; set; } = nameShort;//this is because if not passed in primary ctor only
+    public string Name { get; set; } = nameShort;
+    public string SubTitle { get; set; } = nameShort;//this is because if not passed in primary ctor only
     public string Description { get; set; } = nameShort;//this is because if not passed in primary ctor only
 
     public byte SystemType { get; set; } = systemType;//1 for MP had to later make some better method like enum & all 
