@@ -17,7 +17,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 
 
 //dbtable2
-public class Vote(int constituencyId, string userId):BaseAuditableEntity //1 user 1 row
+public class Vote(int constituencyId, string userId) : BaseAuditableEntity //1 user 1 row
 {
     public Vote() : this(default, default)
     {
@@ -27,7 +27,7 @@ public class Vote(int constituencyId, string userId):BaseAuditableEntity //1 use
     //[Key]
     ////[DatabaseGenerated(DatabaseGeneratedOption.Computed)]//this gives error so using fluentnt API .ValueGeneratedOnAdd();
     //public int Id { get; set; }//dont remove id,even its not directly needed.avoids tracking issues
-   
+
     [Required]
     public string UserId { get; set; } = userId;
 
@@ -42,6 +42,9 @@ public class Vote(int constituencyId, string userId):BaseAuditableEntity //1 use
 
     [Required] //overall rating
     public sbyte Rating { get; set; }    //this has to be autogerated only then it makes great value for all,but curently not done anything for that
+
+    public string OpenIssues { get; set; }
+    public bool? WishToReElectMp { get; set; } = null;//yes/no/no answer
 
     public void UpdateModified()
     {

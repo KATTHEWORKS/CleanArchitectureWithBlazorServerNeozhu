@@ -16,11 +16,12 @@ namespace CleanArchitecture.Blazor.Domain.Entities;
 //https://sansad.in/
 
 //dbtable3
-public class VoteSummary:BaseAuditableEntity //each location one row as summary
+public class VoteSummary : BaseAuditableEntity //each location one row as summary
 {
     public VoteSummary()
     {
         Created = DateTime.Now;
+        CalculateAggregateRatingOfConstituency();
     }
 
     //[Key]
@@ -31,11 +32,24 @@ public class VoteSummary:BaseAuditableEntity //each location one row as summary
 
     [ForeignKey(nameof(ConstituencyId))]
     public Constituency Constituency { get; set; }
-    [Required]
-    public int CommentsCount { get; set; }
+
+
+
 
     [Required]
-    public int VotesCount { get { return KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)); } }
+    public int CommentsCount { get; set; } = 0;
+
+    [Required]
+    public int VoteCount { get; set; } = 0;
+    // public int VoteCount { get { return KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)); } }
+    //this is for total aggregate of all KPI values
+    //AggregateRatingOfConstituency
+    public sbyte? Rating { get; set; } = null;//this can be null when added user removed vote
+    ////public float AggregateVote { get { return CalculateAggregateVote(); } }
+    public int? VoteCountForExistingMp { get; set; } = 0;//from vote table  count(WishToReElectMp==true)
+    public int? VoteCountAgainstExistingMp { get; set; } = 0;//from vote table  count(WishToReElectMp==false)
+
+
 
     public void UpdateModified()
     {
@@ -57,16 +71,15 @@ public class VoteSummary:BaseAuditableEntity //each location one row as summary
     //        //CommentCountForMpId //this cant be added here,instead at services
     //    }
     //}
-    //this is for total aggregate of all KPI values
-    public sbyte AggregateRatingOfConstituency => CalculateAggregateRatingOfConstituency();//if this created db column then below is not required
-    ////public float AggregateVote { get { return CalculateAggregateVote(); } }
 
-    private sbyte CalculateAggregateRatingOfConstituency()
+
+    private void CalculateAggregateRatingOfConstituency()
     {
-        if (KPIVotes == null || KPIVotes.Count == 0) return 0; // or any default value //todo need to think what could be, but mostly this wont come any time
+        if (KPIVotes == null || KPIVotes.Count == 0) return; // or any default value //todo need to think what could be, but mostly this wont come any time
+        VoteCount = KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count));
         var sumOfAggregateKPIs = KPIVotes.Sum(x => x.AggregateRatingOfKPI);
-        var totalCount = KPIVotes.Count;
-        return totalCount != 0 ? (sbyte)Math.Min(3, Math.Max(-2, sumOfAggregateKPIs / totalCount)) : (sbyte)0;
+        var totalKpis = KPIVotes.Count;
+        Rating = totalKpis != 0 ? (sbyte)Math.Min(3, Math.Max(-2, sumOfAggregateKPIs / totalKpis)) : (sbyte)0;
     }
     public class ToAddRemove
     {

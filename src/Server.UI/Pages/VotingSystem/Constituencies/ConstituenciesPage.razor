@@ -197,7 +197,7 @@
 
                 <PropertyColumn Property="x => x.MpNamesEarlierOthers" Title="@L[_currentDto.GetMemberDescription(x=>x.MpNamesEarlierOthers)]" />
                 <PropertyColumn Property="x => x.ReadCount" Title="@L[_currentDto.GetMemberDescription(x=>x.ReadCount)]" />
-                <PropertyColumn Property="x => x.WriteCount" Title="@L[_currentDto.GetMemberDescription(x=>x.WriteCount)]" />
+                <PropertyColumn Property="x => x.VoteCount" Title="@L[_currentDto.GetMemberDescription(x=>x.VoteCount)]" />
             @*     <PropertyColumn Property="x => x.Summary" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary)]" /> *@
 
             </Columns>
@@ -318,7 +318,7 @@
         AlternateMpNames = dto.MpNamesEarlierOthers, 
         Description = dto.Description, 
         ReadCount = dto.ReadCount, 
-        WriteCount = dto.WriteCount, 
+        WriteCount = dto.VoteCount, 
   
         };
         var parameters = new DialogParameters<ConstituencyFormDialog>

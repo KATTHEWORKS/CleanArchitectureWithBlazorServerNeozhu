@@ -22,7 +22,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 //    public bool Expanded { get; set; }//for Ui purposes
 //}
 //dbtable1
-public class Constituency(string stateName, string constituency):BaseAuditableEntity //target Topic/Focus details // for small voting case this can be enum but for V_Constituency
+public class Constituency(string stateName, string constituency) : BaseAuditableEntity //target Topic/Focus details // for small voting case this can be enum but for V_Constituency
 {
     public Constituency() : this(default, default)
     {
@@ -63,9 +63,8 @@ public class Constituency(string stateName, string constituency):BaseAuditableEn
 
 
 
-    public int ReadCount { get; set; } = 0;
-    public int WriteCount { get; set; } = 0;
-
+    public int ReadCount { get; set; } = 0;//users read count of constituency,add frm cache
+   
     public virtual VoteSummary? Summary { get; set; }//; = new();
 
 }
