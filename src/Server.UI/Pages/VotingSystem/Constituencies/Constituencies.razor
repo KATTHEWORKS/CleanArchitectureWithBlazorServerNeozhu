@@ -1,4 +1,5 @@
-﻿@page "/pages/Constituencies"
+﻿@namespace CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Constituencies
+@page "/pages/Constituencies"
 
 @using BlazorDownloadFile
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Caching
@@ -9,7 +10,7 @@
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Export
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Commands.AddEdit
-@using CleanArchitecture.Blazor.Server.UI.Pages.Constituencies.Components
+@using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Constituencies.Components
 @inject IJSRuntime JS
 @inject IStringLocalizer<Constituencies> L
 @attribute [Authorize(Policy = Permissions.Constituencies.View)]
