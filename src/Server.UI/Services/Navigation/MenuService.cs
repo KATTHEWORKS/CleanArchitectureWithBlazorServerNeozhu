@@ -20,6 +20,34 @@ public class MenuService : IMenuService
                 new() { Title = "Home", Icon = Icons.Material.Filled.Home, Href = "/" },
                 new()
                 {
+                    Title = "Voting-System",
+                    Icon = Icons.Material.Filled.HowToVote,
+                    PageStatus = PageStatus.Completed,
+                    IsParent = true,
+                    MenuItems = new List<MenuSectionSubItemModel>
+                    {
+                        new()
+                        {
+                            Title = "Constituencies",
+                            Href = "/pages/Constituencies",
+                            PageStatus = PageStatus.Completed
+                        },
+                        new()
+                        {
+                            Title = "Votes",
+                            Href = "/pages/Votes",
+                            PageStatus = PageStatus.Completed
+                        },
+                         new()
+                        {
+                            Title = "Vote Summary",
+                            Href = "/pages/VoteSummaries",
+                            PageStatus = PageStatus.Completed
+                        }
+                    }
+                },
+                new()
+                {
                     Title = "E-Commerce",
                     Icon = Icons.Material.Filled.ShoppingCart,
                     PageStatus = PageStatus.Completed,
