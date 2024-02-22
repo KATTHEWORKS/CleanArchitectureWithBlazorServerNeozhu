@@ -249,7 +249,7 @@
 
         }
     private async Task OnSearch(string text)
-        {
+        { //search with name of constituency or state name or mp name
         _selectedItems = new();
         Query.Keyword = text;
         await _table.ReloadServerData();
