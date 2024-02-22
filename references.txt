@@ -1,0 +1,2 @@
+CQRS pattern
+https://learn.microsoft.com/en-us/azure/architecture/patterns/cqrs?source=docs
