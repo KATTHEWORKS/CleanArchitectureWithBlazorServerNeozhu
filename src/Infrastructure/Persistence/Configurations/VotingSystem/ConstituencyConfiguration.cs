@@ -3,7 +3,7 @@
 
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace CleanArchitecture.Blazor.Infrastructure.Persistence.Configurations;
+namespace CleanArchitecture.Blazor.Infrastructure.Persistence.Configurations.VotingSystem;
 
 #nullable disable
 public class ConstituencyConfiguration : IEntityTypeConfiguration<Constituency>

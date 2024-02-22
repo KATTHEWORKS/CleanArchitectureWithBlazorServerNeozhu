@@ -1,19 +1,19 @@
-﻿@namespace CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Constituencies
-@page "/pages/Constituencies"
+﻿@namespace CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.VoteSummaries
+@page "/pages/VoteSummaries"
 
 @using BlazorDownloadFile
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Caching
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.DTOs
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Specifications
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Commands.Delete
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Commands.Import
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Export
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Commands.AddEdit
-@using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Constituencies.Components
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Caching
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.DTOs
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Specifications
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Commands.Delete
+@* @using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Commands.Import *@
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Queries.Export
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Queries.Pagination
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Commands.AddEdit
+@using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.VoteSummaries.Components
 @inject IJSRuntime JS
-@inject IStringLocalizer<Constituencies> L
-@attribute [Authorize(Policy = Permissions.Constituencies.View)]
+@inject IStringLocalizer<VoteSummariesPage> L
+@attribute [Authorize(Policy = Permissions.VoteSummaries.View)]
 <PageTitle>@Title</PageTitle>
 <style>
     .mud-table-toolbar {
@@ -38,7 +38,7 @@
                             <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" />
                             <div class="d-flex flex-column">
                                 <MudText Typo="Typo.caption" Class="mb-2">@Title</MudText>
-                                <MudEnumSelect Style="min-width:120px" TEnum="ConstituencyListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
+                                <MudEnumSelect Style="min-width:120px" TEnum="VoteSummaryListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
                                 </MudEnumSelect>
                             </div>
                         </div>
@@ -93,7 +93,7 @@
                                     @ConstantString.Export
                                     </MudLoadingButton>
                                 }
-                                @if (_canImport)
+                              @*   @if (_canImport)
                                 {
                                     <MudFileUpload T="IBrowserFile" FilesChanged="OnImportData" Accept=".xlsx" Style="margin-top:0px" >
                                         <ButtonTemplate>
@@ -116,7 +116,7 @@
                                             </MudButton>
                                         </ButtonTemplate>
                                     </MudFileUpload>
-                                }
+                                } *@
                             </MudHidden>
                              <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
                                 @if (_canCreate)
@@ -182,20 +182,12 @@
                     </CellTemplate>
                 </TemplateColumn>
                 @*TODO: Define the fields that should be displayed in data table*@
-                <PropertyColumn Property="x => x.Name" Title="@L[_currentDto.GetMemberDescription(x=>x.Name)]"> 
-   <CellTemplate>
-      <div class="d-flex flex-column">
-        <MudText Typo="Typo.body2">@context.Item.Name</MudText>
-        <MudText Typo="Typo.body2" Class="mud-text-secondary">@context.Item.Description</MudText>
-     </div>
-    </CellTemplate>
-</PropertyColumn>
-                <PropertyColumn Property="x => x.StateName" Title="@L[_currentDto.GetMemberDescription(x=>x.StateName)]" />
-                <PropertyColumn Property="x => x.ExistingMpName" Title="@L[_currentDto.GetMemberDescription(x=>x.ExistingMpName)]" />
-                <PropertyColumn Property="x => x.AlternateMpNames" Title="@L[_currentDto.GetMemberDescription(x=>x.AlternateMpNames)]" />
-                <PropertyColumn Property="x => x.ReadCount" Title="@L[_currentDto.GetMemberDescription(x=>x.ReadCount)]" />
-                <PropertyColumn Property="x => x.WriteCount" Title="@L[_currentDto.GetMemberDescription(x=>x.WriteCount)]" />
-            @*     <PropertyColumn Property="x => x.Summary" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary)]" /> *@
+                                <PropertyColumn Property="x => x.ConstituencyId" Title="@L[_currentDto.GetMemberDescription(x=>x.ConstituencyId)]" />
+               @*  <PropertyColumn Property="x => x.Constituency" Title="@L[_currentDto.GetMemberDescription(x=>x.Constituency)]" /> *@
+                <PropertyColumn Property="x => x.CommentsCount" Title="@L[_currentDto.GetMemberDescription(x=>x.CommentsCount)]" />
+                <PropertyColumn Property="x => x.VotesCount" Title="@L[_currentDto.GetMemberDescription(x=>x.VotesCount)]" />
+                @* <PropertyColumn Property="x => x.KPIVotes" Title="@L[_currentDto.GetMemberDescription(x=>x.KPIVotes)]" /> *@
+                @* <PropertyColumn Property="x => x.AggregateRatingOfConstituency" Title="@L[_currentDto.GetMemberDescription(x=>x.AggregateRatingOfConstituency)]" /> *@
 
             </Columns>
             <NoRecordsContent>
@@ -214,9 +206,9 @@
 @code {
     public string? Title { get; private set; }
     private int _defaultPageSize = 15;
-    private HashSet<ConstituencyDto> _selectedItems = new HashSet<ConstituencyDto>();
-    private MudDataGrid<ConstituencyDto> _table = default!;
-    private ConstituencyDto _currentDto = new();
+    private HashSet<VoteSummaryDto> _selectedItems = new HashSet<VoteSummaryDto>();
+    private MudDataGrid<VoteSummaryDto> _table = default!;
+    private VoteSummaryDto _currentDto = new();
     private bool _loading;
     private bool _uploading;
     private bool _downloading;
@@ -230,7 +222,7 @@
     [CascadingParameter]
     private UserProfile? UserProfile { get; set; }
 
-    private ConstituenciesWithPaginationQuery Query { get; set; } = new();
+    private VoteSummariesWithPaginationQuery Query { get; set; } = new();
     [Inject]
     private IBlazorDownloadFileService BlazorDownloadFileService { get; set; } = null!;
     private bool _canSearch;
@@ -244,14 +236,14 @@
     {
         Title = L[_currentDto.GetClassDescription()];
         var state = await AuthState;
-        _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Create)).Succeeded;
-        _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Search)).Succeeded;
-        _canEdit   = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Edit)).Succeeded;
-        _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Delete)).Succeeded;
-        _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Import)).Succeeded;
-        _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Export)).Succeeded;
+        _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.VoteSummaries.Create)).Succeeded;
+        _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.VoteSummaries.Search)).Succeeded;
+        _canEdit   = (await AuthService.AuthorizeAsync(state.User, Permissions.VoteSummaries.Edit)).Succeeded;
+        _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.VoteSummaries.Delete)).Succeeded;
+        _canImport = (await AuthService.AuthorizeAsync(state.User, Permissions.VoteSummaries.Import)).Succeeded;
+        _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.VoteSummaries.Export)).Succeeded;
     }
-    private async Task<GridData<ConstituencyDto>> ServerReload(GridState<ConstituencyDto> state)
+    private async Task<GridData<VoteSummaryDto>> ServerReload(GridState<VoteSummaryDto> state)
     {
         try
         {
@@ -262,7 +254,7 @@
             Query.PageNumber = state.Page + 1;
             Query.PageSize = state.PageSize;
             var result = await Mediator.Send(Query).ConfigureAwait(false);
-            return new GridData<ConstituencyDto>() { TotalItems = result.TotalItems, Items = result.Items };
+            return new GridData<VoteSummaryDto>() { TotalItems = result.TotalItems, Items = result.Items };
         }
         finally
         {
@@ -276,14 +268,14 @@
         Query.Keyword = text;
         await _table.ReloadServerData();
     }
-    private async Task OnChangedListView(ConstituencyListView listview)
+    private async Task OnChangedListView(VoteSummaryListView listview)
     {
         Query.ListView = listview;
         await _table.ReloadServerData();
     }
     private async Task OnRefresh()
     {
-        ConstituencyCacheKey.Refresh();
+        VoteSummaryCacheKey.Refresh();
         _selectedItems = new();
         Query.Keyword  = string.Empty;
         await _table.ReloadServerData();
@@ -291,13 +283,13 @@
 
     private async Task OnCreate()
     {
-        var command = new AddEditConstituencyCommand();
-        var parameters = new DialogParameters<ConstituencyFormDialog>
+        var command = new AddEditVoteSummaryCommand();
+        var parameters = new DialogParameters<VoteSummaryFormDialog>
             {
                 { x=>x.model,command },
             };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = DialogService.Show<ConstituencyFormDialog>
+        var dialog = DialogService.Show<VoteSummaryFormDialog>
         (L["Create a new item"], parameters, options);
         var state = await dialog.Result;
         if (!state.Canceled)
@@ -308,39 +300,35 @@
     private async Task OnClone()
     {
         var dto = _selectedItems.First();
-        var command = new AddEditConstituencyCommand(){
-                    StateName = dto.StateName, 
-        Name = dto.Name, 
-        ExistingMpName = dto.ExistingMpName, 
-        AlternateMpNames = dto.AlternateMpNames, 
-        Description = dto.Description, 
-        ReadCount = dto.ReadCount, 
-        WriteCount = dto.WriteCount, 
+        var command = new AddEditVoteSummaryCommand(){
+                    ConstituencyId = dto.ConstituencyId, 
+        CommentsCount = dto.CommentsCount, 
+        VotesCount = dto.VotesCount, 
   
         };
-        var parameters = new DialogParameters<ConstituencyFormDialog>
+        var parameters = new DialogParameters<VoteSummaryFormDialog>
             {
                { x=>x.model,command },
             };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = DialogService.Show<ConstituencyFormDialog>
+        var dialog = DialogService.Show<VoteSummaryFormDialog>
         (L["Create a new item"], parameters, options);
         var state = await dialog.Result;
         if (!state.Canceled)
         {
             await _table.ReloadServerData();
-            _selectedItems=new HashSet<ConstituencyDto>(); 
+            _selectedItems=new HashSet<VoteSummaryDto>(); 
         }
     }
-    private async Task OnEdit(ConstituencyDto dto)
+    private async Task OnEdit(VoteSummaryDto dto)
     {
-        var command = Mapper.Map<AddEditConstituencyCommand>(dto);
-        var parameters = new DialogParameters<ConstituencyFormDialog>
+        var command = Mapper.Map<AddEditVoteSummaryCommand>(dto);
+        var parameters = new DialogParameters<VoteSummaryFormDialog>
             {
                 { x=>x.model,command },
             };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = DialogService.Show<ConstituencyFormDialog>
+        var dialog = DialogService.Show<VoteSummaryFormDialog>
         (L["Edit the item"], parameters, options);
         var state = await dialog.Result;
         if (!state.Canceled)
@@ -349,9 +337,9 @@
         }
     }
 
-    private async Task OnDelete(ConstituencyDto dto)
+    private async Task OnDelete(VoteSummaryDto dto)
     {
-        var command = new DeleteConstituencyCommand(new int[] { dto.Id });
+        var command = new DeleteVoteSummaryCommand(new int[] { dto.Id });
         var parameters = new DialogParameters<DeleteConfirmation> 
            {
              { x=>x.Command,  command },
@@ -369,7 +357,7 @@
 
     private async Task OnDeleteChecked()
     {
-        var command = new DeleteConstituencyCommand(_selectedItems.Select(x => x.Id).ToArray());
+        var command = new DeleteVoteSummaryCommand(_selectedItems.Select(x => x.Id).ToArray());
         var parameters = new DialogParameters<DeleteConfirmation>
             {
                   { x=>x.Command,  command },
@@ -388,7 +376,7 @@
     private async Task OnExport()
     {
         _exporting = true;
-        var request = new ExportConstituenciesQuery()
+        var request = new ExportVoteSummariesQuery()
             {
                 Keyword = Query.Keyword,
                 CurrentUser = UserProfile,
@@ -399,7 +387,7 @@
         var result = await Mediator.Send(request);
         if (result.Succeeded)
         {
-            var downloadresult = await BlazorDownloadFileService.DownloadFile($"{L["Constituencies"]}.xlsx", result.Data, contentType:"application/octet-stream");
+            var downloadresult = await BlazorDownloadFileService.DownloadFile($"{L["VoteSummaries"]}.xlsx", result.Data, contentType:"application/octet-stream");
             Snackbar.Add($"{ConstantString.ExportSuccess}", MudBlazor.Severity.Info);
         }
         else
@@ -408,26 +396,26 @@
         }
         _exporting = false;
     }
-    private async Task OnImportData(IBrowserFile file)
-    {
-        _uploading = true;
-        var stream = new MemoryStream();
-        await file.OpenReadStream().CopyToAsync(stream);
-        var command = new ImportConstituenciesCommand(file.Name, stream.ToArray());
-        var result = await Mediator.Send(command);
-        if (result.Succeeded)
-        {
-            await _table.ReloadServerData();
-            Snackbar.Add($"{ConstantString.ImportSuccess}", MudBlazor.Severity.Info);
-        }
-        else
-        {
-            foreach (var msg in result.Errors)
-            {
-                Snackbar.Add($"{msg}", MudBlazor.Severity.Error);
-            }
-        }
-        _uploading = false;
-    }
+    // private async Task OnImportData(IBrowserFile file)
+    // {
+    //     _uploading = true;
+    //     var stream = new MemoryStream();
+    //     await file.OpenReadStream().CopyToAsync(stream);
+    //     var command = new ImportVoteSummariesCommand(file.Name, stream.ToArray());
+    //     var result = await Mediator.Send(command);
+    //     if (result.Succeeded)
+    //     {
+    //         await _table.ReloadServerData();
+    //         Snackbar.Add($"{ConstantString.ImportSuccess}", MudBlazor.Severity.Info);
+    //     }
+    //     else
+    //     {
+    //         foreach (var msg in result.Errors)
+    //         {
+    //             Snackbar.Add($"{msg}", MudBlazor.Severity.Error);
+    //         }
+    //     }
+    //     _uploading = false;
+    // }
 
 }

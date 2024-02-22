@@ -3,6 +3,7 @@
 
 using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.DTOs;
 using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Caching;
+using CleanArchitecture.Blazor.Domain.Events.VotingSystem;
 namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.Commands.AddEdit;
 
 public class AddEditVoteSummaryCommand: ICacheInvalidatorRequest<Result<int>>

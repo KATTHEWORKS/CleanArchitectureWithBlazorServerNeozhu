@@ -1,5 +1,6 @@
-﻿@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.Pagination
-@inject IStringLocalizer<Votes> L
+﻿@namespace CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Votes.Components
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.Pagination
+@inject IStringLocalizer<VotesPage> L
 
 <MudExpansionPanel @bind-IsExpanded="_advancedSearchExpanded"
                    Style="border-radius: var(--mud-default-borderradius) !important;"

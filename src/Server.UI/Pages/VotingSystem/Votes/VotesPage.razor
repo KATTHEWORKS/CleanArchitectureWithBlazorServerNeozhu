@@ -1,4 +1,5 @@
-﻿@page "/pages/Votes"
+﻿@namespace CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Votes
+@page "/pages/Votes"
 
 @using BlazorDownloadFile
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Caching
@@ -9,9 +10,9 @@
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.Export
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.Pagination
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit
-@using CleanArchitecture.Blazor.Server.UI.Pages.Votes.Components
+@using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Votes.Components
 @inject IJSRuntime JS
-@inject IStringLocalizer<Votes> L
+@inject IStringLocalizer<VotesPage> L
 @attribute [Authorize(Policy = Permissions.Votes.View)]
 <PageTitle>@Title</PageTitle>
 <style>
