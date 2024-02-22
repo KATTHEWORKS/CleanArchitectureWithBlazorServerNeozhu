@@ -51,11 +51,16 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
 
            var result = await _excelService.ImportAsync(request.Data, mappers: new Dictionary<string, Func<DataRow, ConstituencyDto, object?>>
             {
-                { _localizer[_dto.GetMemberDescription(x=>x.StateName)], (row, item) => item.StateName = row[_localizer[_dto.GetMemberDescription(x=>x.StateName)]].ToString() }, 
-{ _localizer[_dto.GetMemberDescription(x=>x.Name)], (row, item) => item.Name = row[_localizer[_dto.GetMemberDescription(x=>x.Name)]].ToString() }, 
-{ _localizer[_dto.GetMemberDescription(x=>x.ExistingMpName)], (row, item) => item.ExistingMpName = row[_localizer[_dto.GetMemberDescription(x=>x.ExistingMpName)]].ToString() }, 
-{ _localizer[_dto.GetMemberDescription(x=>x.AlternateMpNames)], (row, item) => item.AlternateMpNames = row[_localizer[_dto.GetMemberDescription(x=>x.AlternateMpNames)]].ToString() }, 
-{ _localizer[_dto.GetMemberDescription(x=>x.Description)], (row, item) => item.Description = row[_localizer[_dto.GetMemberDescription(x=>x.Description)]].ToString() }, 
+                { _localizer[_dto.GetMemberDescription(x=>x.State)], (row, item) => item.State = row[_localizer[_dto.GetMemberDescription(x=>x.State)]].ToString() }, 
+{ _localizer[_dto.GetMemberDescription(x=>x.Name)], (row, item) => item.Name = row[_localizer[_dto.GetMemberDescription(x=>x.Name)]].ToString() },
+{ _localizer[_dto.GetMemberDescription(x=>x.Description)], (row, item) => item.Description = row[_localizer[_dto.GetMemberDescription(x=>x.Description)]].ToString() },
+{ _localizer[_dto.GetMemberDescription(x=>x.MpNameExisting)], (row, item) => item.MpNameExisting = row[_localizer[_dto.GetMemberDescription(x=>x.MpNameExisting)]].ToString() },
+{ _localizer[_dto.GetMemberDescription(x=>x.ExistingMpParty)], (row, item) => item.ExistingMpParty = row[_localizer[_dto.GetMemberDescription(x=>x.ExistingMpParty)]].ToString() },
+{ _localizer[_dto.GetMemberDescription(x=>x.ExistingMpTerms)], (row, item) => item.ExistingMpTerms = row[_localizer[_dto.GetMemberDescription(x=>x.ExistingMpTerms)]].ToString() },
+
+
+{ _localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)], (row, item) => item.MpNamesEarlierOthers = row[_localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)]].ToString() }, 
+
 //{ _localizer[_dto.GetMemberDescription(x=>x.ReadCount)], (row, item) => item.ReadCount = row[_localizer[_dto.GetMemberDescription(x=>x.ReadCount)]].ToString() }, 
 //{ _localizer[_dto.GetMemberDescription(x=>x.WriteCount)], (row, item) => item.WriteCount = row[_localizer[_dto.GetMemberDescription(x=>x.WriteCount)]].ToString() }, 
 
@@ -86,10 +91,10 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
             // TODO: Implement ImportConstituenciesCommandHandler method 
             var fields = new string[] {
                    // TODO: Define the fields that should be generate in the template, for example:
-                   _localizer[_dto.GetMemberDescription(x=>x.StateName)], 
+                   _localizer[_dto.GetMemberDescription(x=>x.State)], 
 _localizer[_dto.GetMemberDescription(x=>x.Name)], 
-_localizer[_dto.GetMemberDescription(x=>x.ExistingMpName)], 
-_localizer[_dto.GetMemberDescription(x=>x.AlternateMpNames)], 
+_localizer[_dto.GetMemberDescription(x=>x.MpNameExisting)], 
+_localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)], 
 _localizer[_dto.GetMemberDescription(x=>x.Description)], 
 _localizer[_dto.GetMemberDescription(x=>x.ReadCount)], 
 _localizer[_dto.GetMemberDescription(x=>x.WriteCount)], 

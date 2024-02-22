@@ -44,11 +44,16 @@ public class ExportConstituenciesQueryHandler :
                 new Dictionary<string, Func<ConstituencyDto, object?>>()
                 {
                     // TODO: Define the fields that should be exported, for example:
-                    {_localizer[_dto.GetMemberDescription(x=>x.StateName)],item => item.StateName}, 
-{_localizer[_dto.GetMemberDescription(x=>x.Name)],item => item.Name}, 
-{_localizer[_dto.GetMemberDescription(x=>x.ExistingMpName)],item => item.ExistingMpName}, 
-{_localizer[_dto.GetMemberDescription(x=>x.AlternateMpNames)],item => item.AlternateMpNames}, 
-{_localizer[_dto.GetMemberDescription(x=>x.Description)],item => item.Description}, 
+{_localizer[_dto.GetMemberDescription(x=>x.State)],item => item.State}, 
+{_localizer[_dto.GetMemberDescription(x=>x.Name)],item => item.Name},
+{_localizer[_dto.GetMemberDescription(x=>x.Description)],item => item.Description},
+
+{_localizer[_dto.GetMemberDescription(x=>x.MpNameExisting)],item => item.MpNameExisting},
+{_localizer[_dto.GetMemberDescription(x=>x.ExistingMpParty)],item => item.ExistingMpParty},
+{_localizer[_dto.GetMemberDescription(x=>x.ExistingMpTerms)],item => item.ExistingMpTerms},
+
+{_localizer[_dto.GetMemberDescription(x=>x.MpNamesEarlierOthers)],item => item.MpNamesEarlierOthers}, 
+
 {_localizer[_dto.GetMemberDescription(x=>x.ReadCount)],item => item.ReadCount}, 
 {_localizer[_dto.GetMemberDescription(x=>x.WriteCount)],item => item.WriteCount}, 
 

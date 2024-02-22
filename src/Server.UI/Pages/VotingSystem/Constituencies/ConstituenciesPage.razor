@@ -190,9 +190,12 @@
      </div>
     </CellTemplate>
 </PropertyColumn>
-                <PropertyColumn Property="x => x.StateName" Title="@L[_currentDto.GetMemberDescription(x=>x.StateName)]" />
-                <PropertyColumn Property="x => x.ExistingMpName" Title="@L[_currentDto.GetMemberDescription(x=>x.ExistingMpName)]" />
-                <PropertyColumn Property="x => x.AlternateMpNames" Title="@L[_currentDto.GetMemberDescription(x=>x.AlternateMpNames)]" />
+                <PropertyColumn Property="x => x.State" Title="@L[_currentDto.GetMemberDescription(x=>x.State)]" />
+                <PropertyColumn Property="x => x.MpNameExisting" Title="@L[_currentDto.GetMemberDescription(x=>x.MpNameExisting)]" />
+        <PropertyColumn Property="x => x.ExistingMpParty" Title="@L[_currentDto.GetMemberDescription(x=>x.ExistingMpParty)]" />
+        <PropertyColumn Property="x => x.ExistingMpTerms" Title="@L[_currentDto.GetMemberDescription(x=>x.ExistingMpTerms)]" />
+
+                <PropertyColumn Property="x => x.MpNamesEarlierOthers" Title="@L[_currentDto.GetMemberDescription(x=>x.MpNamesEarlierOthers)]" />
                 <PropertyColumn Property="x => x.ReadCount" Title="@L[_currentDto.GetMemberDescription(x=>x.ReadCount)]" />
                 <PropertyColumn Property="x => x.WriteCount" Title="@L[_currentDto.GetMemberDescription(x=>x.WriteCount)]" />
             @*     <PropertyColumn Property="x => x.Summary" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary)]" /> *@
@@ -309,10 +312,10 @@
     {
         var dto = _selectedItems.First();
         var command = new AddEditConstituencyCommand(){
-                    StateName = dto.StateName, 
+                    StateName = dto.State, 
         Name = dto.Name, 
-        ExistingMpName = dto.ExistingMpName, 
-        AlternateMpNames = dto.AlternateMpNames, 
+        ExistingMpName = dto.MpNameExisting, 
+        AlternateMpNames = dto.MpNamesEarlierOthers, 
         Description = dto.Description, 
         ReadCount = dto.ReadCount, 
         WriteCount = dto.WriteCount, 

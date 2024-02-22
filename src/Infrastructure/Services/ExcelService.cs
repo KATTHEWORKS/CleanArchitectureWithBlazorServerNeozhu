@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Data;
@@ -109,6 +109,7 @@ public class ExcelService : IExcelService
             if (!workbook.Worksheets.Contains(sheetName))
                 return await Result<IEnumerable<TEntity>>.FailureAsync(
                     string.Format(_localizer["Sheet with name {0} does not exist!"], sheetName));
+            //if fails once check for the default name "Sheet1" itself
             var ws = workbook.Worksheet(sheetName);
             var dt = new DataTable();
             var titlesInFirstRow = true;

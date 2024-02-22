@@ -31,12 +31,12 @@ public class Constituency(string stateName, string constituency):BaseAuditableEn
     public Constituency(string stateName, string constituency, string existingMpName)
         : this(stateName, constituency)
     {
-        ExistingMpName = existingMpName;
+        MpNameExisting = existingMpName;
     }
     public Constituency(string stateName, string constituency, string existingMpName, string description)
        : this(stateName, constituency, existingMpName)
     {
-        ExistingMpName = existingMpName;
+        MpNameExisting = existingMpName;
         Description = description;
     }
     //[Key]
@@ -45,14 +45,23 @@ public class Constituency(string stateName, string constituency):BaseAuditableEn
 
     //todo better to add stateid
     [Required]
-    public string StateName { get; set; } = stateName;
+    public string State { get; set; } = stateName;
 
     [Required]
     public string Name { get; set; } = constituency;
-    public string? ExistingMpName { get; set; }
-    public string? AlternateMpNames { get; set; }
 
     public string? Description { get; set; }//extra comment
+
+
+    public string? MpNameExisting { get; set; }
+    public string? ExistingMpParty { get; set; }
+    public string? ExistingMpTerms { get; set; }
+
+
+    public string? MpNamesEarlierOthers { get; set; }
+    //name+party+terms
+
+
 
     public int ReadCount { get; set; } = 0;
     public int WriteCount { get; set; } = 0;
