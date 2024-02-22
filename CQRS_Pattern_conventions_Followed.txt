@@ -1,0 +1,5 @@
+﻿Dto Using for Display in Main grid on search page, import,export
+
+AddEditCommand for Adding,updating
+
+Delete,UpdateCommand currently not using anywhere
