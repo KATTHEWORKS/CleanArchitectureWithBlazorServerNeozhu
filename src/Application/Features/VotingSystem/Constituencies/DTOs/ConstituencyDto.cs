@@ -11,7 +11,7 @@ public class ConstituencyDto
 {
     public ConstituencyDto()
     {
-        VoteCountAgainstExistingMp = VoteCount - VoteCountForExistingMp ?? 0;
+       // Summary ??= new();
     }
     [Description("Id")]
     public int Id { get; set; }
@@ -43,26 +43,37 @@ public class ConstituencyDto
     public int ReadsCount { get; set; } = 0;//how many users looking for this,can increase by 1 each time on cache & write once after certain time
 
     //todo had to link summary
-    public virtual VoteSummaryDto? Summary { get; set; }//; = new();
+    public virtual VoteSummaryDto? Summary { get; set; } = new();
 
 
-    //below are from summary data table,as its keep changing.get from summary join result
-    public sbyte? Rating { get; set; } = null;//fetch from summary
-    public int? VoteCountForExistingMp { get; set; } = 0;//fetch from summary
-    public int? VoteCountAgainstExistingMp { get; set; } = 0;//fetch from summary
-                                                             //public bool? ReElectSameExistingMp { get; set; }
+    ////below are from summary data table,as its keep changing.get from summary join result
+    //public sbyte? Rating { get; set; } = null;//fetch from summary
+    //public int? VoteCountForExistingMp { get; set; } = 0;//fetch from summary
+    //public int? VoteCountAgainstExistingMp { get; set; } = 0;//fetch from summary
+    //                                                         //public bool? ReElectSameExistingMp { get; set; }
 
 
 
-    [Description("Vote Count")]//not in constituency db
-    public int VoteCount { get; set; } = 0;//not required,instead its useful in Summary
+    //[Description("Vote Count")]//not in constituency db
+    //public int VoteCount { get; set; } = 0;//not required,instead its useful in Summary
 
-  
+
     private class Mapping : Profile
     {
         public Mapping()
         {
-            CreateMap<VoteConstituency, ConstituencyDto>().ReverseMap();
+            // CreateMap<VoteConstituency, ConstituencyDto>().ReverseMap();
+
+
+            CreateMap<ConstituencyDto, VoteConstituency>()
+    .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary))
+    .ReverseMap();
+
+            CreateMap<VoteConstituency, ConstituencyDto>()
+                .ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary ?? new VoteSummary()));
+                //.ForMember(dest => dest.Summary, opt => opt.MapFrom(src => src.Summary != null ? src.Summary : new VoteSummaryDto()));
+
+
             //need to map these from summary results if exists
             //     public sbyte? Rating { get; set; } = null;//fetch from summary
             //public int? VoteCounts { get; set; } = 0;//fetch from summary

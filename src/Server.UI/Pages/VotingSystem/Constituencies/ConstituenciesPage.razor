@@ -197,7 +197,8 @@
 
         <PropertyColumn Property="x => x.OtherPastMps" Title="@L[_currentDto.GetMemberDescription(x=>x.OtherPastMps)]" />
         <PropertyColumn Property="x => x.ReadsCount" Title="@L[_currentDto.GetMemberDescription(x=>x.ReadsCount)]" />
-        <PropertyColumn Property="x => x.VoteCount" Title="@L[_currentDto.GetMemberDescription(x=>x.VoteCount)]" />
+        <PropertyColumn Property="x => x.Summary.VotesCount" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary.VotesCount)]" />
+        <PropertyColumn Property="x => x.Summary.Rating" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary.Rating)]" />
         @*     <PropertyColumn Property="x => x.Summary" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary)]" /> *@
 
     </Columns>

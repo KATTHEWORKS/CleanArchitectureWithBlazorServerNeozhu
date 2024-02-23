@@ -173,8 +173,8 @@
 
         <PropertyColumn Property="x => x.OtherPastMps" Title="@L[_currentDto.GetMemberDescription(x=>x.OtherPastMps)]" />
         <PropertyColumn Property="x => x.ReadsCount" Title="@L[_currentDto.GetMemberDescription(x=>x.ReadsCount)]" />
-        <PropertyColumn Property="x => x.VoteCount" Title="@L[_currentDto.GetMemberDescription(x=>x.VoteCount)]" />
-        @*     <PropertyColumn Property="x => x.Summary" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary)]" /> *@
+        <PropertyColumn Property="x => x.Summary.VotesCount" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary.VotesCount)]" />
+        <PropertyColumn Property="x => x.Summary.Rating" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary.Rating)]" />
 
     </Columns>
     <NoRecordsContent>
@@ -240,7 +240,8 @@
             Query.PageNumber = state.Page + 1;
             Query.PageSize = state.PageSize;
             var result = await Mediator.Send(Query).ConfigureAwait(false);
-            return new GridData<ConstituencyDto>() { TotalItems = result.TotalItems, Items = result.Items };
+            var res = new GridData<ConstituencyDto>() { TotalItems = result.TotalItems, Items = result.Items };
+            return res;
             }
         finally
             {

@@ -6,6 +6,10 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummari
 [Description("VoteSummaries")]
 public class VoteSummaryDto
 {//to show on search page results
+    public VoteSummaryDto()
+    {
+        VotesCountAgainstExistingMp = VotesCount - VotesCountForExistingMp ?? 0;
+    }
     [Description("Id")]
     public int Id { get; set; }
     [Description("Constituency Id")]

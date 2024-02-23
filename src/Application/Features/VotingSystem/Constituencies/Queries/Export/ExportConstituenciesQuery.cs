@@ -55,7 +55,8 @@ public class ExportConstituenciesQueryHandler :
 {_localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)],item => item.OtherPastMps}, 
 
 {_localizer[_dto.GetMemberDescription(x=>x.ReadsCount)],item => item.ReadsCount}, 
-{_localizer[_dto.GetMemberDescription(x=>x.VoteCount)],item => item.VoteCount}, 
+{_localizer[_dto.GetMemberDescription(x=>x.Summary.VotesCount)],item => item.Summary.VotesCount}, 
+//todo add all the rows for exporting necessity
 
                 }
                 , _localizer[_dto.GetClassDescription()]);

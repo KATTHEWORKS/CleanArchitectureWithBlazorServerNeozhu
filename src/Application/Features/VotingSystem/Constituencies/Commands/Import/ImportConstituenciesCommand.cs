@@ -97,7 +97,6 @@ _localizer[_dto.GetMemberDescription(x=>x.MpNameExisting)],
 _localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)], 
 _localizer[_dto.GetMemberDescription(x=>x.Description)], 
 _localizer[_dto.GetMemberDescription(x=>x.ReadsCount)], 
-_localizer[_dto.GetMemberDescription(x=>x.VoteCount)], 
 
                 };
             var result = await _excelService.CreateTemplateAsync(fields, _localizer[_dto.GetClassDescription()]);
