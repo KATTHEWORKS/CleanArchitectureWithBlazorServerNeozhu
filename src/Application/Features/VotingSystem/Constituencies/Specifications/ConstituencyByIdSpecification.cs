@@ -1,6 +1,6 @@
 ﻿namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Specifications;
 #nullable disable warnings
-public class ConstituencyByIdSpecification : Specification<Constituency>
+public class ConstituencyByIdSpecification : Specification<VoteConstituency>
 {
     public ConstituencyByIdSpecification(int id)
     {

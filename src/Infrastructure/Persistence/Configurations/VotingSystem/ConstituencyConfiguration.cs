@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence.Configurations.VotingSystem;
 
 #nullable disable
-public class ConstituencyConfiguration : IEntityTypeConfiguration<Constituency>
+public class ConstituencyConfiguration : IEntityTypeConfiguration<VoteConstituency>
 {
-    public void Configure(EntityTypeBuilder<Constituency> builder)
+    public void Configure(EntityTypeBuilder<VoteConstituency> builder)
     {
         builder.Property(t => t.Name).HasMaxLength(50).IsRequired();
         builder.Ignore(e => e.DomainEvents);

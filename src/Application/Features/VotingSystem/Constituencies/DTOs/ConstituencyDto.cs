@@ -40,7 +40,7 @@ public class ConstituencyDto
     public string? OtherPastMps { get; set; } = null;
     //name+party+terms
     [Description("Read Count")]
-    public int ReadCount { get; set; } = 0;//how many users looking for this,can increase by 1 each time on cache & write once after certain time
+    public int ReadsCount { get; set; } = 0;//how many users looking for this,can increase by 1 each time on cache & write once after certain time
 
     //todo had to link summary
     public virtual VoteSummaryDto? Summary { get; set; }//; = new();
@@ -54,7 +54,7 @@ public class ConstituencyDto
 
 
 
-    [Description("Write Count")]//not in constituency db
+    [Description("Vote Count")]//not in constituency db
     public int VoteCount { get; set; } = 0;//not required,instead its useful in Summary
 
   
@@ -62,7 +62,7 @@ public class ConstituencyDto
     {
         public Mapping()
         {
-            CreateMap<Constituency, ConstituencyDto>().ReverseMap();
+            CreateMap<VoteConstituency, ConstituencyDto>().ReverseMap();
             //need to map these from summary results if exists
             //     public sbyte? Rating { get; set; } = null;//fetch from summary
             //public int? VoteCounts { get; set; } = 0;//fetch from summary

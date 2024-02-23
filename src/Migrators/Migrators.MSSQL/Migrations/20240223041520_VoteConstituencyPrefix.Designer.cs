@@ -4,6 +4,7 @@ using CleanArchitecture.Blazor.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240223041520_VoteConstituencyPrefix")]
+    partial class VoteConstituencyPrefix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -509,13 +512,13 @@ namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
                     b.Property<short?>("Rating")
                         .HasColumnType("smallint");
 
-                    b.Property<int>("VotesCount")
+                    b.Property<int>("VoteCount")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VotesCountAgainstExistingMp")
+                    b.Property<int?>("VoteCountAgainstExistingMp")
                         .HasColumnType("int");
 
-                    b.Property<int?>("VotesCountForExistingMp")
+                    b.Property<int?>("VoteCountForExistingMp")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -625,7 +628,7 @@ namespace CleanArchitecture.Blazor.Migrators.MSSQL.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int>("ReadsCount")
+                    b.Property<int>("ReadCount")
                         .HasColumnType("int");
 
                     b.Property<string>("State")

@@ -40,8 +40,8 @@ public class ConstituenciesWithPaginationQueryHandler :
 
         public async Task<PaginatedData<ConstituencyDto>> Handle(ConstituenciesWithPaginationQuery request, CancellationToken cancellationToken)
         {
-           var data = await _context.Constituencies.OrderBy($"{request.OrderBy} {request.SortDirection}")
-                                    .ProjectToPaginatedDataAsync<Constituency, ConstituencyDto>(request.Specification, request.PageNumber, request.PageSize, _mapper.ConfigurationProvider, cancellationToken);
+           var data = await _context.VoteConstituencies.OrderBy($"{request.OrderBy} {request.SortDirection}")
+                                    .ProjectToPaginatedDataAsync<VoteConstituency, ConstituencyDto>(request.Specification, request.PageNumber, request.PageSize, _mapper.ConfigurationProvider, cancellationToken);
             return data;
         }
 }

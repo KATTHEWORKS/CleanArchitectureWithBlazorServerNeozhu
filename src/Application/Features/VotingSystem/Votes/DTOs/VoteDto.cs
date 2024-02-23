@@ -7,7 +7,7 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.DTOs;
 
 [Description("Votes")]
 public class VoteDto
-{
+{//for showing in list of search page on grid
     [Description("Id")]
     public int Id { get; set; }
 
@@ -32,6 +32,11 @@ public class VoteDto
     //[Description("Constituency Id Delta")]
     //public int? ConstituencyIdDelta {get;set;} //only for backend purpose
 
+    //need to think is below are required in this model or not
+    public List<KPIComment>? KPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
+    //public bool IsCommentExists() => VoteKPIRatingComments.Any(x => !string.IsNullOrEmpty(x.Comment) && x.Comment.Length > 3);
+    //since comments of others also visible to all in summary page but not votes usually
+    public List<KPIRatingComment>? KPIRatingComments { get; set; }//mostly for self
 
     private class Mapping : Profile
     {

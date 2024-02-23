@@ -5,11 +5,11 @@ namespace CleanArchitecture.Blazor.Domain.Events.VotingSystem;
 
 public class ConstituencyDeletedEvent : DomainEvent
 {
-    public ConstituencyDeletedEvent(Constituency item)
+    public ConstituencyDeletedEvent(VoteConstituency item)
     {
         Item = item;
     }
 
-    public Constituency Item { get; }
+    public VoteConstituency Item { get; }
 }
 

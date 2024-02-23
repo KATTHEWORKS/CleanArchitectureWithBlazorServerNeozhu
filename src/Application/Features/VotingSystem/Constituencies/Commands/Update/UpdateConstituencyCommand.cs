@@ -32,7 +32,7 @@ public class UpdateConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
         public Mapping()
         {
             CreateMap<ConstituencyDto,UpdateConstituencyCommand>(MemberList.None);
-            CreateMap<UpdateConstituencyCommand,Constituency>(MemberList.None);
+            CreateMap<UpdateConstituencyCommand,VoteConstituency>(MemberList.None);
         }
     }
 }
@@ -55,7 +55,7 @@ public class UpdateConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
         public async Task<Result<int>> Handle(UpdateConstituencyCommand request, CancellationToken cancellationToken)
         {
 
-           var item =await _context.Constituencies.FindAsync( new object[] { request.Id }, cancellationToken)?? throw new NotFoundException($"Constituency with id: [{request.Id}] not found.");
+           var item =await _context.VoteConstituencies.FindAsync( new object[] { request.Id }, cancellationToken)?? throw new NotFoundException($"Constituency with id: [{request.Id}] not found.");
            item = _mapper.Map(request, item);
 		    // raise a update domain event
 		   item.AddDomainEvent(new ConstituencyUpdatedEvent(item));

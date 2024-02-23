@@ -10,18 +10,19 @@
     <DialogContent>
         <MudForm Model="@model" @ref="@_form" Validation="@(Validator.ValidateValue(model))">
             <MudGrid>
+               
                 @*TODO: define mudform that should be edit fields, for example:*@
-                <MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.State)]" @bind-Value="model.State" For="@(() => model.State)" Required="false" RequiredError="@L["state name is required!"]"></MudTextField>
-                </MudItem> 
-<MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.Name)]" @bind-Value="model.Name" For="@(() => model.Name)" Required="true" RequiredError="@L["name is required!"]"></MudTextField>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.State)]" @bind-Value="model.State" For="@(() => model.State)" Required="false" RequiredError="@L["state name is required!"]"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.Name)]" @bind-Value="model.Name" For="@(() => model.Name)" Required="true" RequiredError="@L["name is required!"]"></MudTextField>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.Description)]" Lines="3" For="@(() => model.Description)" @bind-Value="model.Description"></MudTextField>
                 </MudItem>
-                <MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.MpNameExisting)]" @bind-Value="model.MpNameExisting" For="@(() => model.MpNameExisting)" Required="false" RequiredError="@L["existing mp name is required!"]"></MudTextField>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.MpNameExisting)]" @bind-Value="model.MpNameExisting" For="@(() => model.MpNameExisting)" Required="false" RequiredError="@L["existing mp name is required!"]"></MudTextField>
                 </MudItem>
 
                 <MudItem xs="12" md="6">
@@ -30,10 +31,12 @@
                 <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.ExistingMpTerms)]" @bind-Value="model.ExistingMpTerms" For="@(() => model.ExistingMpTerms)" Min="0" Required="false" RequiredError="@L["write count is required!"]"></MudTextField>
                 </MudItem>
-                <MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.OtherPastMps)]" @bind-Value="model.OtherPastMps" For="@(() => model.OtherPastMps)" Required="false" RequiredError="@L["alternate mp names is required!"]"></MudTextField>
-                </MudItem> 
-
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.OtherPastMps)]" @bind-Value="model.OtherPastMps" For="@(() => model.OtherPastMps)" Required="false" RequiredError="@L["alternate mp names is required!"]"></MudTextField>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudInputLabel>@model.Id </MudInputLabel>
+                </MudItem>
 
             </MudGrid>
         </MudForm>
@@ -41,7 +44,7 @@
     <DialogActions>
         <MudButton OnClick="Cancel">@ConstantString.Cancel</MudButton>
         <MudLoadingButton Loading="@_savingnew" OnClick="SaveAndNew">@ConstantString.SaveAndNew</MudLoadingButton>
-        <MudLoadingButton Loading="@_saving"  OnClick="Submit">@ConstantString.Save</MudLoadingButton>
+        <MudLoadingButton Loading="@_saving" OnClick="Submit">@ConstantString.Save</MudLoadingButton>
     </DialogActions>
 </MudDialog>
 
@@ -51,57 +54,57 @@
     private bool _savingnew = false;
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; } = default!;
-    AddEditConstituencyCommandValidator _modelValidator = new ();
-    [EditorRequired] [Parameter] public AddEditConstituencyCommand model { get; set; } = null!;
+    AddEditConstituencyCommandValidator _modelValidator = new();
+    [EditorRequired][Parameter] public AddEditConstituencyCommand model { get; set; } = null!;
     [Inject] private IMediator _mediator { get; set; } = default!;
     async Task Submit()
-    {
-        try
         {
+        try
+            {
             _saving = true;
             await _form!.Validate().ConfigureAwait(false);
             if (!_form!.IsValid)
                 return;
             var result = await _mediator.Send(model);
             if (result.Succeeded)
-            {
+                {
                 MudDialog.Close(DialogResult.Ok(true));
                 Snackbar.Add(ConstantString.SaveSuccess, MudBlazor.Severity.Info);
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(result.ErrorMessage, MudBlazor.Severity.Error);
+                }
+            }
+        finally
+            {
+            _saving = false;
             }
         }
-        finally
-        {
-            _saving = false;
-        }
-    }
     async Task SaveAndNew()
-    {
-        try
         {
+        try
+            {
             _savingnew = true;
             await _form!.Validate().ConfigureAwait(false);
             if (!_form!.IsValid)
-               return;
+                return;
             var result = await _mediator.Send(model);
             if (result.Succeeded)
-            {
+                {
                 Snackbar.Add(ConstantString.SaveSuccess, MudBlazor.Severity.Info);
                 await Task.Delay(300);
                 model = new AddEditConstituencyCommand() { };
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(result.ErrorMessage, MudBlazor.Severity.Error);
+                }
+            }
+        finally
+            {
+            _savingnew = false;
             }
         }
-        finally
-        {
-            _savingnew = false;
-        }
-    }
     void Cancel() => MudDialog.Cancel();
 }

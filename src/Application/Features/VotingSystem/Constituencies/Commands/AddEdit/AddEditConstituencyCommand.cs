@@ -49,7 +49,7 @@ public class AddEditConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
         public Mapping()
         {
             CreateMap<ConstituencyDto,AddEditConstituencyCommand>(MemberList.None);
-            CreateMap<AddEditConstituencyCommand,Constituency>(MemberList.None);
+            CreateMap<AddEditConstituencyCommand,VoteConstituency>(MemberList.None);
          
         }
     }
@@ -74,7 +74,7 @@ public class AddEditConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
         {
             if (request.Id > 0)
             {
-                var item = await _context.Constituencies.FindAsync(new object[] { request.Id }, cancellationToken) ?? throw new NotFoundException($"Constituency with id: [{request.Id}] not found.");
+                var item = await _context.VoteConstituencies.FindAsync(new object[] { request.Id }, cancellationToken) ?? throw new NotFoundException($"Constituency with id: [{request.Id}] not found.");
                 item = _mapper.Map(request, item);
 				// raise a update domain event
 				item.AddDomainEvent(new ConstituencyUpdatedEvent(item));
@@ -83,10 +83,10 @@ public class AddEditConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
             }
             else
             {
-                var item = _mapper.Map<Constituency>(request);
+                var item = _mapper.Map<VoteConstituency>(request);
                 // raise a create domain event
 				item.AddDomainEvent(new ConstituencyCreatedEvent(item));
-                _context.Constituencies.Add(item);
+                _context.VoteConstituencies.Add(item);
                 await _context.SaveChangesAsync(cancellationToken);
                 return await Result<int>.SuccessAsync(item.Id);
             }

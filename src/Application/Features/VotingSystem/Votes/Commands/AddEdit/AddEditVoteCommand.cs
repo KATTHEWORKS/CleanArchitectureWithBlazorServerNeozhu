@@ -30,6 +30,11 @@ public class AddEditVoteCommand : ICacheInvalidatorRequest<Result<int>>
 
     public DateTime? LastModified { get; set; }//for display only
 
+    public List<KPIComment>? KPIComments { get; set; }//for the sake of summary page,this will appear without any person name,so stays anonymous
+    //public bool IsCommentExists() => VoteKPIRatingComments.Any(x => !string.IsNullOrEmpty(x.Comment) && x.Comment.Length > 3);
+    //since comments of others also visible to all in summary page but not votes usually
+    public List<KPIRatingComment>? KPIRatingComments { get; set; }//mostly for self
+
     public string CacheKey => VoteCacheKey.GetAllCacheKey;
     public CancellationTokenSource? SharedExpiryTokenSource => VoteCacheKey.SharedExpiryTokenSource();
 

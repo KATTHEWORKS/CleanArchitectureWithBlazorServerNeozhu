@@ -6,11 +6,11 @@ namespace CleanArchitecture.Blazor.Domain.Events.VotingSystem;
 
 public class ConstituencyUpdatedEvent : DomainEvent
 {
-    public ConstituencyUpdatedEvent(Constituency item)
+    public ConstituencyUpdatedEvent(VoteConstituency item)
     {
         Item = item;
     }
 
-    public Constituency Item { get; }
+    public VoteConstituency Item { get; }
 }
 

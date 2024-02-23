@@ -35,7 +35,7 @@ public class ExportConstituenciesQueryHandler :
         #nullable disable warnings
         public async Task<Result<byte[]>> Handle(ExportConstituenciesQuery request, CancellationToken cancellationToken)
         {
-            var data = await _context.Constituencies.ApplySpecification(request.Specification)
+            var data = await _context.VoteConstituencies.ApplySpecification(request.Specification)
                        .OrderBy($"{request.OrderBy} {request.SortDirection}")
                        .ProjectTo<ConstituencyDto>(_mapper.ConfigurationProvider)
                        .AsNoTracking()
@@ -54,7 +54,7 @@ public class ExportConstituenciesQueryHandler :
 
 {_localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)],item => item.OtherPastMps}, 
 
-{_localizer[_dto.GetMemberDescription(x=>x.ReadCount)],item => item.ReadCount}, 
+{_localizer[_dto.GetMemberDescription(x=>x.ReadsCount)],item => item.ReadsCount}, 
 {_localizer[_dto.GetMemberDescription(x=>x.VoteCount)],item => item.VoteCount}, 
 
                 }

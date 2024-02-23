@@ -32,7 +32,7 @@ public class GetAllConstituenciesQueryHandler :
 
     public async Task<IEnumerable<ConstituencyDto>> Handle(GetAllConstituenciesQuery request, CancellationToken cancellationToken)
     {
-        var data = await _context.Constituencies
+        var data = await _context.VoteConstituencies
                      .ProjectTo<ConstituencyDto>(_mapper.ConfigurationProvider)
                      .AsNoTracking()
                      .ToListAsync(cancellationToken);

@@ -38,7 +38,7 @@ public class Vote(int constituencyId, string userId) : BaseAuditableEntity //1 u
     public int ConstituencyId { get; set; } = constituencyId;
 
     [ForeignKey(nameof(ConstituencyId))]
-    public Constituency? Constituency { get; set; }
+    public VoteConstituency? Constituency { get; set; }
 
     [Required] //overall rating
     public sbyte Rating { get; set; }    //this has to be autogerated only then it makes great value for all,but curently not done anything for that

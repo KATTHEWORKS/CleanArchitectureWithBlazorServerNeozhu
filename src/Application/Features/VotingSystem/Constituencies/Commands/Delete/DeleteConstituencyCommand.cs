@@ -36,12 +36,12 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
         }
         public async Task<Result<int>> Handle(DeleteConstituencyCommand request, CancellationToken cancellationToken)
         {
-            var items = await _context.Constituencies.Where(x=>request.Id.Contains(x.Id)).ToListAsync(cancellationToken);
+            var items = await _context.VoteConstituencies.Where(x=>request.Id.Contains(x.Id)).ToListAsync(cancellationToken);
             foreach (var item in items)
             {
 			    // raise a delete domain event
 				item.AddDomainEvent(new ConstituencyDeletedEvent(item));
-                _context.Constituencies.Remove(item);
+                _context.VoteConstituencies.Remove(item);
             }
             var result = await _context.SaveChangesAsync(cancellationToken);
             return await Result<int>.SuccessAsync(result);

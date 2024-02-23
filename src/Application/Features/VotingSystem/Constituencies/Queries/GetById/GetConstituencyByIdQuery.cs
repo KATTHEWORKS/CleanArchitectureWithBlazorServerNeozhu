@@ -34,7 +34,7 @@ public class GetConstituencyByIdQueryHandler :
 
     public async Task<ConstituencyDto> Handle(GetConstituencyByIdQuery request, CancellationToken cancellationToken)
     {
-        var data = await _context.Constituencies.ApplySpecification(new ConstituencyByIdSpecification(request.Id))
+        var data = await _context.VoteConstituencies.ApplySpecification(new ConstituencyByIdSpecification(request.Id))
                      .ProjectTo<ConstituencyDto>(_mapper.ConfigurationProvider)
                      .FirstAsync(cancellationToken) ?? throw new NotFoundException($"Constituency with id: [{request.Id}] not found.");
         return data;

@@ -33,7 +33,7 @@ public class CreateConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
         public Mapping()
         {
              CreateMap<ConstituencyDto,CreateConstituencyCommand>(MemberList.None);
-             CreateMap<CreateConstituencyCommand,Constituency>(MemberList.None);
+             CreateMap<CreateConstituencyCommand,VoteConstituency>(MemberList.None);
         }
     }
 }
@@ -55,10 +55,10 @@ public class CreateConstituencyCommand: ICacheInvalidatorRequest<Result<int>>
         }
         public async Task<Result<int>> Handle(CreateConstituencyCommand request, CancellationToken cancellationToken)
         {
-           var item = _mapper.Map<Constituency>(request);
+           var item = _mapper.Map<VoteConstituency>(request);
            // raise a create domain event
 	       item.AddDomainEvent(new ConstituencyCreatedEvent(item));
-           _context.Constituencies.Add(item);
+           _context.VoteConstituencies.Add(item);
            await _context.SaveChangesAsync(cancellationToken);
            return  await Result<int>.SuccessAsync(item.Id);
         }

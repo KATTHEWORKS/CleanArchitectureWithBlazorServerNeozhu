@@ -69,13 +69,13 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
             {
                 foreach (var dto in result.Data)
                 {
-                    var exists = await _context.Constituencies.AnyAsync(x => x.Name == dto.Name, cancellationToken);
+                    var exists = await _context.VoteConstituencies.AnyAsync(x => x.Name == dto.Name, cancellationToken);
                     if (!exists)
                     {
-                        var item = _mapper.Map<Constituency>(dto);
+                        var item = _mapper.Map<VoteConstituency>(dto);
                         // add create domain events if this entity implement the IHasDomainEvent interface
 				        // item.AddDomainEvent(new ConstituencyCreatedEvent(item));
-                        await _context.Constituencies.AddAsync(item, cancellationToken);
+                        await _context.VoteConstituencies.AddAsync(item, cancellationToken);
                     }
                  }
                  await _context.SaveChangesAsync(cancellationToken);
@@ -96,7 +96,7 @@ _localizer[_dto.GetMemberDescription(x=>x.Name)],
 _localizer[_dto.GetMemberDescription(x=>x.MpNameExisting)], 
 _localizer[_dto.GetMemberDescription(x=>x.OtherPastMps)], 
 _localizer[_dto.GetMemberDescription(x=>x.Description)], 
-_localizer[_dto.GetMemberDescription(x=>x.ReadCount)], 
+_localizer[_dto.GetMemberDescription(x=>x.ReadsCount)], 
 _localizer[_dto.GetMemberDescription(x=>x.VoteCount)], 
 
                 };

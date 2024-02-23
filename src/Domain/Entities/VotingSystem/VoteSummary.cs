@@ -17,7 +17,7 @@ namespace CleanArchitecture.Blazor.Domain.Entities;
 
 //dbtable3
 public class VoteSummary : BaseAuditableEntity //each location one row as summary
-{
+{//db structure
     public VoteSummary()
     {
         Created = DateTime.Now;
@@ -31,7 +31,7 @@ public class VoteSummary : BaseAuditableEntity //each location one row as summar
     public int ConstituencyId { get; set; }
 
     [ForeignKey(nameof(ConstituencyId))]
-    public Constituency Constituency { get; set; }
+    public VoteConstituency Constituency { get; set; }
 
 
 
@@ -40,14 +40,14 @@ public class VoteSummary : BaseAuditableEntity //each location one row as summar
     public int CommentsCount { get; set; } = 0;
 
     [Required]
-    public int VoteCount { get; set; } = 0;
+    public int VotesCount { get; set; } = 0;
     // public int VoteCount { get { return KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)); } }
     //this is for total aggregate of all KPI values
     //AggregateRatingOfConstituency
     public sbyte? Rating { get; set; } = null;//this can be null when added user removed vote
     ////public float AggregateVote { get { return CalculateAggregateVote(); } }
-    public int? VoteCountForExistingMp { get; set; } = 0;//from vote table  count(WishToReElectMp==true)
-    public int? VoteCountAgainstExistingMp { get; set; } = 0;//from vote table  count(WishToReElectMp==false)
+    public int? VotesCountForExistingMp { get; set; } = 0;//from vote table  count(WishToReElectMp==true)
+    public int? VotesCountAgainstExistingMp { get; set; } = 0;//from vote table  count(WishToReElectMp==false)
 
 
 
@@ -76,7 +76,7 @@ public class VoteSummary : BaseAuditableEntity //each location one row as summar
     private void CalculateAggregateRatingOfConstituency()
     {
         if (KPIVotes == null || KPIVotes.Count == 0) return; // or any default value //todo need to think what could be, but mostly this wont come any time
-        VoteCount = KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count));
+        VotesCount = KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count));
         var sumOfAggregateKPIs = KPIVotes.Sum(x => x.AggregateRatingOfKPI);
         var totalKpis = KPIVotes.Count;
         Rating = totalKpis != 0 ? (sbyte)Math.Min(3, Math.Max(-2, sumOfAggregateKPIs / totalKpis)) : (sbyte)0;

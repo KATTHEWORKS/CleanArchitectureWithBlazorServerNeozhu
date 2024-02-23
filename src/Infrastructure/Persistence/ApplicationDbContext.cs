@@ -46,7 +46,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<Product> Products { get; set; }
 
 #if VOTING_SYSTEM
-    public DbSet<Constituency> Constituencies { get; set; }
+    public DbSet<VoteConstituency> VoteConstituencies { get; set; }
     public DbSet<Vote> Votes { get; set; }
     public DbSet<VoteSummary> VoteSummaries { get; set; }
 
@@ -162,7 +162,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         .OnDelete(DeleteBehavior.Restrict); // or DeleteBehavior.NoAction, depending on your requirements
 
 #if VOTING_SYSTEM
-        builder.Entity<Constituency>().Property(b => b.Id).ValueGeneratedOnAdd();
+        builder.Entity<VoteConstituency>().Property(b => b.Id).ValueGeneratedOnAdd();
         builder.Entity<Vote>().Property(b => b.Id).ValueGeneratedOnAdd();
         builder.Entity<Vote>().Property(b => b.Created).HasDefaultValueSql("getdate()");
         builder.Entity<Vote>()

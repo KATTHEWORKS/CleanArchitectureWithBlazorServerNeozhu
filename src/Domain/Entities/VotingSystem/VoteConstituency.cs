@@ -22,19 +22,19 @@ namespace CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 //    public bool Expanded { get; set; }//for Ui purposes
 //}
 //dbtable1
-public class Constituency(string stateName, string constituency) : BaseAuditableEntity //target Topic/Focus details // for small voting case this can be enum but for V_Constituency
+public class VoteConstituency(string stateName, string constituencyName) : BaseAuditableEntity //target Topic/Focus details // for small voting case this can be enum but for V_Constituency
 {
-    public Constituency() : this(default, default)
+    public VoteConstituency() : this(default, default)
     {
 
     }
-    public Constituency(string stateName, string constituency, string existingMpName)
-        : this(stateName, constituency)
+    public VoteConstituency(string stateName, string constituencyName, string existingMpName)
+        : this(stateName, constituencyName)
     {
         MpNameExisting = existingMpName;
     }
-    public Constituency(string stateName, string constituency, string existingMpName, string description)
-       : this(stateName, constituency, existingMpName)
+    public VoteConstituency(string stateName, string constituencyName, string existingMpName, string description)
+       : this(stateName, constituencyName, existingMpName)
     {
         MpNameExisting = existingMpName;
         Description = description;
@@ -48,7 +48,7 @@ public class Constituency(string stateName, string constituency) : BaseAuditable
     public string State { get; set; } = stateName;
 
     [Required]
-    public string Name { get; set; } = constituency;
+    public string Name { get; set; } = constituencyName;
 
     public string? Description { get; set; }//extra comment
 
@@ -58,12 +58,13 @@ public class Constituency(string stateName, string constituency) : BaseAuditable
     public string? ExistingMpTerms { get; set; }
 
 
+    //later make this as json of //name+party+terms
     public string? MpNamesEarlierOthers { get; set; }
     //name+party+terms
 
 
 
-    public int ReadCount { get; set; } = 0;//users read count of constituency,add frm cache
+    public int ReadsCount { get; set; } = 0;//users read count of constituency,add frm cache
    
     public virtual VoteSummary? Summary { get; set; }//; = new();
 
