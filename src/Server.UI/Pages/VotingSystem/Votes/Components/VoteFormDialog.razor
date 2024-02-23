@@ -10,37 +10,44 @@
         <MudForm Model="@model" @ref="@_form" Validation="@(Validator.ValidateValue(model))">
             <MudGrid>
                 @*TODO: define mudform that should be edit fields, for example:*@
-          @*       <MudItem xs="12" md="6"> 
-                        <MudTextField Label="@L[model.GetMemberDescription(x=>x.UserId)]" @bind-Value="model.UserId" For="@(() => model.UserId)" Required="false" RequiredError="@L["user id is required!"]"></MudTextField>
+                @*       <MudItem xs="12" md="6">
+                <MudTextField Label="@L[model.GetMemberDescription(x=>x.UserId)]" @bind-Value="model.UserId" For="@(() => model.UserId)" Required="false" RequiredError="@L["user id is required!"]"></MudTextField>
                 </MudItem>  *@
-<MudItem xs="12" md="6"> 
-                        <MudNumericField  Label="@L[model.GetMemberDescription(x=>x.ConstituencyId)]" @bind-Value="model.ConstituencyId" For="@(() => model.ConstituencyId)" Min="0" Required="false" RequiredError="@L["constituency id is required!"]"></MudNumericField >
-                            @* display name of selected constituency,also allow to edit  *@
-                </MudItem> 
-<MudItem xs="12" md="6">
+                <MudItem xs="12" md="6">
+                    <MudNumericField Label="@L[model.GetMemberDescription(x=>x.ConstituencyId)]" @bind-Value="model.ConstituencyId" For="@(() => model.ConstituencyId)" Min="0" Required="false" RequiredError="@L["constituency id is required!"]"></MudNumericField>
+                    @* display name of selected constituency,also allow to edit  *@
+                </MudItem>
+                <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField>
-                </MudItem> 
+                </MudItem>
                 @* this requires little more space like expandable text area *@
 
 
 
                 <MudItem xs="12" md="6">
-                   @*  <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField> *@
+                    @*  <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField> *@
                     <MudInputLabel>@L[model.GetMemberDescription(x => x.WishToReElectMp)]</MudInputLabel>
                     <MudRadioGroup T="bool?" Label="@L[model.GetMemberDescription(x=>x.WishToReElectMp)]" @bind-SelectedOption="model.WishToReElectMp">
-                        <MudRadio T="bool?"  Option ="@true" Color="Color.Success">Yes</MudRadio>
+                        <MudRadio T="bool?" Option="@true" Color="Color.Success">Yes</MudRadio>
                         <MudRadio T="bool?" Option="@false" Color="Color.Error">No</MudRadio>
                         <MudRadio T="bool?" Option="@null">Not Sure</MudRadio>
                     </MudRadioGroup>
                 </MudItem>
-
+                @foreach (var kpiRatingComment in model.KPIRatingComments)
+                    {
+                    <div class="mt-4">
+                        <MudTextField Label="KPI" @bind-Value="kpiRatingComment.KPI_Id" />
+                        <MudNumericField Label="Rating" @bind-Value="kpiRatingComment.Rating" />
+                        <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" />
+                    </div>
+                    }
             </MudGrid>
         </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">@ConstantString.Cancel</MudButton>
         <MudLoadingButton Loading="@_savingnew" OnClick="SaveAndNew">@ConstantString.SaveAndNew</MudLoadingButton>
-        <MudLoadingButton Loading="@_saving"  OnClick="Submit">@ConstantString.Save</MudLoadingButton>
+        <MudLoadingButton Loading="@_saving" OnClick="Submit">@ConstantString.Save</MudLoadingButton>
     </DialogActions>
 </MudDialog>
 
@@ -50,57 +57,61 @@
     private bool _savingnew = false;
     [CascadingParameter]
     MudDialogInstance MudDialog { get; set; } = default!;
-    AddEditVoteCommandValidator _modelValidator = new ();
-    [EditorRequired] [Parameter] public AddEditVoteCommand model { get; set; } = null!;
+    AddEditVoteCommandValidator _modelValidator = new();
+    [EditorRequired][Parameter] public AddEditVoteCommand model { get; set; } = null!;
     [Inject] private IMediator _mediator { get; set; } = default!;
-    async Task Submit()
-    {
-        try
+    protected override async Task OnInitializedAsync()
         {
+        model.KPIRatingComments = KPI.GetAllDefaultAsVoteKPIRatingCommentList();
+        }
+    async Task Submit()
+        {
+        try
+            {
             _saving = true;
             await _form!.Validate().ConfigureAwait(false);
             if (!_form!.IsValid)
                 return;
             var result = await _mediator.Send(model);
             if (result.Succeeded)
-            {
+                {
                 MudDialog.Close(DialogResult.Ok(true));
                 Snackbar.Add(ConstantString.SaveSuccess, MudBlazor.Severity.Info);
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(result.ErrorMessage, MudBlazor.Severity.Error);
+                }
+            }
+        finally
+            {
+            _saving = false;
             }
         }
-        finally
-        {
-            _saving = false;
-        }
-    }
     async Task SaveAndNew()
-    {
-        try
         {
+        try
+            {
             _savingnew = true;
             await _form!.Validate().ConfigureAwait(false);
             if (!_form!.IsValid)
-               return;
+                return;
             var result = await _mediator.Send(model);
             if (result.Succeeded)
-            {
+                {
                 Snackbar.Add(ConstantString.SaveSuccess, MudBlazor.Severity.Info);
                 await Task.Delay(300);
                 model = new AddEditVoteCommand() { };
-            }
+                }
             else
-            {
+                {
                 Snackbar.Add(result.ErrorMessage, MudBlazor.Severity.Error);
+                }
+            }
+        finally
+            {
+            _savingnew = false;
             }
         }
-        finally
-        {
-            _savingnew = false;
-        }
-    }
     void Cancel() => MudDialog.Cancel();
 }
