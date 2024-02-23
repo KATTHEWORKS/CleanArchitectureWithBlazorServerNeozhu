@@ -241,6 +241,8 @@
             Query.PageSize = state.PageSize;
             var result = await Mediator.Send(Query).ConfigureAwait(false);
             var res = new GridData<ConstituencyDto>() { TotalItems = result.TotalItems, Items = result.Items };
+
+            //if result has data ,then first row had to be shown with details of KPIs result
             return res;
             }
         finally

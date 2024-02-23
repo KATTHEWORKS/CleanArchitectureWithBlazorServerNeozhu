@@ -17,6 +17,7 @@ public class AddEditVoteCommand : ICacheInvalidatorRequest<Result<int>>
     [Description("Constituency Id")]
     public int ConstituencyId { get; set; } //not in UI,set from selected constituency
 
+    public string? ConstituencyName { get; set; } = null;
 
     [Description("Open Issues/Problems Needs to be addressed")]
     public string? OpenIssues { get; set; }

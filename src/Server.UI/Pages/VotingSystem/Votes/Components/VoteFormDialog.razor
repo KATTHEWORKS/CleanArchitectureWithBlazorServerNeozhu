@@ -15,10 +15,24 @@
                 </MudItem>  *@
 <MudItem xs="12" md="6"> 
                         <MudNumericField  Label="@L[model.GetMemberDescription(x=>x.ConstituencyId)]" @bind-Value="model.ConstituencyId" For="@(() => model.ConstituencyId)" Min="0" Required="false" RequiredError="@L["constituency id is required!"]"></MudNumericField >
+                            @* display name of selected constituency,also allow to edit  *@
                 </MudItem> 
 <MudItem xs="12" md="6">
                     <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField>
                 </MudItem> 
+                @* this requires little more space like expandable text area *@
+
+
+
+                <MudItem xs="12" md="6">
+                   @*  <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField> *@
+                    <MudInputLabel>@L[model.GetMemberDescription(x => x.WishToReElectMp)]</MudInputLabel>
+                    <MudRadioGroup T="bool?" Label="@L[model.GetMemberDescription(x=>x.WishToReElectMp)]" @bind-SelectedOption="model.WishToReElectMp">
+                        <MudRadio T="bool?"  Option ="@true" Color="Color.Success">Yes</MudRadio>
+                        <MudRadio T="bool?" Option="@false" Color="Color.Error">No</MudRadio>
+                        <MudRadio T="bool?" Option="@null">Not Sure</MudRadio>
+                    </MudRadioGroup>
+                </MudItem>
 
             </MudGrid>
         </MudForm>
