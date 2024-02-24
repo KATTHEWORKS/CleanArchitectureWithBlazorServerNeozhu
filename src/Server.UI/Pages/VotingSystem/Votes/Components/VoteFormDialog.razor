@@ -1,5 +1,6 @@
 ﻿@namespace CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Votes.Components
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit
+@using CleanArchitecture.Blazor.Domain.Common.Enums
 
 @inherits MudComponentBase
 @inject IValidationService Validator
@@ -33,47 +34,49 @@
 
                 @foreach (var kpiRatingComment in model.KPIRatingComments)
                     {
-                          
-                        @* <MudTextField Label="KPI" @bind-Value="kpiRatingComment.KPI_Id" />
-                        <MudNumericField Label="Rating" @bind-Value="kpiRatingComment.Rating" />
-                        <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" /> *@
-                    <MudItem xs="12">
-                        <input type="hidden" @bind="kpiRatingComment.KPI_Id" />
-                        <MudInputLabel> @kpiRatingComment.KPI_Id </MudInputLabel>
-                        
-                        <!-- Rating field with radio buttons -->
-        <div class="d-flex align-items-center">
-            @for (sbyte i = -2; i <= 3; i++) //change this to reference from enums
-            {
-                <div class="rating-item">
-                    <MudRadio T="sbyte?" Label="@i" GroupName="@($"rating-{kpiRatingComment.KPI_Id}")" @bind-Value="kpiRatingComment.Rating"/>
-                    @if (kpiRatingComment.Rating == i)
-                    {
-                        <span class="selected-rating">@i</span>
-                    }
-                </div>
-            }
-        </div>
 
-                        <!-- Button to toggle the comment section -->
-                      @*   <div class="d-flex align-items-center">
-                            <MudButton Color="Color.Primary" Size="Size.Small" @onclick="@(() => kpiRatingComment.IsExpanded = !kpiRatingComment.IsExpanded)">
-                                @if (!kpiRatingComment.IsExpanded)
-                                    {
-                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" />
-                                    }
-                                else
-                                    {
-                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" Size="Size.Small" />
-                                    }
-                            </MudButton>
-                        </div> *@
-                        <!-- Comment field with toggle functionality -->
-                        @* <div style="transition: height 0.5s; overflow-y: hidden; height: @(kpiRatingComment.IsExpanded ? "auto" : "0")">
-                            <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" Multiline="true" Rows="3" Required="true" Placeholder="Enter your comment" />
-                        </div> *@
-                       
+                    @* <MudTextField Label="KPI" @bind-Value="kpiRatingComment.KPI_Id" />
+                <MudNumericField Label="Rating" @bind-Value="kpiRatingComment.Rating" />
+                <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" /> *@
+                    <MudItem xs="12" md="12">
+                        <MudItem>
+                            <input type="hidden" @bind="kpiRatingComment.KPI_Id" />
+                            <MudInputLabel> @($"{kpiRatingComment.KPI_Id}.{kpiRatingComment.KPI.Name}") </MudInputLabel>
+                        </MudItem>
+
+                        <!-- Rating field with radio buttons -->
+                        <MudItem>
+                            <MudRadioGroup T="sbyte?" Label="@L[model.GetMemberDescription(x=>kpiRatingComment.Rating)]" @bind-SelectedOption="kpiRatingComment.Rating">
+                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.VeryBad)" Placement="@Placement.Bottom" Color="Color.Error"> @RatingEnum.VeryBad </MudRadio>
+                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.Bad)" Placement="@Placement.Bottom" Color="Color.Dark"> @RatingEnum.Bad </MudRadio>
+                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.OkOk)" Placement="@Placement.Bottom" Color="Color.Default"> @RatingEnum.OkOk </MudRadio>
+
+                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.GoodWork)" Placement="@Placement.Bottom" Color="Color.Success"> @RatingEnum.GoodWork </MudRadio>
+                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.GreatWork)" Placement="@Placement.Bottom" Color="Color.Tertiary"> @RatingEnum.GreatWork </MudRadio>
+                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.GoodPersonButUnableToDoDueToOtherCircumstances)" Placement="@Placement.Bottom" Color="Color.Secondary"> Good But </MudRadio>
+
+                            </MudRadioGroup>
+                        </MudItem>
                     </MudItem>
+                    <!-- Button to toggle the comment section -->
+                    @*   <div class="d-flex align-items-center">
+                <MudButton Color="Color.Primary" Size="Size.Small" @onclick="@(() => kpiRatingComment.IsExpanded = !kpiRatingComment.IsExpanded)">
+                @if (!kpiRatingComment.IsExpanded)
+                {
+                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" />
+                }
+                else
+                {
+                <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" Size="Size.Small" />
+                }
+                </MudButton>
+                </div> *@
+                    <!-- Comment field with toggle functionality -->
+                    @* <div style="transition: height 0.5s; overflow-y: hidden; height: @(kpiRatingComment.IsExpanded ? "auto" : "0")">
+                <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" Multiline="true" Rows="3" Required="true" Placeholder="Enter your comment" />
+                </div> *@
+
+
                     }
 
                 <MudItem xs="12" md="6">
@@ -100,6 +103,11 @@
     AddEditVoteCommandValidator _modelValidator = new();
     [EditorRequired][Parameter] public AddEditVoteCommand model { get; set; } = null!;
     [Inject] private IMediator _mediator { get; set; } = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+
+
     protected override async Task OnInitializedAsync()
         {
         model.KPIRatingComments = KPI.GetAllDefaultAsVoteKPIRatingCommentList();
@@ -112,6 +120,8 @@
             await _form!.Validate().ConfigureAwait(false);
             if (!_form!.IsValid)
                 return;
+            var state = await AuthState;
+            model.UserId = state.GetUserId();
             var result = await _mediator.Send(model);
             if (result.Succeeded)
                 {
