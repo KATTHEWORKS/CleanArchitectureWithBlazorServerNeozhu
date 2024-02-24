@@ -13,6 +13,12 @@
     </PropertyGroup>
     
     <ItemGroup>
+      <Compile Remove="Services\Vote\**" />
+      <EmbeddedResource Remove="Services\Vote\**" />
+      <None Remove="Services\Vote\**" />
+    </ItemGroup>
+    
+    <ItemGroup>
         
         <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />

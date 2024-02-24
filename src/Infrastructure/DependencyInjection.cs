@@ -22,7 +22,7 @@ using CleanArchitecture.Blazor.Infrastructure.Services.MultiTenant;
 using CleanArchitecture.Blazor.Infrastructure.Services.PaddleOCR;
 using CleanArchitecture.Blazor.Infrastructure.Services.Serialization;
 #if VOTING_SYSTEM
-using CleanArchitecture.Blazor.Infrastructure.Services.Vote;
+//using CleanArchitecture.Blazor.Infrastructure.Services.Vote;
 #endif
 using FluentEmail.MailKitSmtp;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -204,16 +204,16 @@ public static class DependencyInjection
                 return service;
             });
 #if VOTING_SYSTEM
-        services.AddSingleton<ConstituencyService>()
-            .AddSingleton<IConstituencyService>(sp =>
-            {
-                var service = sp.GetRequiredService<ConstituencyService>();
-                service.Initialize();
-                return service;
-            });
+        //services.AddSingleton<ConstituencyService>()
+        //    .AddSingleton<IConstituencyService>(sp =>
+        //    {
+        //        var service = sp.GetRequiredService<ConstituencyService>();
+        //        service.Initialize();
+        //        return service;
+        //    });
 
-        services.AddScoped<IVoteSummaryService, VoteSummaryService>();
-        services.AddScoped<IVoteService, VoteService>();
+        //services.AddScoped<IVoteSummaryService, VoteSummaryService>();
+        //services.AddScoped<IVoteService, VoteService>();
 #endif
         return services.AddSingleton<ISerializer, SystemTextJsonSerializer>()
             .AddScoped<ICurrentUserService, CurrentUserService>()

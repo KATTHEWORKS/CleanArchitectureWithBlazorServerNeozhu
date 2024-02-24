@@ -13,18 +13,12 @@
         <UserSecretsId>8118d19e-a6db-4446-bdb6-fa62b17f843d</UserSecretsId>
         <LangVersion>default</LangVersion>
     </PropertyGroup>
-   <ItemGroup>
-      <Content Remove="Pages\Vote\ConstituencyChoose.razor" />
-      <Content Remove="Pages\Vote\Kpi.razor" />
-      <Content Remove="Pages\Vote\KpiRatingComment.razor" />
-      <Content Remove="Pages\Vote\Tree.razor" />
-      <Content Remove="Pages\Vote\Vote.razor" />
-      <Content Remove="Pages\Vote\VoteSummary.razor" />
-    </ItemGroup>
 
-    
     <ItemGroup>
-      <None Remove="Pages\Vote\Structure.txt" />
+      <Compile Remove="Pages\Vote\**" />
+      <Content Remove="Pages\Vote\**" />
+      <EmbeddedResource Remove="Pages\Vote\**" />
+      <None Remove="Pages\Vote\**" />
     </ItemGroup>
 
     <ItemGroup>

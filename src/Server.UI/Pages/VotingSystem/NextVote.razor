@@ -1,5 +1,5 @@
 ﻿@namespace CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem
-@page "/Summary"
+@page "/"
 
 @using BlazorDownloadFile
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Caching
@@ -11,6 +11,7 @@
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit
 @using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Constituencies.Components
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.GetByUserId
 @using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Votes.Components
 @inject IJSRuntime JS
 @inject IStringLocalizer<ConstituenciesPage> L
@@ -226,6 +227,7 @@
     private UserProfile? UserProfile { get; set; }
 
     private ConstituenciesWithPaginationQuery Query { get; set; } = new();
+    private GetByUserIdQuery Q { get; set; }
     [Inject]
     private IBlazorDownloadFileService BlazorDownloadFileService { get; set; } = null!;
     private bool _canSearch;
@@ -236,8 +238,12 @@
 
     protected override async Task OnInitializedAsync()
         {
+
         Title = L[_currentDto.GetClassDescription()];
         var state = await AuthState;
+        Q = new GetByUserIdQuery() { UserId = state.GetUserId() };
+        var myVote=await Mediator.Send(Q).ConfigureAwait(false);
+
         _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Create)).Succeeded;
         _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Search)).Succeeded;
         _canEdit = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Edit)).Succeeded;

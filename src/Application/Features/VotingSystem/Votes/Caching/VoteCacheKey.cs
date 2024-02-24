@@ -16,6 +16,10 @@ public static class VoteCacheKey
     public static string GetByIdCacheKey(string parameters) {
         return $"VoteCacheKey:GetByIdCacheKey,{parameters}";
     }
+    public static string GetByUserIdCacheKey(string parameters)
+    {
+        return $"VoteCacheKey:GetByUserIdCacheKey,{parameters}";
+    }
     static VoteCacheKey()
     {
         _tokensource = new CancellationTokenSource(refreshInterval);

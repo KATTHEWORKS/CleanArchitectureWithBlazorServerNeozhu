@@ -43,9 +43,9 @@ public interface IApplicationDbContext : IDbContext
 
     //had to remove below 3
 
-    public DbSet<V_Constituency> V_Constituencies { get; set; }
-    public DbSet<V_Vote> V_Votes { get; set; }
-    public DbSet<V_VoteSummary> V_VoteSummarys { get; set; }
+    //public DbSet<V_Constituency> V_Constituencies { get; set; }
+    //public DbSet<V_Vote> V_Votes { get; set; }
+    //public DbSet<V_VoteSummary> V_VoteSummarys { get; set; }
 #endif
 
     //public override DatabaseFacade Database => base.Database;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CleanArchitecture.Blazor.Infrastructure.Services.Vote;
+//using CleanArchitecture.Blazor.Infrastructure.Services.Vote;
 using Microsoft.AspNetCore.Http;
 
 namespace CleanArchitecture.Blazor.Infrastructure;
@@ -11,7 +11,7 @@ public class ConcurrencyControlMiddleware(RequestDelegate next)
 {
     private readonly RequestDelegate _next = next;
 
-    public async Task InvokeAsync(HttpContext context, IVoteSummaryService voteSummaryService)
+    public async Task InvokeAsync(HttpContext context )/*, IVoteSummaryService voteSummaryService)*/
     {
         try
         {
@@ -19,7 +19,7 @@ public class ConcurrencyControlMiddleware(RequestDelegate next)
 
             // Load data asynchronously using services
             //await LoadDataAsync();
-            await voteSummaryService.RefreshSummary();
+            //await voteSummaryService.RefreshSummary();
 
             // Continue processing the request pipeline
             await _next(context);

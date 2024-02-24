@@ -189,22 +189,22 @@ public class ApplicationDbContextInitializer
         await AddNewUserToDb(RoleNamesEnum.VIEWERHOSPITAL.ToString() + "1", hospitalTenant, new List<RoleNamesEnum> { RoleNamesEnum.VIEWERHOSPITAL });
 #elif VOTING_SYSTEM
 
-        V_Constituency AddConstituency(V_Constituency c)
+       VoteConstituency AddConstituency(VoteConstituency c)
         {
-            if (!_context.V_Constituencies.Any(x => x.Name == c.Name && x.StateName == c.StateName))
+            if (!_context.VoteConstituencies.Any(x => x.Name == c.Name && x.State == c.State))
             {
-                _context.V_Constituencies.Add(c);
+                _context.VoteConstituencies.Add(c);
                 return c;
             }
             return null;
         }
 
-        if (!_context.V_Constituencies.Any() || AddConstituency(new V_Constituency("Karnataka", "Shimoga", "BYR", "asdasdsad")) != null)
+        if (!_context.VoteConstituencies.Any() || AddConstituency(new VoteConstituency("Karnataka", "Shimoga", "BYR", "asdasdsad")) != null)
         {
-            AddConstituency(new V_Constituency("Karnataka", "Chikmagalur", "Bojegowda", "asdasdsad"));
-            AddConstituency(new V_Constituency("Karnataka", "Mandya", "Suma", "asdasdsad"));
-            AddConstituency(new V_Constituency("Tnad", "Chennai", "MGR", "asdasdsad"));
-            AddConstituency(new V_Constituency("Tnad", "Tiruchi", "BYR", "asdasdsad"));
+            AddConstituency(new VoteConstituency("Karnataka", "Chikmagalur", "Bojegowda", "asdasdsad"));
+            AddConstituency(new VoteConstituency("Karnataka", "Mandya", "Suma", "asdasdsad"));
+            AddConstituency(new VoteConstituency("Tnad", "Chennai", "MGR", "asdasdsad"));
+            AddConstituency(new VoteConstituency("Tnad", "Tiruchi", "BYR", "asdasdsad"));
             await _context.SaveChangesAsync();
         }
 #endif

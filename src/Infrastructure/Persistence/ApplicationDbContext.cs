@@ -52,11 +52,11 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
 
     //had to remove below 3
-    public DbSet<V_Constituency> V_Constituencies { get; set; }
-    public DbSet<V_Vote> V_Votes { get; set; }
-    //public DbSet<V_CommentSupportOppose> V_CommentSupportOpposeCounts { get; set; }
+    //public DbSet<V_Constituency> V_Constituencies { get; set; }
+    //public DbSet<V_Vote> V_Votes { get; set; }
+    ////public DbSet<V_CommentSupportOppose> V_CommentSupportOpposeCounts { get; set; }
 
-    public DbSet<V_VoteSummary> V_VoteSummarys { get; set; }
+    //public DbSet<V_VoteSummary> V_VoteSummarys { get; set; }
 #endif
 
     public async Task AddEntityAsync<TEntity>(TEntity entity) where TEntity : class
@@ -218,55 +218,55 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
 
 
 
-        builder.Entity<V_Constituency>().Property(b => b.Id).ValueGeneratedOnAdd();
+        //builder.Entity<V_Constituency>().Property(b => b.Id).ValueGeneratedOnAdd();
 
-        //https://learn.microsoft.com/en-us/ef/core/modeling/generated-properties?tabs=fluent-api
-        builder.Entity<V_Vote>().Property(b => b.Id).ValueGeneratedOnAdd();
-        builder.Entity<V_Vote>().Property(b => b.Created).HasDefaultValueSql("getdate()");
+        ////https://learn.microsoft.com/en-us/ef/core/modeling/generated-properties?tabs=fluent-api
+        //builder.Entity<V_Vote>().Property(b => b.Id).ValueGeneratedOnAdd();
+        //builder.Entity<V_Vote>().Property(b => b.Created).HasDefaultValueSql("getdate()");
 
-        //builder.Entity<V_Vote>().OwnsMany(b => b.VoteKPIRatingComments, ownedNavigationBuilder =>
-        // { ownedNavigationBuilder.ToJson(); }
-        //);
-        //above wont work so trying like below
-        builder.Entity<V_Vote>()
-         .Property(v => v.VoteKPIRatingComments)
-         .HasConversion(
-             v => JsonSerializer.Serialize(v.Where(c => c.Rating != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
-             v => JsonSerializer.Deserialize<List<VoteKPIRatingComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
-         );
-        builder.Entity<V_Vote>()
-         .Property(v => v.VoteKPIComments)
-         .HasConversion(
-             v => JsonSerializer.Serialize(v.Where(c => c.Comment != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
-             v => JsonSerializer.Deserialize<List<VoteKPIComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
-         );
-        var delta = new List<VoteKPIRatingComment>();
-        builder.Entity<V_Vote>()
-         .Property(v => v.VoteKPIRatingCommentsDelta)
-         .HasConversion(
-             v => JsonSerializer.Serialize(v, JsonExtensions.IgnoreNullSerializationOptions),
-             v => (JsonExtensions.TryDeserialize<List<VoteKPIRatingComment>>(v, out delta, JsonExtensions.IgnoreNullSerializationOptions)
-             ? delta : new List<VoteKPIRatingComment>())
-         );
+        ////builder.Entity<V_Vote>().OwnsMany(b => b.VoteKPIRatingComments, ownedNavigationBuilder =>
+        //// { ownedNavigationBuilder.ToJson(); }
+        ////);
+        ////above wont work so trying like below
+        //builder.Entity<V_Vote>()
+        // .Property(v => v.VoteKPIRatingComments)
+        // .HasConversion(
+        //     v => JsonSerializer.Serialize(v.Where(c => c.Rating != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
+        //     v => JsonSerializer.Deserialize<List<VoteKPIRatingComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+        // );
+        //builder.Entity<V_Vote>()
+        // .Property(v => v.VoteKPIComments)
+        // .HasConversion(
+        //     v => JsonSerializer.Serialize(v.Where(c => c.Comment != null).ToList(), JsonExtensions.IgnoreNullSerializationOptions),
+        //     v => JsonSerializer.Deserialize<List<VoteKPIComment>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+        // );
+        //var delta = new List<VoteKPIRatingComment>();
+        //builder.Entity<V_Vote>()
+        // .Property(v => v.VoteKPIRatingCommentsDelta)
+        // .HasConversion(
+        //     v => JsonSerializer.Serialize(v, JsonExtensions.IgnoreNullSerializationOptions),
+        //     v => (JsonExtensions.TryDeserialize<List<VoteKPIRatingComment>>(v, out delta, JsonExtensions.IgnoreNullSerializationOptions)
+        //     ? delta : new List<VoteKPIRatingComment>())
+        // );
 
-        //for updatetime had to use triggers
+        ////for updatetime had to use triggers
 
-        builder.Entity<V_VoteSummary>().HasKey(x => x.Id);
-        builder.Entity<V_VoteSummary>().Property(b => b.Id).ValueGeneratedOnAdd();
+        //builder.Entity<V_VoteSummary>().HasKey(x => x.Id);
+        //builder.Entity<V_VoteSummary>().Property(b => b.Id).ValueGeneratedOnAdd();
         
-        builder.Entity<V_VoteSummary>().Property(b => b.Created).HasDefaultValueSql("getdate()");
+        //builder.Entity<V_VoteSummary>().Property(b => b.Created).HasDefaultValueSql("getdate()");
 
-        builder.Entity<V_VoteSummary>()
-                .HasOne(x => x.Constituency)
-                .WithOne(c => c.Summary)
-                .HasForeignKey<V_VoteSummary>(x => x.ConstituencyId);
+        //builder.Entity<V_VoteSummary>()
+        //        .HasOne(x => x.Constituency)
+        //        .WithOne(c => c.Summary)
+        //        .HasForeignKey<V_VoteSummary>(x => x.ConstituencyId);
 
-        builder.Entity<V_VoteSummary>()
-        .Property(v => v.KPIVotes)
-        .HasConversion(
-            v => JsonSerializer.Serialize(v, JsonExtensions.IgnoreNullSerializationOptions),
-            v => JsonSerializer.Deserialize<List<VoteSummary_KPIVote>>(v, JsonExtensions.IgnoreNullSerializationOptions)
-        );
+        //builder.Entity<V_VoteSummary>()
+        //.Property(v => v.KPIVotes)
+        //.HasConversion(
+        //    v => JsonSerializer.Serialize(v, JsonExtensions.IgnoreNullSerializationOptions),
+        //    v => JsonSerializer.Deserialize<List<VoteSummary_KPIVote>>(v, JsonExtensions.IgnoreNullSerializationOptions)
+        //);
 #else
         builder.Ignore<V_Vote>();
         builder.Ignore<V_Constituency>();

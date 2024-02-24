@@ -12,6 +12,14 @@
     <PropertyGroup Label="Override Stack trace file locations">
         <PathMap>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))=./</PathMap>
     </PropertyGroup>
+
+    <ItemGroup>
+      <Compile Remove="Entities\V_Constituency.cs" />
+      <Compile Remove="Entities\V_JsonStructures.cs" />
+      <Compile Remove="Entities\V_KPI.cs" />
+      <Compile Remove="Entities\V_Vote.cs" />
+      <Compile Remove="Entities\V_VoteSummary.cs" />
+    </ItemGroup>
     
     <ItemGroup>
         <PackageReference Include="MediatR" Version="12.2.0" />

@@ -47,7 +47,7 @@ public class ApplicationUser : IdentityUser
     public ApplicationUser? Superior { get; set; } = null;
 
 #if VOTING_SYSTEM
-    [NotMapped]
-    public V_Vote? MyVote { get; set; }
+    //[NotMapped]
+    //public V_Vote? MyVote { get; set; }
 #endif
 }
