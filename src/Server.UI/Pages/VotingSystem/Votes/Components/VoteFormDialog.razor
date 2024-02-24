@@ -13,17 +13,14 @@
                 @*       <MudItem xs="12" md="6">
                 <MudTextField Label="@L[model.GetMemberDescription(x=>x.UserId)]" @bind-Value="model.UserId" For="@(() => model.UserId)" Required="false" RequiredError="@L["user id is required!"]"></MudTextField>
                 </MudItem>  *@
+
+                @*<MudItem xs="12" md="6">
+                <MudNumericField Label="@L[model.GetMemberDescription(x=>x.ConstituencyName)]" @bind-Value="model.ConstituencyId" For="@(() => model.ConstituencyId)" Min="0" Required="false" RequiredError="@L["constituency id is required!"]"></MudNumericField>
+                display name of selected constituency,also allow to edit
+                </MudItem>*@
                 <MudItem xs="12" md="6">
-                    <MudNumericField Label="@L[model.GetMemberDescription(x=>x.ConstituencyId)]" @bind-Value="model.ConstituencyId" For="@(() => model.ConstituencyId)" Min="0" Required="false" RequiredError="@L["constituency id is required!"]"></MudNumericField>
-                    @* display name of selected constituency,also allow to edit  *@
+                    <MudInputLabel> @L["Current MP/Party/Times"]: @model.MpNameExisting / @model.ExistingMpTerms </MudInputLabel>
                 </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField>
-                </MudItem>
-                @* this requires little more space like expandable text area *@
-
-
-
                 <MudItem xs="12" md="6">
                     @*  <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField> *@
                     <MudInputLabel>@L[model.GetMemberDescription(x => x.WishToReElectMp)]</MudInputLabel>
@@ -33,20 +30,63 @@
                         <MudRadio T="bool?" Option="@null">Not Sure</MudRadio>
                     </MudRadioGroup>
                 </MudItem>
+
                 @foreach (var kpiRatingComment in model.KPIRatingComments)
                     {
-                    <div class="mt-4">
-                        <MudTextField Label="KPI" @bind-Value="kpiRatingComment.KPI_Id" />
+                          
+                        @* <MudTextField Label="KPI" @bind-Value="kpiRatingComment.KPI_Id" />
                         <MudNumericField Label="Rating" @bind-Value="kpiRatingComment.Rating" />
-                        <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" />
-                    </div>
+                        <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" /> *@
+                    <MudItem xs="12">
+                        <input type="hidden" @bind="kpiRatingComment.KPI_Id" />
+                        <MudInputLabel> @kpiRatingComment.KPI_Id </MudInputLabel>
+                        
+                        <!-- Rating field with radio buttons -->
+        <div class="d-flex align-items-center">
+            @for (sbyte i = -2; i <= 3; i++) //change this to reference from enums
+            {
+                <div class="rating-item">
+                    <MudRadio T="sbyte?" Label="@i" GroupName="@($"rating-{kpiRatingComment.KPI_Id}")" @bind-Value="kpiRatingComment.Rating"/>
+                    @if (kpiRatingComment.Rating == i)
+                    {
+                        <span class="selected-rating">@i</span>
                     }
+                </div>
+            }
+        </div>
+
+                        <!-- Button to toggle the comment section -->
+                      @*   <div class="d-flex align-items-center">
+                            <MudButton Color="Color.Primary" Size="Size.Small" @onclick="@(() => kpiRatingComment.IsExpanded = !kpiRatingComment.IsExpanded)">
+                                @if (!kpiRatingComment.IsExpanded)
+                                    {
+                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Size="Size.Small" />
+                                    }
+                                else
+                                    {
+                                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowUp" Size="Size.Small" />
+                                    }
+                            </MudButton>
+                        </div> *@
+                        <!-- Comment field with toggle functionality -->
+                        @* <div style="transition: height 0.5s; overflow-y: hidden; height: @(kpiRatingComment.IsExpanded ? "auto" : "0")">
+                            <MudTextField Label="Comment" @bind-Value="kpiRatingComment.Comment" Multiline="true" Rows="3" Required="true" Placeholder="Enter your comment" />
+                        </div> *@
+                       
+                    </MudItem>
+                    }
+
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField>
+                </MudItem>
+                @* this requires little more space like expandable text area *@
+
             </MudGrid>
         </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">@ConstantString.Cancel</MudButton>
-        <MudLoadingButton Loading="@_savingnew" OnClick="SaveAndNew">@ConstantString.SaveAndNew</MudLoadingButton>
+        @* <MudLoadingButton Loading="@_savingnew" OnClick="SaveAndNew">@ConstantString.SaveAndNew</MudLoadingButton> *@
         <MudLoadingButton Loading="@_saving" OnClick="Submit">@ConstantString.Save</MudLoadingButton>
     </DialogActions>
 </MudDialog>

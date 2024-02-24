@@ -72,7 +72,7 @@ public static class ConstantString
     public static string UploadSuccess => Localize("Upload successfully");
 
 
-    public static string AddMyVote => Localize("Add My Vote");
+    public static string MyVote => Localize("My Vote");
     public static string UpdateMyVote => Localize("Update My Vote");
     public static string RemoveMyVote => Localize("Remove My Vote");
 

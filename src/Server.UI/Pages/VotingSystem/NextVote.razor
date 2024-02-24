@@ -5,20 +5,21 @@
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Caching
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.DTOs
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Specifications
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Commands.Delete
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.Delete
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Commands.Import
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Export
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Commands.AddEdit
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit
 @using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Constituencies.Components
+@using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Votes.Components
 @inject IJSRuntime JS
 @inject IStringLocalizer<ConstituenciesPage> L
 @attribute [Authorize(Policy = Permissions.Constituencies.View)]
 <PageTitle>@Title</PageTitle>
 <style>
-    .mud-table-toolbar {
-        height: 120px !important;
-    }
+    /*  .mud-table-toolbar {
+                height: 120px !important;
+            } */
 </style>
 
 <MudDataGrid ServerData="@(ServerReload)"
@@ -32,97 +33,111 @@
              @bind-SelectedItem="_currentDto"
              Hover="true" @ref="_table">
     <ToolBarContent>
-        <div class="d-flex align-start flex-grow-1">
-            <div class="d-flex gap-4">
-                <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" />
-                <div class="d-flex flex-column">
-                    <MudText Typo="Typo.caption" Class="mb-2">@Title</MudText>
-                    <MudEnumSelect Style="min-width:120px" TEnum="ConstituencyListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
-                    </MudEnumSelect>
-                </div>
-            </div>
-            <div class="flex-grow-1" />
+        <div class="d-flex align-start">
 
-            <div class="d-flex flex-column justify-end">
+            @if (_canSearch)
+                {
                 <div class="d-flex">
-                    <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                        <MudButton DisableElevation Variant="Variant.Outlined"
-                                   Size="Size.Small"
-                                   Disabled="@_loading"
-                                   OnClick="@(()=>OnRefresh())"
-                                   StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary"
-                                   Style="margin-right: 4px; margin-bottom:4px">@ConstantString.Refresh</MudButton>
-                        @if (_canCreate)
-                            {
-                            <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       Size="Size.Small"
-                                       Disabled="@_loading"
-                                       OnClick="OnAddMyVote"
-                                       Style="margin-right: 4px; margin-bottom:4px"
-                                       IconColor="Color.Surface">@ConstantString.AddMyVote</MudButton>
-                            <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.ContentCopy"
-                                       Size="Size.Small"
-                                       Disabled="@(_selectedItems.Count!=1)"
-                                       OnClick="OnUpdateMyVote"
-                                       Style="margin-right: 4px; margin-bottom:4px"
-                                       IconColor="Color.Surface">@ConstantString.UpdateMyVote</MudButton>
-                            }
-                        @if (_canDelete)
-                            {
-                            <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
-                                       StartIcon="@Icons.Material.Filled.Delete"
-                                       Disabled="@(!(_selectedItems.Count>0))"
-                                       Size="Size.Small"
-                                       Style="margin-right: 4px; margin-bottom:4px"
-                                       OnClick="OnRemoveMyVote"
-                                       IconColor="Color.Surface">@ConstantString.RemoveMyVote</MudButton>
-                            }
-                        @if (_canExport)
-                            {
-                            <MudLoadingButton @bind-Loading="_exporting" DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
-                                              Label="@ConstantString.Export"
-                                              Disabled="@_loading"
-                                              StartIcon="@Icons.Custom.FileFormats.FileExcel"
-                                              Size="Size.Small"
-                                              Style="margin-right: 4px; margin-bottom:4px"
-                                              OnClick="OnExport"
-                                              IconColor="Color.Surface">
-                                @ConstantString.Export
-                            </MudLoadingButton>
-                            }
-
-                    </MudHidden>
-                    <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
-                        @if (_canCreate)
-                            {
-                            <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       Size="Size.Small"
-                                       Disabled="@_loading"
-                                       OnClick="OnAddMyVote"
-                                       Style="margin-right: 4px; margin-bottom:4px"
-                                       IconColor="Color.Surface">@ConstantString.New</MudButton>
-                            }
-                        @if (_canDelete)
-                            {
-                            <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
-                                       StartIcon="@Icons.Material.Filled.Delete"
-                                       Disabled="@(!(_selectedItems.Count>0))"
-                                       Size="Size.Small"
-                                       Style="margin-right: 4px; margin-bottom:4px"
-                                       OnClick="OnRemoveMyVote"
-                                       IconColor="Color.Surface">@ConstantString.Delete</MudButton>
-                            }
-                    </MudHidden>
+                    @*  <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" /> *@
+                    <div class="d-flex flex-column">
+                        <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Value="@Query.Keyword" Placeholder="Search & Select Constituency" Adornment="Adornment.End"
+                                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"></MudTextField>
+                    </div>
                 </div>
-                @if (_canSearch)
-                    {
-                    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Value="@Query.Keyword" Placeholder="@ConstantString.Search" Adornment="Adornment.End"
-                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Small"></MudTextField>
-                    }
+                }
+            @*   <div class="d-flex gap-4">
+            <MudIcon Icon="@Icons.Material.Filled.Window" Size="Size.Large" />
+            <div class="d-flex flex-column">
+            <MudText Typo="Typo.caption" Class="mb-2">@Title</MudText>
+            <MudEnumSelect Style="min-width:120px" TEnum="ConstituencyListView" ValueChanged="OnChangedListView" Value="Query.ListView" Dense="true" Label="List View">
+            </MudEnumSelect>
+            </div>
+            </div>
+            <div class="flex-grow-1" /> *@
 
+            @* lets enable this later *@
+            <div style='visibility:hidden; overflow:hidden; height:0; width:0;'>
+                <div class="d-flex flex-column justify-end">
+                    <div class="d-flex">
+                        <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                            <MudButton DisableElevation Variant="Variant.Outlined"
+                                       Size="Size.Small"
+                                       Disabled="@_loading"
+                                       OnClick="@(()=>OnRefresh())"
+                                       StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary"
+                                       Style="margin-right: 4px; margin-bottom:4px">@ConstantString.Refresh</MudButton>
+                            @if (_canCreate)
+                                {
+                                @* keep this button,if user clicks first time show alert as "please select constituency and then add"
+                            if vote already exists then go for editing of that  *@
+
+                                @* actually to add vote user has to select constituency then only add, here only update option should appear with message of overwriting, within this only update/delete all has to coverup *@
+                                <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
+                                           MyVoteStartIcon="@Icons.Material.Filled.Add"
+                                           Size="Size.Small"
+                                           Disabled="@_loading"
+                                           OnClick="OnAddMyVoteToConstituency"
+                                           Style="margin-right: 4px; margin-bottom:4px"
+                                           IconColor="Color.Surface">@ConstantString.MyVote</MudButton>
+                                @*  <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
+                            StartIcon="@Icons.Material.Filled.ContentCopy"
+                            Size="Size.Small"
+                            Disabled="@(_selectedItems.Count!=1)"
+                            OnClick="OnClone"
+                            Style="margin-right: 4px; margin-bottom:4px"
+                            IconColor="Color.Surface">@ConstantString.UpdateMyVote</MudButton> *@
+                                }
+                            @*  @if (_canDelete)
+                            {
+                            <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
+                            StartIcon="@Icons.Material.Filled.Delete"
+                            Disabled="@(!(_selectedItems.Count>0))"
+                            Size="Size.Small"
+                            Style="margin-right: 4px; margin-bottom:4px"
+                            OnClick="OnDeleteMyVoteChecked"
+                            IconColor="Color.Surface">@ConstantString.RemoveMyVote</MudButton>
+                            } *@
+                            @if (_canExport)
+                                {
+                                <MudLoadingButton @bind-Loading="_exporting" DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
+                                                  Label="@ConstantString.Export"
+                                                  Disabled="@_loading"
+                                                  StartIcon="@Icons.Custom.FileFormats.FileExcel"
+                                                  Size="Size.Small"
+                                                  Style="margin-right: 4px; margin-bottom:4px"
+                                                  OnClick="OnExport"
+                                                  IconColor="Color.Surface">
+                                    @ConstantString.Export
+                                </MudLoadingButton>
+                                }
+
+                        </MudHidden>
+                        <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
+                            @if (_canCreate)
+                                {
+                                <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.Add"
+                                           Size="Size.Small"
+                                           Disabled="@_loading"
+                                           OnClick="OnAddMyVoteToConstituency"
+                                           Style="margin-right: 4px; margin-bottom:4px"
+                                           IconColor="Color.Surface">@ConstantString.New</MudButton>
+                                }
+                            @*   @if (_canDelete)
+                            {
+                            <MudButton DisableElevation Variant="Variant.Outlined" Color="Color.Error"
+                            StartIcon="@Icons.Material.Filled.Delete"
+                            Disabled="@(!(_selectedItems.Count>0))"
+                            Size="Size.Small"
+                            Style="margin-right: 4px; margin-bottom:4px"
+                            OnClick="OnDeleteMyVoteChecked"
+                            IconColor="Color.Surface">@ConstantString.Delete</MudButton>
+                            } *@
+                        </MudHidden>
+                    </div>
+
+
+                </div>
             </div>
         </div>
     </ToolBarContent>
@@ -131,18 +146,19 @@
         <TemplateColumn CellStyle="width:60px" Title="@ConstantString.Actions" Sortable="false">
             <CellTemplate>
                 @if (_canEdit || _canDelete)
-                    {
+                    {// this is with each row
                     <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" DisableElevation="true" Size="Size.Small"
                              Dense="true"
                              EndIcon="@Icons.Material.Filled.KeyboardArrowDown" IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
                         @if (_canEdit)
                             {
-                            <MudMenuItem OnAction="@(()=>OnEdit(context.Item))">@ConstantString.Edit</MudMenuItem>
+                            //here had to make as Update vote/ add vote if already exist for this
+                            <MudMenuItem OnAction="@(()=> OnAddMyVoteToConstituency(context.Item))">@ConstantString.MyVote</MudMenuItem>
                             }
-                        @if (_canDelete)
-                            {
-                            <MudMenuItem OnAction="@(()=>OnRemoveMyVote(context.Item))">@ConstantString.Delete</MudMenuItem>
-                            }
+                        @*   @if (_canDelete)
+                    {//this is not required
+                    <MudMenuItem OnAction="@(()=>OnDeleteMyVote(context.Item))">@ConstantString.Delete</MudMenuItem>
+                    } *@
                     </MudMenu>
                     }
                 else
@@ -213,7 +229,7 @@
     [Inject]
     private IBlazorDownloadFileService BlazorDownloadFileService { get; set; } = null!;
     private bool _canSearch;
-    private bool _canCreate;
+    private bool _canCreate;//can add vote,yes if logged
     private bool _canEdit;
     private bool _canDelete;
     private bool _canExport;
@@ -222,10 +238,10 @@
         {
         Title = L[_currentDto.GetClassDescription()];
         var state = await AuthState;
-        _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Create)).Succeeded;
+        _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Create)).Succeeded;
         _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Search)).Succeeded;
-        _canEdit = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Edit)).Succeeded;
-        _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Delete)).Succeeded;
+        _canEdit = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Edit)).Succeeded;
+        _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Delete)).Succeeded;
 
         _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Export)).Succeeded;
         }
@@ -270,60 +286,93 @@
         await _table.ReloadServerData();
         }
 
-    private async Task OnAddMyVote()
+    // private async Task OnCreateMyVote()
+    //     {
+    //     // var command = new AddEditConstituencyCommand();
+    //     // var parameters = new DialogParameters<ConstituencyFormDialog>
+    //     //     {
+    //     //         { x=>x.model,command },
+    //     //     };
+    //     // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    //     // var dialog = DialogService.Show<ConstituencyFormDialog>
+    //     // (L["Create a new item"], parameters, options);
+    //     // var state = await dialog.Result;
+    //     var command = new AddEditVoteCommand();
+    //     var parameters = new DialogParameters<VoteFormDialog>
+    //         {
+    //             { x=>x.model,command },
+    //         };
+    //     var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    //     var dialog = DialogService.Show<VoteFormDialog>
+    //     (L["Create a new item"], parameters, options);
+    //     var state = await dialog.Result;
+    //     if (!state.Canceled)
+    //         {
+    //         await _table.ReloadServerData();
+    //         }
+    //     }
+    // private async Task OnClone()
+    //     {
+    //     var dto = _selectedItems.First();
+    //     var command = new AddEditConstituencyCommand()
+    //             {
+    //             State = dto.State,
+    //             Name = dto.Name,
+    //             MpNameExisting = dto.MpNameExisting,
+    //             OtherPastMps = dto.OtherPastMps,
+    //             Description = dto.Description,
+    //             ExistingMpParty = dto.ExistingMpParty,
+    //             ExistingMpTerms = dto.ExistingMpTerms,
+
+    //             };
+    //     var parameters = new DialogParameters<ConstituencyFormDialog>
+    //         {
+    //            { x=>x.model,command },
+    //         };
+    //     var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+    //     var dialog = DialogService.Show<ConstituencyFormDialog>
+    //     (L["Create a new item"], parameters, options);
+    //     var state = await dialog.Result;
+    //     if (!state.Canceled)
+    //         {
+    //         await _table.ReloadServerData();
+    //         // _selectedItems = new HashSet<ConstituencyDto>();
+    //         }
+    //     }
+    private async Task OnAddMyVoteToConstituency()
         {
-        var command = new AddEditConstituencyCommand();
-        var parameters = new DialogParameters<ConstituencyFormDialog>
-            {
-                { x=>x.model,command },
-            };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = DialogService.Show<ConstituencyFormDialog>
-        (L["Create a new item"], parameters, options);
-        var state = await dialog.Result;
-        if (!state.Canceled)
-            {
-            await _table.ReloadServerData();
-            }
+        //show popup message as please slect constituency
         }
-    private async Task OnUpdateMyVote()
+    private async Task OnAddMyVoteToConstituency(ConstituencyDto dto)
         {
-        var dto = _selectedItems.First();
-        var command = new AddEditConstituencyCommand()
+        // var command = Mapper.Map<AddEditConstituencyCommand>(dto);
+        // var parameters = new DialogParameters<ConstituencyFormDialog>
+        //     {
+        //         { x=>x.model,command },
+        //     };
+        // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        // var dialog = DialogService.Show<ConstituencyFormDialog>
+        // (L["Edit the item"], parameters, options);
+        // var state = await dialog.Result;
+
+        //had to fetch my vote & attach with passing entity to add/edit screen of vote
+        VoteDto newVote = new VoteDto()
                 {
-                State = dto.State,
-                Name = dto.Name,
-                MpNameExisting = dto.MpNameExisting,
-                OtherPastMps = dto.OtherPastMps,
-                Description = dto.Description,
-                ExistingMpParty = dto.ExistingMpParty,
-                ExistingMpTerms = dto.ExistingMpTerms,
-
+                ConstituencyId = dto.Id,
+                ConstituencyName = $"{dto.Name}/{dto.State}",
+                MpNameExisting = $"{dto.MpNameExisting}/{dto.ExistingMpParty}",
+                ExistingMpTerms = dto.ExistingMpTerms
+                //,UserId = state//fetch from logged in account
                 };
-        var parameters = new DialogParameters<ConstituencyFormDialog>
-            {
-               { x=>x.model,command },
-            };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = DialogService.Show<ConstituencyFormDialog>
-        (L["Create a new item"], parameters, options);
-        var state = await dialog.Result;
-        if (!state.Canceled)
-            {
-            await _table.ReloadServerData();
-            _selectedItems = new HashSet<ConstituencyDto>();
-            }
-        }
-    private async Task OnEdit(ConstituencyDto dto)
-        {
-        var command = Mapper.Map<AddEditConstituencyCommand>(dto);
-        var parameters = new DialogParameters<ConstituencyFormDialog>
+
+        var command = Mapper.Map<AddEditVoteCommand>(newVote);
+        var parameters = new DialogParameters<VoteFormDialog>
             {
                 { x=>x.model,command },
             };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = DialogService.Show<ConstituencyFormDialog>
-        (L["Edit the item"], parameters, options);
+        var dialog = DialogService.Show<VoteFormDialog>
+        (L[$"Adding My Vote to Constituency: {dto.Name}/{dto.State}"], parameters, options);//updating if exists
         var state = await dialog.Result;
         if (!state.Canceled)
             {
@@ -331,9 +380,18 @@
             }
         }
 
-    private async Task OnRemoveMyVote(ConstituencyDto dto)
+    private async Task OnDeleteMyVote(VoteDto dto)
         {
-        var command = new DeleteConstituencyCommand(new int[] { dto.Id });
+        // var command = new DeleteConstituencyCommand(new int[] { dto.Id });
+        // var parameters = new DialogParameters<DeleteConfirmation>
+        //    {
+        //      { x=>x.Command,  command },
+        //      { x=>x.ContentText, string.Format(ConstantString.DeleteConfirmation, dto.Id) }
+        //    };
+        // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, DisableBackdropClick = true };
+        // var dialog = DialogService.Show<DeleteConfirmation>(ConstantString.DeleteConfirmationTitle, parameters, options);
+        // var state = await dialog.Result;
+        var command = new DeleteVoteCommand(new int[] { dto.Id });
         var parameters = new DialogParameters<DeleteConfirmation>
            {
              { x=>x.Command,  command },
@@ -345,13 +403,22 @@
         if (!state.Canceled)
             {
             await _table.ReloadServerData();
-            _selectedItems.Remove(dto);
+            // _selectedItems.Remove(dto); //need to re-think how can i appear result on screen
             }
         }
 
-    private async Task OnRemoveMyVote()
+    private async Task OnDeleteMyVoteChecked()
         {
-        var command = new DeleteConstituencyCommand(_selectedItems.Select(x => x.Id).ToArray());
+        // var command = new DeleteConstituencyCommand(_selectedItems.Select(x => x.Id).ToArray());
+        // var parameters = new DialogParameters<DeleteConfirmation>
+        //     {
+        //           { x=>x.Command,  command },
+        //           { x=>x.ContentText, string.Format(ConstantString.DeleteConfirmWithSelected,_selectedItems.Count) }
+        //     };
+        // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true, DisableBackdropClick = true };
+        // var dialog = DialogService.Show<DeleteConfirmation>(ConstantString.DeleteConfirmationTitle, parameters, options);
+        // var state = await dialog.Result;
+        var command = new DeleteVoteCommand(_selectedItems.Select(x => x.Id).ToArray());
         var parameters = new DialogParameters<DeleteConfirmation>
             {
                   { x=>x.Command,  command },

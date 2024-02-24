@@ -17,6 +17,16 @@ public class VoteDto
     [Description("Constituency Id")]
     public int ConstituencyId { get; set; } //not in UI,set from selected constituency
 
+    //below 3 are in Add/EditCommand also
+    [Description("Constituency Name")]
+    public string? ConstituencyName { get; set; }//only for UI
+
+    [Description("Existing MP Name")]
+    public string? MpNameExisting { get; set; }//only for UI
+    [Description("Existing MP Terms")]
+    public string? ExistingMpTerms { get; set; }//only for UI
+
+
     // [Required] //overall rating
     public sbyte Rating { get; set; }//auto-generate based on kpi values
 
