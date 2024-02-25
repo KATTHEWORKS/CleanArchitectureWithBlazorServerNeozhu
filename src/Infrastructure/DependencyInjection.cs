@@ -32,6 +32,7 @@ using Microsoft.IdentityModel.Tokens;
 using ZiggyCreatures.Caching.Fusion;
 using CleanArchitecture.Blazor.Application.Constants.User;
 using CleanArchitecture.Blazor.Application.Constants;
+using CleanArchitecture.Blazor.Infrastructure.Services.VotingSystem;
 
 namespace CleanArchitecture.Blazor.Infrastructure;
 
@@ -214,6 +215,9 @@ public static class DependencyInjection
 
         //services.AddScoped<IVoteSummaryService, VoteSummaryService>();
         //services.AddScoped<IVoteService, VoteService>();
+
+        services.AddScoped<IVoteSummaryService, VoteSummaryService>();
+
 #endif
         return services.AddSingleton<ISerializer, SystemTextJsonSerializer>()
             .AddScoped<ICurrentUserService, CurrentUserService>()

@@ -27,8 +27,8 @@ try
     var app = builder.Build();
 
     app.ConfigureServer(builder.Configuration);
-   
- 
+
+
     if (app.Environment.IsDevelopment())
     {
         // Initialise and seed database
@@ -55,7 +55,9 @@ try
         await initializer.LoadAllTenants();
         await initializer.LoadUserBaseRoles();
     }
-    app.UseMiddleware<ConcurrencyControlMiddleware>();
+    //app.UseMiddleware<ConcurrencyControlMiddleware>();
+    app.UseMiddleware<VoteSummaryRefreshMiddleware>();
+
     await app.RunAsync();
 }
 catch (Exception e)
