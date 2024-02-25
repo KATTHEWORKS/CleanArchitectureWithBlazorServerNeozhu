@@ -12,7 +12,7 @@ using CleanArchitecture.Blazor.Domain.Identity;
 using Microsoft.EntityFrameworkCore;
 using PublicCommon;
 
-namespace CleanArchitecture.Blazor.Domain.Entities;
+namespace CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 //https://sansad.in/
 
 //dbtable3
@@ -81,13 +81,13 @@ public class VoteSummary : BaseAuditableEntity //each location one row as summar
         var totalKpis = KPIVotes.Count;
         Rating = totalKpis != 0 ? (sbyte)Math.Min(3, Math.Max(-2, sumOfAggregateKPIs / totalKpis)) : (sbyte)0;
     }
-    public class ToAddRemove
-    {
+}
+public class ToAddRemove
+{
 
-        public int? CommentCountDifference { get; set; }
-        public List<(int KPI, sbyte? Rating)>? ToAdd { get; set; }
-        public int ConstituencyIdToAdd { get; set; }
-        public List<(int KPI, sbyte? Rating)>? ToRemove { get; set; }
-        public int ConstituencyIdToRemove { get; set; }
-    }
+    public int? CommentCountDifference { get; set; }
+    public List<(int KPI, sbyte? Rating)>? ToAdd { get; set; }
+    public int ConstituencyIdToAdd { get; set; }
+    public List<(int KPI, sbyte? Rating)>? ToRemove { get; set; }
+    public int ConstituencyIdToRemove { get; set; }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CleanArchitecture.Blazor.Domain.Entities;
+namespace CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 public class KPI(int id, string nameShort, byte systemType = 1)
 {
     public KPI(int id, string nameShort, string nameFull, string description, byte systemType = 1)

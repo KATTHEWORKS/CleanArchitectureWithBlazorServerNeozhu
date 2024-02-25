@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using CleanArchitecture.Blazor.Domain.Identity;
 using PublicCommon;
 
-namespace CleanArchitecture.Blazor.Domain.Entities;
+namespace CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
 //https://sansad.in/
 
 //this structure is for storing in db purpose,not for viewing

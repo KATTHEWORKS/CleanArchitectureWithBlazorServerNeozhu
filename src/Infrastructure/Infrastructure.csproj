@@ -54,4 +54,7 @@
     <ItemGroup>
         <ProjectReference Include="..\Application\Application.csproj" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Services\VotingSystem\" />
+    </ItemGroup>
 </Project>
