@@ -65,11 +65,10 @@
 
                                                     }
                                                 }
-                                        </div>
-
-                                    </MudElement>
-
-                                    <MudTooltip Text="@L["Click upload a image."]">
+                                            </div>
+                                        </MudElement>
+                                    }
+                                    <MudTooltip Text="@L["Click upload a image"]">
                                         <MudFileUpload T="IBrowserFile" Accept=".jpg, .jpeg, .png, .webp" FilesChanged="UploadPhoto" Style="margin-top:-10px;margin-left:-15px">
                                             <ButtonTemplate>
                                                 <MudIconButton HtmlTag="label"
@@ -127,7 +126,7 @@
                                                   Variant="Variant.Text"
                                                   PasswordMode="true"
                                                   Required="true"
-                                                  RequiredError="@L["current password is required!"]" />
+                                                  />
                             </MudItem>
                             <MudItem xs="12">
                                 <MudPasswordField Immediate="true"
@@ -137,7 +136,7 @@
                                                   Variant="Variant.Text"
                                                   PasswordMode="true"
                                                   Required="true"
-                                                  RequiredError="@L["password is required!"]" />
+                                                  />
                             </MudItem>
                             <MudItem xs="12">
                                 <MudPasswordField Immediate="true"
@@ -147,7 +146,7 @@
                                                   Variant="Variant.Text"
                                                   PasswordMode="true"
                                                   Required="true"
-                                                  RequiredError="@L["password is required!"]" />
+                                                 />
                             </MudItem>
                             <MudItem sm="12" xs="12" Class="d-flex justify-end">
                                 <MudButton ButtonType="ButtonType.Button" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto" OnClick="@(async () => await ChangePassword())">
@@ -192,7 +191,7 @@
 
     public string Id => Guid.NewGuid().ToString();
     private bool IsLoading => UserProfileState.Value.IsLoading;
-    private UserProfile? model => UserProfileState.Value.UserProfile;
+    private UserProfile model => UserProfileState.Value.UserProfile;
 
 
     private async void ActivePanelIndexChanged(int index)
@@ -261,20 +260,20 @@
         using (var outStream = new MemoryStream())
             {
             using (var image = Image.Load(imgstream))
-                {
-                image.Mutate(i => i.Resize(new ResizeOptions() { Mode = SixLabors.ImageSharp.Processing.ResizeMode.Crop, Size = new SixLabors.ImageSharp.Size(128, 128) }));
-                image.Save(outStream, SixLabors.ImageSharp.Formats.Png.PngFormat.Instance);
-                var result = await UploadService.UploadAsync(new UploadRequest(Guid.NewGuid().ToString() + ".png", UploadType.ProfilePicture, outStream.ToArray()));
-                // model.ProfilePictureDataUrl = result;
-                // var user = await _userManager.FindByIdAsync(model.UserId!);
-                // user!.ProfilePictureDataUrl = model.ProfilePictureDataUrl;
-                // await _userManager.UpdateAsync(user);
-                await UserManager.UpdateColumn(model.UserId, nameof(model.ProfilePictureDataUrl), result);
-                Snackbar.Add(L["The avatar has been updated."], MudBlazor.Severity.Info);
-                Dispatcher.Dispatch(new UserProfileUpdateAction() { UserProfile = model });
-                }
+            {
+                image.Mutate(i => i.Resize(new ResizeOptions { Mode = ResizeMode.Crop, Size = new Size(128, 128) }));
+                image.Save(outStream, PngFormat.Instance);
+                var result = await UploadService.UploadAsync(new UploadRequest(Guid.NewGuid() + ".png", UploadType.ProfilePicture, outStream.ToArray()));
+                //model.ProfilePictureDataUrl = result;
+                //var user = await UserManager.FindByIdAsync(model.UserId!);
+                //user!.ProfilePictureDataUrl = model.ProfilePictureDataUrl;
+                //await UserManager.UpdateAsync(user);
+    await UserManager.UpdateColumn(model.UserId, nameof(model.ProfilePictureDataUrl), result);
+                Snackbar.Add(L["The avatar has been updated"], Severity.Info);
+                Dispatcher.Dispatch(new UserProfileUpdateAction { UserProfile = model });
             }
         }
+    }
 
     private async Task Submit()
         {
@@ -313,9 +312,9 @@
                 var user = await UserManager.FindByIdAsync(model.UserId!);
                 var result = await UserManager.ChangePasswordAsync(user!, _changepassword.CurrentPassword, _changepassword.NewPassword);
                 if (result.Succeeded)
-                    {
-                    Snackbar.Add($"{L["Changed password successfully."]}", Severity.Info);
-                    }
+                {
+                    Snackbar.Add($"{L["Password changed successfully"]}", Severity.Info);
+                }
                 else
                     {
                     Snackbar.Add($"{string.Join(",", result.Errors.Select(x => x.Description).ToArray())}", Severity.Error);
