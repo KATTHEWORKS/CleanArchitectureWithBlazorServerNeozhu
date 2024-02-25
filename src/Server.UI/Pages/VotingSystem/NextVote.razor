@@ -13,14 +13,15 @@
 @using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Constituencies.Components
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.GetByUserId
 @using CleanArchitecture.Blazor.Server.UI.Pages.VotingSystem.Votes.Components
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.VoteSummaries.DTOs
 @inject IJSRuntime JS
 @inject IStringLocalizer<ConstituenciesPage> L
-@attribute [Authorize(Policy = Permissions.Constituencies.View)]
+@* @attribute [Authorize(Policy = Permissions.Constituencies.View)] *@
 <PageTitle>@Title</PageTitle>
 <style>
     /*  .mud-table-toolbar {
-                height: 120px !important;
-            } */
+                                height: 120px !important;
+                            } */
 </style>
 
 <MudDataGrid ServerData="@(ServerReload)"
@@ -143,7 +144,9 @@
         </div>
     </ToolBarContent>
     <Columns>
-        <SelectColumn ShowInFooter="false"></SelectColumn>
+
+        <HierarchyColumn T="VoteSummaryDto" ButtonDisabledFunc="@(x => x.KPIVotes== null)"></HierarchyColumn>
+        @* if not logged in then dont show actions *@
         <TemplateColumn CellStyle="width:60px" Title="@ConstantString.Actions" Sortable="false">
             <CellTemplate>
                 @if (_canEdit || _canDelete)
@@ -192,8 +195,22 @@
         <PropertyColumn Property="x => x.ReadsCount" Title="@L[_currentDto.GetMemberDescription(x=>x.ReadsCount)]" />
         <PropertyColumn Property="x => x.Summary.VotesCount" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary.VotesCount)]" />
         <PropertyColumn Property="x => x.Summary.Rating" Title="@L[_currentDto.GetMemberDescription(x=>x.Summary.Rating)]" />
-
+       
     </Columns>
+    <ChildRowContent>
+        <MudCard>
+            @* here only add vote,edit vote, raise complaint all buttons should appear *@
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h6">@context.Item.Summary.VotesCount</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudText>This element is number @context.Item.Summary.VotesCount</MudText>
+                <MudText>This element has a molar mass of @context.Item.Summary.VotesCount</MudText>
+            </MudCardContent>
+        </MudCard>
+    </ChildRowContent>
     <NoRecordsContent>
         <MudText>@ConstantString.NoRecords</MudText>
     </NoRecordsContent>
@@ -230,7 +247,7 @@
     private GetByUserIdQuery Q { get; set; }
     [Inject]
     private IBlazorDownloadFileService BlazorDownloadFileService { get; set; } = null!;
-    private bool _canSearch;
+    private bool _canSearch = true;//for all including anonymous
     private bool _canCreate;//can add vote,yes if logged
     private bool _canEdit;
     private bool _canDelete;
@@ -239,24 +256,27 @@
     protected override async Task OnInitializedAsync()
         {
 
-        Title = L[_currentDto.GetClassDescription()];
+        Title = "Mp24.in";
         var state = await AuthState;
-        Q = new GetByUserIdQuery() { UserId = state.GetUserId() };
-        var myVote=await Mediator.Send(Q).ConfigureAwait(false);
+        if (state.IsAuthenticated())
+            {
+            Q = new GetByUserIdQuery() { UserId = state.GetUserId() };
+            var myVote = await Mediator.Send(Q).ConfigureAwait(false);
 
-        _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Create)).Succeeded;
-        _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Search)).Succeeded;
-        _canEdit = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Edit)).Succeeded;
-        _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Delete)).Succeeded;
+            _canCreate = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Create)).Succeeded;
+            // _canSearch = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Search)).Succeeded;
+            _canEdit = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Edit)).Succeeded;
+            _canDelete = (await AuthService.AuthorizeAsync(state.User, Permissions.Votes.Delete)).Succeeded;
 
-        _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Export)).Succeeded;
+            _canExport = (await AuthService.AuthorizeAsync(state.User, Permissions.Constituencies.Export)).Succeeded;
+            }
         }
     private async Task<GridData<ConstituencyDto>> ServerReload(GridState<ConstituencyDto> state)
         {
         try
             {
             _loading = true;
-            Query.CurrentUser = UserProfile;
+            //   Query.CurrentUser = UserProfile;//since anonymous so not required as of now
             Query.OrderBy = state.SortDefinitions.FirstOrDefault()?.SortBy ?? "Id";
             Query.SortDirection = state.SortDefinitions.FirstOrDefault()?.Descending ?? true ? SortDirection.Descending.ToString() : SortDirection.Ascending.ToString();
             Query.PageNumber = state.Page + 1;
