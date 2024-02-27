@@ -15,6 +15,8 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.DependencyInjection;
 using RazorLight.Extensions;
 using CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
+using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Office.CustomUI;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Services.VotingSystem;
 
@@ -67,6 +69,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
 
     public async Task RefreshSummary()
     {
+        //Vote for mp,DoNotValidateAgainstSchema had to be each time calculate whole db once read all from vote & SummaryLength & QuickAccessToolbar update 
         try
         {
             if (DateTime.Now.Subtract(lastLoadedOn).TotalMinutes > RefreshFrequncyInMinutes && DeltaLoadingInProgress == false)
@@ -339,6 +342,12 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                     {
                         ConstituencyId = diff.ConstituencyIdToAdd,
                         KPIVotes = temp,
+
+                        //if VoteSummary constructor does this job then this can be removed
+                        VotesCount = temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),
+
+                        //for,against had to be fetched directly from votes table direct data only
+                        //VotesCountForExistingMp= temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),
                         CommentsCount = diff.CommentCountDifference > 0 ? 1 : 0
                         //,AggregateVote  had top check whether its added to db by generating or not
                     };
@@ -495,10 +504,12 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //either it shoudlbe be newly added vote or existing with delta
         //else
         if (
-            //vote.Modified<=filterTime &&
-            vote.ConstituencyIdDelta == null || vote.KPIRatingCommentsDelta == null
+            (vote.Created < filterTime && vote.LastModified < filterTime)
+           &&
+            (vote.ConstituencyIdDelta == null || vote.KPIRatingCommentsDelta == null
             || vote.KPIRatingComments == null ||
             (vote.KPIRatingComments.Count == 0 && vote.KPIRatingCommentsDelta.Count == 0))
+            )
             return null;
         var toAddRemove = new ToAddRemove();
 

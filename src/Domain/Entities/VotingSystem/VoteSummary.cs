@@ -22,6 +22,7 @@ public class VoteSummary : BaseAuditableEntity //each location one row as summar
     {
         Created = DateTime.Now;
         CalculateAggregateRatingOfConstituency();
+        VotesCount = KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count));
     }
 
     //[Key]
@@ -40,7 +41,7 @@ public class VoteSummary : BaseAuditableEntity //each location one row as summar
     public int CommentsCount { get; set; } = 0;
 
     [Required]
-    public int VotesCount { get; set; } = 0;
+    public int VotesCount { get; set; } = 0;// KPIVotes.Sum(x=>x.RatingTypeCountsList.Sum(c=>c.Count));
     // public int VoteCount { get { return KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)); } }
     //this is for total aggregate of all KPI values
     //AggregateRatingOfConstituency
@@ -53,6 +54,7 @@ public class VoteSummary : BaseAuditableEntity //each location one row as summar
 
     public void UpdateModified()
     {
+        VotesCount = KPIVotes.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count));
         LastModified = DateTime.Now;
     }
     //below propertiues will be used in Dtos,so here commenting
