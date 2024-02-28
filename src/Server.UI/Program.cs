@@ -56,8 +56,7 @@ try
         await initializer.LoadUserBaseRoles();
     }
     //app.UseMiddleware<ConcurrencyControlMiddleware>();
-    app.UseMiddleware<VoteSummaryRefreshMiddleware>();
-
+    
     await app.RunAsync();
 }
 catch (Exception e)

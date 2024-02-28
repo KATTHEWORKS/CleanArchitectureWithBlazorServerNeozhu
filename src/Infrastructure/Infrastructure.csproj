@@ -19,6 +19,10 @@
     </ItemGroup>
     
     <ItemGroup>
+      <Compile Remove="Services\VotingSystem\VoteSummaryService.cs" />
+    </ItemGroup>
+    
+    <ItemGroup>
         
         <PackageReference Include="EFCore.NamingConventions" Version="8.0.3" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.2" />

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using CleanArchitecture.Blazor.Application.Common.PublishStrategies;
+using CleanArchitecture.Blazor.Application.Features.VotingSystem;
 using CleanArchitecture.Blazor.Application.Pipeline;
 using CleanArchitecture.Blazor.Application.Pipeline.PreProcessors;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,7 +29,7 @@ public static class DependencyInjection
             config.AddOpenBehavior(typeof(AuthorizationBehaviour<,>));
             config.AddOpenBehavior(typeof(CacheInvalidationBehaviour<,>));
         });
-
+        services.AddScoped<IVoteSummaryService, VoteSummaryService>();
         services.AddLazyCache();
 
         return services;

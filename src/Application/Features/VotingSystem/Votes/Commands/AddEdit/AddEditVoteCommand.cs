@@ -61,15 +61,18 @@ public class AddEditVoteCommandHandler : IRequestHandler<AddEditVoteCommand, Res
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IStringLocalizer<AddEditVoteCommandHandler> _localizer;
+    private readonly IVoteSummaryService _voteSummaryService;
     public AddEditVoteCommandHandler(
         IApplicationDbContext context,
         IStringLocalizer<AddEditVoteCommandHandler> localizer,
-        IMapper mapper
+        IMapper mapper,
+        IVoteSummaryService voteSummaryService
         )
     {
         _context = context;
         _localizer = localizer;
         _mapper = mapper;
+        _voteSummaryService = voteSummaryService;
     }
     public async Task<Result<int>> Handle(AddEditVoteCommand request, CancellationToken cancellationToken)
     {
@@ -88,7 +91,9 @@ public class AddEditVoteCommandHandler : IRequestHandler<AddEditVoteCommand, Res
             // raise a create domain event
             item.AddDomainEvent(new VoteCreatedEvent(item));
             _context.Votes.Add(item);
-            await _context.SaveChangesAsync(cancellationToken);
+            if (await _context.SaveChangesAsync(cancellationToken) > 0)
+                _voteSummaryService.RefreshSummary();//dont wait for result
+                                                     //may be only wait for first 5 votes .
             return await Result<int>.SuccessAsync(item.Id);
         }
 
