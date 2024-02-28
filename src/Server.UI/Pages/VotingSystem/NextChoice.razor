@@ -1,10 +1,14 @@
 ﻿@page "/"
+@page "/{ConstituencyIdSelected:int?}/{IsToAdd:bool?}"
+@* @page "/{ConstituencyIdSelected:int?}/{IsToAdd:bool?}" *@
 
 @using System.Linq
 @using System.Threading.Tasks
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.DTOs
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.GetByUserId
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @inject IMediator Mediator
 @inject IStringLocalizer<ConstituenciesPage> L
@@ -29,7 +33,14 @@
                     <p>State: @constituency.State</p>
                     <p>Existing MP: @constituency.MpNameExisting</p>
                     <p>Existing Party: @constituency.ExistingMpParty</p>
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Add MyVote</MudButton>
+                    @if (MyVote != null && constituency.Id == MyVote.ConstituencyId)
+                        {
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Update MyVote</MudButton>
+                        }
+                    else
+                        {
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Add MyVote</MudButton>
+                        }
                     <!-- Add/Edit Vote buttons and other details here -->
                 </div>
                 }
@@ -38,10 +49,25 @@
     }
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+    [Parameter]
+    public string StateSelected { get; set; }
+
+    [Parameter]
+    public int ConstituencyIdSelected { get; set; }
+
+    [Parameter]
+    public bool? IsToAdd { get; set; }
+
+
+    @inject NavigationManager Navigation;
+
     private string Title { get; set; } = "Mp24.in";
     private string searchTerm = "";
     private List<ConstituencyDto> constituencies;//on default load last/recent/top search results
     private ConstituenciesWithPaginationQuery Query { get; set; } = new();
+    private VoteDto? MyVote = null;
     private async Task LoadConstituencies(string searchText)
         {
         Query.Keyword = searchText;
@@ -55,7 +81,24 @@
 
     protected override async Task OnInitializedAsync()
         {
-        await LoadConstituencies(searchTerm);
+        if (ConstituencyIdSelected > 0 && string.IsNullOrEmpty(searchTerm))
+            {
+            Query.Id = ConstituencyIdSelected;
+            var result = await Mediator.Send(Query).ConfigureAwait(false);
+            constituencies = result.Items.ToList();
+            }
+        else
+            {
+            await LoadConstituencies(searchTerm);
+            }
+
+        var state = await AuthState;
+
+        if (state.IsAuthenticated())
+            {
+            var myQuery = new GetByUserIdQuery() { UserId = state.GetUserId() };
+            MyVote = await Mediator.Send(myQuery).ConfigureAwait(false);
+            }
         }
 
     private async Task Search()
@@ -69,49 +112,69 @@
             await Search();
             }
         }
-    private void AddMyVote(ConstituencyDto result)
-        {
-        // Replace with your logic to add inputs based on the selected result
-        // Example: Show a form or input fields for the user to add data
-        // You can use state management (e.g., cascading parameters, services) to pass data between components
-        // For anonymous users, consider using local storage or session storage to persist data
-        }
 
     private async Task OnAddMyVoteToConstituency(ConstituencyDto dto)
         {
-        // var command = Mapper.Map<AddEditConstituencyCommand>(dto);
-        // var parameters = new DialogParameters<ConstituencyFormDialog>
-        //     {
-        //         { x=>x.model,command },
-        //     };
-        // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        // var dialog = DialogService.Show<ConstituencyFormDialog>
-        // (L["Edit the item"], parameters, options);
-        // var state = await dialog.Result;
-
-        //had to fetch my vote & attach with passing entity to add/edit screen of vote
-        VoteDto newVote = new VoteDto()
+        var state = await AuthState;
+        if (state.IsAuthenticated())
+            {
+            VoteDto newVote = new VoteDto()
+                    {
+                    ConstituencyId = dto.Id,
+                    ConstituencyName = $"{dto.Name}/{dto.State}",
+                    MpNameExisting = $"{dto.MpNameExisting}/{dto.ExistingMpParty}",
+                    ExistingMpTerms = dto.ExistingMpTerms
+                    //,UserId = state//fetch from logged in account
+                    };
+            @if (MyVote != null && dto.Id == MyVote.ConstituencyId)
                 {
-                ConstituencyId = dto.Id,
-                ConstituencyName = $"{dto.Name}/{dto.State}",
-                MpNameExisting = $"{dto.MpNameExisting}/{dto.ExistingMpParty}",
-                ExistingMpTerms = dto.ExistingMpTerms
-                //,UserId = state//fetch from logged in account
-                };
+                MyVote.ConstituencyName = $"{dto.Name}/{dto.State}";
+                MyVote.MpNameExisting = $"{dto.MpNameExisting}/{dto.ExistingMpParty}";
+                MyVote.ExistingMpTerms = dto.ExistingMpTerms;
+                newVote = MyVote;
+                }
 
-        var command = Mapper.Map<AddEditVoteCommand>(newVote);
-        var parameters = new DialogParameters<VoteFormDialog>
+            var command = Mapper.Map<AddEditVoteCommand>(newVote);
+            var parameters = new DialogParameters<VoteFormDialog>
             {
                 { x=>x.model,command },
             };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-        var dialog = DialogService.Show<VoteFormDialog>
-        (L[$"Adding My Vote to Constituency: {dto.Name}/{dto.State}"], parameters, options);//updating if exists
-        var state = await dialog.Result;
-        if (!state.Canceled)
-            {
-            //reload inputted constituency results
-            // await _table.ReloadServerData();
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+            var dialog = DialogService.Show<VoteFormDialog>
+            (L[$"Adding My Vote to Constituency: {dto.Name}/{dto.State}"], parameters, options);//updating if exists
+            var result1 = await dialog.Result;
+            if (!result1.Canceled)
+                {
+                //reload inputted constituency results
+                // await _table.ReloadServerData();
+                }
+            // Add logic to add vote here
             }
+        else
+            {
+            // Redirect to login page or show login modal
+            await LoginThenRedirectToAdd(dto);
+            }
+        }
+
+    private async Task LoginThenRedirectToAdd(ConstituencyDto dto)
+        {
+        var returnUrl = Uri.UnescapeDataString(Navigation.Uri).Replace(Navigation.BaseUri, string.Empty);
+        //if (string.IsNullOrEmpty(returnUrl))
+        returnUrl = $"?returnUrl={dto.Id}/true";
+        Navigation.NavigateTo($"{UiConstants.LoginUrl}{returnUrl}", forceLoad: true);
+        // else
+        //     returnUrl = $"?returnUrl={returnUrl}{ConstituencyId}/true";
+        //vote/constid/true => vote/3/true means after login directly addvote
+        // if (string.IsNullOrEmpty(userId))
+        //     {
+        //     // Redirect to the login page & then to this page
+        //     Navigation.NavigateTo($"{UiConstants.LoginUrl}{returnUrl}", forceLoad: true);
+        //     }
+        // else
+        //     {
+        //     // Redirect to the specified URL after successful login
+        //     Navigation.NavigateTo(returnUrl);
+        //     }
         }
 }

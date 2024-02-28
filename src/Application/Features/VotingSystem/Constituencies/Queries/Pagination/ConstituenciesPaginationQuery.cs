@@ -11,6 +11,7 @@ namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituenc
 
 public class ConstituenciesWithPaginationQuery : ConstituencyAdvancedFilter, ICacheableRequest<PaginatedData<ConstituencyDto>>
 {
+    public int Id { get; set; }
     public override string ToString()
     {
         return $"Listview:{ListView}, Search:{Keyword}, {OrderBy}, {SortDirection}, {PageNumber}, {PageSize}";
