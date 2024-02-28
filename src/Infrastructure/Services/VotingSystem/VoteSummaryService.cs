@@ -344,7 +344,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                         KPIVotes = temp,
 
                         //if VoteSummary constructor does this job then this can be removed
-                        VotesCount = temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),
+                      //  VotesCount = temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),
 
                         //for,against had to be fetched directly from votes table direct data only
                         //VotesCountForExistingMp= temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),
