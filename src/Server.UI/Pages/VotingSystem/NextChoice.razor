@@ -1,0 +1,117 @@
+﻿@page "/"
+
+@using System.Linq
+@using System.Threading.Tasks
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.DTOs
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit
+
+@inject IMediator Mediator
+@inject IStringLocalizer<ConstituenciesPage> L
+ @inject IMapper Mapper
+
+<PageTitle>@Title</PageTitle>
+<MudCard>
+    <MudCardContent>
+        <MudTextField Label="Search" @bind-Value="searchTerm" Variant="Variant.Filled" @onkeydown="HandleKeyPress" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Search">Search</MudButton>
+    </MudCardContent>
+</MudCard>
+
+@if (constituencies != null && constituencies.Any())
+    {
+    <MudCard>
+        <MudCardContent>
+            @foreach (var constituency in constituencies)
+                {
+                <div>
+                    <h3>@constituency.Name</h3>
+                    <p>State: @constituency.State</p>
+                    <p>Existing MP: @constituency.MpNameExisting</p>
+                    <p>Existing Party: @constituency.ExistingMpParty</p>
+                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Add MyVote</MudButton>
+                    <!-- Add/Edit Vote buttons and other details here -->
+                </div>
+                }
+        </MudCardContent>
+    </MudCard>
+    }
+
+@code {
+    private string Title { get; set; } = "Mp24.in";
+    private string searchTerm = "";
+    private List<ConstituencyDto> constituencies;//on default load last/recent/top search results
+    private ConstituenciesWithPaginationQuery Query { get; set; } = new();
+    private async Task LoadConstituencies(string searchText)
+        {
+        Query.Keyword = searchText;
+        // Query.OrderBy = state.SortDefinitions.FirstOrDefault()?.SortBy ?? "Id";
+        // Query.SortDirection = state.SortDefinitions.FirstOrDefault()?.Descending ?? true ? SortDirection.Descending.ToString() : SortDirection.Ascending.ToString();
+        // Query.PageNumber = state.Page + 1;
+        // Query.PageSize = state.PageSize;
+        var result = await Mediator.Send(Query).ConfigureAwait(false);
+        constituencies = result.Items.ToList();
+        }
+
+    protected override async Task OnInitializedAsync()
+        {
+        await LoadConstituencies(searchTerm);
+        }
+
+    private async Task Search()
+        {
+        await LoadConstituencies(searchTerm);
+        }
+    private async Task HandleKeyPress(KeyboardEventArgs e)
+        {
+        if (e.Key == "Enter")
+            {
+            await Search();
+            }
+        }
+    private void AddMyVote(ConstituencyDto result)
+        {
+        // Replace with your logic to add inputs based on the selected result
+        // Example: Show a form or input fields for the user to add data
+        // You can use state management (e.g., cascading parameters, services) to pass data between components
+        // For anonymous users, consider using local storage or session storage to persist data
+        }
+
+    private async Task OnAddMyVoteToConstituency(ConstituencyDto dto)
+        {
+        // var command = Mapper.Map<AddEditConstituencyCommand>(dto);
+        // var parameters = new DialogParameters<ConstituencyFormDialog>
+        //     {
+        //         { x=>x.model,command },
+        //     };
+        // var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        // var dialog = DialogService.Show<ConstituencyFormDialog>
+        // (L["Edit the item"], parameters, options);
+        // var state = await dialog.Result;
+
+        //had to fetch my vote & attach with passing entity to add/edit screen of vote
+        VoteDto newVote = new VoteDto()
+                {
+                ConstituencyId = dto.Id,
+                ConstituencyName = $"{dto.Name}/{dto.State}",
+                MpNameExisting = $"{dto.MpNameExisting}/{dto.ExistingMpParty}",
+                ExistingMpTerms = dto.ExistingMpTerms
+                //,UserId = state//fetch from logged in account
+                };
+
+        var command = Mapper.Map<AddEditVoteCommand>(newVote);
+        var parameters = new DialogParameters<VoteFormDialog>
+            {
+                { x=>x.model,command },
+            };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = DialogService.Show<VoteFormDialog>
+        (L[$"Adding My Vote to Constituency: {dto.Name}/{dto.State}"], parameters, options);//updating if exists
+        var state = await dialog.Result;
+        if (!state.Canceled)
+            {
+            //reload inputted constituency results
+            // await _table.ReloadServerData();
+            }
+        }
+}
