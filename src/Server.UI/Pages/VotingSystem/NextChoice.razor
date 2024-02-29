@@ -29,10 +29,8 @@
             @foreach (var constituency in constituencies)
                 {
                 <div>
-                    <h3>@constituency.Name</h3>
-                    <p>State: @constituency.State</p>
-                    <p>Existing MP: @constituency.MpNameExisting</p>
-                    <p>Existing Party: @constituency.ExistingMpParty</p>
+                    <h3>@constituency.Name / @constituency.State</h3>
+                    <p>Existing MP: @constituency.MpNameExisting/@constituency.ExistingMpParty/@constituency.ExistingMpTerms</p>
                     @if (MyVote != null && constituency.Id == MyVote.ConstituencyId)
                         {
                         <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Update MyVote</MudButton>
@@ -40,6 +38,13 @@
                     else
                         {
                         <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Add MyVote</MudButton>
+                        }
+                    @if (constituency.Summary != null && constituency.Summary.KPIVotes != null)
+                        {
+                        foreach (var kpi in constituency.Summary.KPIVotes)
+                            {
+                            <MudInputLabel> @KPI.Get(kpi.KPI).Name- @kpi.AggregateRatingOfKPI - by @kpi.RatingTypeCountsList.Sum(c => c.Count)</MudInputLabel>
+                            }
                         }
                     <!-- Add/Edit Vote buttons and other details here -->
                 </div>
@@ -51,8 +56,6 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> AuthState { get; set; } = default!;
-    [Parameter]
-    public string StateSelected { get; set; }
 
     [Parameter]
     public int ConstituencyIdSelected { get; set; }
