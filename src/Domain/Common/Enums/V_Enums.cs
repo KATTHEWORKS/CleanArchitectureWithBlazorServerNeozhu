@@ -37,11 +37,19 @@ namespace CleanArchitecture.Blazor.Domain.Common.Enums;
 
 public enum RatingEnum
 {
-    VeryBad = -2,
-    Bad = -1,
+    VeryBad =  -2,
+    Bad =  -1,
     OkOk = 0,
-    GoodPersonButUnableToDoDueToOtherCircumstances = 1,
-    GoodWork = 2,
-    GreatWork = 3
+    //GoodPersonButUnableToDoDueToOtherCircumstances = 1,
+    GoodWork =  1,
+    GreatWork =  2
 }
-
+//public enum RatingEnum
+//{
+//    VeryBad = 1,// -2,
+//    Bad = 2,// -1,
+//    OkOk = 3,//0,
+//    //GoodPersonButUnableToDoDueToOtherCircumstances = 1,
+//    GoodWork = 4,// 1,
+//    GreatWork = 5,// 2
+//}

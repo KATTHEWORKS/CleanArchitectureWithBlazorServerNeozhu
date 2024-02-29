@@ -19,16 +19,15 @@
                 <MudNumericField Label="@L[model.GetMemberDescription(x=>x.ConstituencyName)]" @bind-Value="model.ConstituencyId" For="@(() => model.ConstituencyId)" Min="0" Required="false" RequiredError="@L["constituency id is required!"]"></MudNumericField>
                 display name of selected constituency,also allow to edit
                 </MudItem>*@
-                <MudItem xs="12" md="6">
-                    <MudInputLabel> @L["Current MP/Party/Times"]: @model.MpNameExisting / @model.ExistingMpTerms </MudInputLabel>
-                </MudItem>
+               
                 <MudItem xs="12" md="6">
                     @*  <MudTextField Label="@L[model.GetMemberDescription(x=>x.OpenIssues)]" @bind-Value="model.OpenIssues" For="@(() => model.OpenIssues)" Min="0" Required="false" RequiredError="@L["constituency id delta is required!"]"></MudTextField> *@
                     <MudInputLabel>@L[model.GetMemberDescription(x => x.WishToReElectMp)]</MudInputLabel>
+                    <MudInputLabel> @L["Current MP/Party/Times"]: @model.MpNameExisting / @model.ExistingMpTerms </MudInputLabel>
                     <MudRadioGroup T="bool?" Label="@L[model.GetMemberDescription(x=>x.WishToReElectMp)]" @bind-SelectedOption="model.WishToReElectMp">
-                        <MudRadio T="bool?" Option="@true" Color="Color.Success">Yes</MudRadio>
-                        <MudRadio T="bool?" Option="@false" Color="Color.Error">No</MudRadio>
-                        <MudRadio T="bool?" Option="@null">Not Sure</MudRadio>
+                        <MudRadio T="bool?" Value="@true" Color="Color.Success">Yes</MudRadio>
+                        <MudRadio T="bool?" Value="@false" Color="Color.Error">No</MudRadio>
+                        <MudRadio T="bool?" Value="@null">Not Sure</MudRadio>
                     </MudRadioGroup>
                 </MudItem>
 
@@ -45,18 +44,21 @@
                         </MudItem>
 
                         <!-- Rating field with radio buttons -->
-                        <MudItem>
-                            <MudRadioGroup T="sbyte?" Label="@L[model.GetMemberDescription(x=>kpiRatingComment.Rating)]" @bind-SelectedOption="kpiRatingComment.Rating">
-                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.VeryBad)" Placement="@Placement.Bottom" Color="Color.Error"> @RatingEnum.VeryBad </MudRadio>
-                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.Bad)" Placement="@Placement.Bottom" Color="Color.Dark"> @RatingEnum.Bad </MudRadio>
-                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.OkOk)" Placement="@Placement.Bottom" Color="Color.Default"> @RatingEnum.OkOk </MudRadio>
+                        @* <MudItem> *@
 
-                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.GoodWork)" Placement="@Placement.Bottom" Color="Color.Success"> @RatingEnum.GoodWork </MudRadio>
-                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.GreatWork)" Placement="@Placement.Bottom" Color="Color.Tertiary"> @RatingEnum.GreatWork </MudRadio>
-                                <MudRadio T="sbyte?" Option="@((sbyte?)RatingEnum.GoodPersonButUnableToDoDueToOtherCircumstances)" Placement="@Placement.Bottom" Color="Color.Secondary"> Good But </MudRadio>
+                      
+                            <MudRadioGroup T="sbyte?" Label="@L[model.GetMemberDescription(x=>kpiRatingComment.Rating)]" @bind-Value="kpiRatingComment.Rating">
+                             <div class="radio-container">
+                                <MudRadio T="sbyte?" Value="@((sbyte?)RatingEnum.VeryBad)" Placement="@Placement.Bottom" Color="Color.Error" Size="Size.Small"> <very-small>@RatingEnum.VeryBad </very-small></MudRadio>
+                                <MudRadio T="sbyte?" Value="@((sbyte?)RatingEnum.Bad)" Placement="@Placement.Bottom" Color="Color.Dark" Size="Size.Small"><very-small>@RatingEnum.Bad </very-small> </MudRadio>
+                                <MudRadio T="sbyte?" Value="@((sbyte?)RatingEnum.OkOk)" Placement="@Placement.Bottom" Color="Color.Default" Size="Size.Small"> <very-small>@RatingEnum.OkOk</very-small> </MudRadio>
 
+                                <MudRadio T="sbyte?" Value="@((sbyte?)RatingEnum.GoodWork)" Placement="@Placement.Bottom" Color="Color.Success" Size="Size.Small"><very-small> Good</very-small> </MudRadio>
+                                <MudRadio T="sbyte?" Value="@((sbyte?)RatingEnum.GreatWork)" Placement="@Placement.Bottom" Color="Color.Tertiary" Size="Size.Small"> <very-small> Great </very-small> </MudRadio>
+                            </div>
                             </MudRadioGroup>
-                        </MudItem>
+                       
+                       @*  </MudItem> *@
                     </MudItem>
                     <!-- Button to toggle the comment section -->
                     @*   <div class="d-flex align-items-center">
@@ -93,7 +95,15 @@
         <MudLoadingButton Loading="@_saving" OnClick="Submit">@ConstantString.Save</MudLoadingButton>
     </DialogActions>
 </MudDialog>
-
+<style>
+    .radio-container {
+        display: flex;
+        gap: 10px; /* Adjust spacing between buttons */
+        padding-left:0px; 
+        @* float: left;
+        margin: -2px 0 0 2px; *@
+    }
+</style>
 @code {
     MudForm? _form;
     private bool _saving = false;
@@ -107,10 +117,12 @@
     [CascadingParameter]
     private Task<AuthenticationState> AuthState { get; set; } = default!;
 
-
     protected override async Task OnInitializedAsync()
         {
-        model.KPIRatingComments = KPI.GetAllDefaultAsVoteKPIRatingCommentList();
+
+        model.KPIRatingComments = KPI.MergeWithExistingVoteKPIRatingCommentList(model != null ? model.KPIRatingComments : null);
+        // model.KPIRatingComments.ForEach(x => x.Rating += 100);
+
         }
     async Task Submit()
         {

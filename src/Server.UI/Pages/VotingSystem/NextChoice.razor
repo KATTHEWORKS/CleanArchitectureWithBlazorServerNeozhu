@@ -153,11 +153,11 @@
         else
             {
             // Redirect to login page or show login modal
-            await LoginThenRedirectToAdd(dto);
+            LoginThenRedirectToAdd(dto);
             }
         }
 
-    private async Task LoginThenRedirectToAdd(ConstituencyDto dto)
+    private void LoginThenRedirectToAdd(ConstituencyDto dto)
         {
         var returnUrl = Uri.UnescapeDataString(Navigation.Uri).Replace(Navigation.BaseUri, string.Empty);
         //if (string.IsNullOrEmpty(returnUrl))

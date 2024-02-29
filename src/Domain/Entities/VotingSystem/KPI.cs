@@ -69,6 +69,11 @@ public class KPI(int id, string nameShort, byte systemType = 1)
                 existing.Add(new KPIRatingComment(item.KPI_Id));
             }
         }
+
+        foreach (var item in existing.Where(x => x.KPI == null))
+        {
+            item.KPI = KPI.Get(item.KPI_Id);
+        }
         //return existing.OrderBy(x => x.Rating).ThenBy(x => x.KPI).ToList();
         return [.. existing.OrderByDescending(x => x.Rating).ThenBy(x => x.KPI_Id)];
     }
