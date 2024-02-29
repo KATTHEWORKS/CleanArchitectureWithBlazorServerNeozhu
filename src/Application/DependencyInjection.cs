@@ -13,9 +13,10 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        services.AddAutoMapper(config=> {
+        services.AddAutoMapper(config =>
+        {
             config.AddMaps(Assembly.GetExecutingAssembly());
-            });
+        });
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
         services.AddMediatR(config =>
         {
@@ -30,6 +31,7 @@ public static class DependencyInjection
             config.AddOpenBehavior(typeof(CacheInvalidationBehaviour<,>));
         });
         services.AddScoped<IVoteSummaryService, VoteSummaryService>();
+        services.AddHostedService<VoteSummaryBackgroundService>();
         services.AddLazyCache();
 
         return services;

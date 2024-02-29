@@ -127,6 +127,7 @@
                 return;
             var state = await AuthState;
             model.UserId = state.GetUserId();
+            model.KPIRatingComments = model.KPIRatingComments.Where(x => x.Rating != null).ToList();
             var result = await _mediator.Send(model);
             if (result.Succeeded)
                 {

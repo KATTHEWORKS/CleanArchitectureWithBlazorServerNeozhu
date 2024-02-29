@@ -5,7 +5,8 @@
 @using System.Linq
 @using System.Threading.Tasks
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.DTOs
-@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination
+@using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.GetAll
+@* @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Queries.Pagination *@
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit
 @using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Queries.GetByUserId
 @inject AuthenticationStateProvider AuthenticationStateProvider
@@ -69,44 +70,49 @@
     private string Title { get; set; } = "Mp24.in";
     private string searchTerm = "";
     private List<ConstituencyDto> constituencies;//on default load last/recent/top search results
-    private ConstituenciesWithPaginationQuery Query { get; set; } = new();
+    private List<ConstituencyDto> allConstituencies;
+    private GetAllConstituenciesQuery Query { get; set; } = new();
     private VoteDto? MyVote = null;
-    private async Task LoadConstituencies(string searchText)
+
+    private async Task LoadConstituencies()
         {
-        Query.Keyword = searchText;
+        //maintain timer here ti improve optimizations or like last updated time
+
+        //Query.Keyword = searchText;
         // Query.OrderBy = state.SortDefinitions.FirstOrDefault()?.SortBy ?? "Id";
         // Query.SortDirection = state.SortDefinitions.FirstOrDefault()?.Descending ?? true ? SortDirection.Descending.ToString() : SortDirection.Ascending.ToString();
         // Query.PageNumber = state.Page + 1;
         // Query.PageSize = state.PageSize;
         var result = await Mediator.Send(Query).ConfigureAwait(false);
-        constituencies = result.Items.ToList();
+        allConstituencies = result.ToList();
         }
 
     protected override async Task OnInitializedAsync()
         {
+        await LoadConstituencies();
         if (ConstituencyIdSelected > 0 && string.IsNullOrEmpty(searchTerm))
             {
-            Query.Id = ConstituencyIdSelected;
-            var result = await Mediator.Send(Query).ConfigureAwait(false);
-            constituencies = result.Items.ToList();
-            }
-        else
-            {
-            await LoadConstituencies(searchTerm);
+            constituencies = [allConstituencies.FirstOrDefault(x => x.Id == ConstituencyIdSelected)];
             }
 
         var state = await AuthState;
 
         if (state.IsAuthenticated())
             {
-            var myQuery = new GetByUserIdQuery() { UserId = state.GetUserId() };
-            MyVote = await Mediator.Send(myQuery).ConfigureAwait(false);
+            MyVote = await Mediator.Send(new GetByUserIdQuery() { UserId = state.GetUserId() }).ConfigureAwait(false);
             }
         }
 
     private async Task Search()
         {
-        await LoadConstituencies(searchTerm);
+        await LoadConstituencies();
+        constituencies = allConstituencies.Where(x => x.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+        if (constituencies == null || constituencies.Count == 0)
+            {
+            constituencies = allConstituencies.Where(x => x.State.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || x.MpNameExisting.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+            }
         }
     private async Task HandleKeyPress(KeyboardEventArgs e)
         {
@@ -117,7 +123,7 @@
         }
 
     private async Task OnAddMyVoteToConstituency(ConstituencyDto dto)
-        {
+        { //this just opens the screen
         var state = await AuthState;
         if (state.IsAuthenticated())
             {
@@ -136,7 +142,8 @@
                 MyVote.ExistingMpTerms = dto.ExistingMpTerms;
                 newVote = MyVote;
                 }
-
+            if (newVote.KPIRatingComments != null && newVote.KPIRatingComments.Count > 0)
+                newVote.KPIRatingComments = newVote.KPIRatingComments.Where(x => x.Rating != null).ToList();
             var command = Mapper.Map<AddEditVoteCommand>(newVote);
             var parameters = new DialogParameters<VoteFormDialog>
             {
@@ -148,6 +155,7 @@
             var result1 = await dialog.Result;
             if (!result1.Canceled)
                 {
+                MyVote = await Mediator.Send(new GetByUserIdQuery() { UserId = state.GetUserId() }).ConfigureAwait(false);
                 //reload inputted constituency results
                 // await _table.ReloadServerData();
                 }

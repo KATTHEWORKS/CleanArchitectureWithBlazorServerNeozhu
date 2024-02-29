@@ -4,6 +4,7 @@
 using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.DTOs;
 using CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Caching;
 using CleanArchitecture.Blazor.Domain.Events.VotingSystem;
+using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Caching;
 namespace CleanArchitecture.Blazor.Application.Features.VotingSystem.Votes.Commands.AddEdit;
 
 public class AddEditVoteCommand : ICacheInvalidatorRequest<Result<int>>
@@ -62,27 +63,40 @@ public class AddEditVoteCommandHandler : IRequestHandler<AddEditVoteCommand, Res
     private readonly IMapper _mapper;
     private readonly IStringLocalizer<AddEditVoteCommandHandler> _localizer;
     private readonly IVoteSummaryService _voteSummaryService;
+    private readonly IAppCache _cache;
     public AddEditVoteCommandHandler(
         IApplicationDbContext context,
         IStringLocalizer<AddEditVoteCommandHandler> localizer,
         IMapper mapper,
-        IVoteSummaryService voteSummaryService
+        IVoteSummaryService voteSummaryService,
+        IAppCache cache
         )
     {
         _context = context;
         _localizer = localizer;
         _mapper = mapper;
         _voteSummaryService = voteSummaryService;
+        _cache = cache;
     }
     public async Task<Result<int>> Handle(AddEditVoteCommand request, CancellationToken cancellationToken)
     {
         if (request.Id > 0)
         {
+            request.KPIRatingComments = request.KPIRatingComments.Where(x => x.Rating != null).ToList();
+
             var item = await _context.Votes.FindAsync(new object[] { request.Id }, cancellationToken) ?? throw new NotFoundException($"Vote with id: [{request.Id}] not found.");
+            item.ConstituencyIdDelta = item.ConstituencyId;
+            item.KPIRatingCommentsDelta = item.KPIRatingComments;
             item = _mapper.Map(request, item);
             // raise a update domain event
             item.AddDomainEvent(new VoteUpdatedEvent(item));
-            await _context.SaveChangesAsync(cancellationToken);
+            if (await _context.SaveChangesAsync(cancellationToken) > 0)
+                VoteSummaryBackgroundService.DatabaseChanged = true;
+            //    await _voteSummaryService.RefreshSummary();//ideally shouldnot wait but its giving efcore issue ,so waiting
+            //                                               //may be only wait for first 5 votes .
+
+            //_cache.Remove(ConstituencyCacheKey.GetAllCacheKey);
+
             return await Result<int>.SuccessAsync(item.Id);
         }
         else
@@ -92,8 +106,10 @@ public class AddEditVoteCommandHandler : IRequestHandler<AddEditVoteCommand, Res
             item.AddDomainEvent(new VoteCreatedEvent(item));
             _context.Votes.Add(item);
             if (await _context.SaveChangesAsync(cancellationToken) > 0)
-                _voteSummaryService.RefreshSummary();//dont wait for result
-                                                     //may be only wait for first 5 votes .
+                VoteSummaryBackgroundService.DatabaseChanged = true;
+            //    await _voteSummaryService.RefreshSummary();//ideally shouldnot wait but its giving efcore issue ,so waiting
+            //                                               //may be only wait for first 5 votes .
+            //_cache.Remove(ConstituencyCacheKey.GetAllCacheKey);
             return await Result<int>.SuccessAsync(item.Id);
         }
 

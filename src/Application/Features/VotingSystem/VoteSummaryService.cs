@@ -56,14 +56,25 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //Vote for mp,DoNotValidateAgainstSchema had to be each time calculate whole db once read all from vote & SummaryLength & QuickAccessToolbar update 
         try
         {
+            //todo make it dbcontext of new so second issue will be avoided
             if (DateTime.Now.Subtract(lastLoadedOn).TotalMinutes > RefreshFrequncyInMinutes && DeltaLoadingInProgress == false)
             {
+                DeltaLoadingInProgress = true;
                 var result = "";
+                var changesResultCount = 0;
                 if (await context.VoteSummaries.AsNoTracking().AnyAsync())//not first time
-                    result += "Delta loading:" + await LoadDeltaDifferenceToSummary();
+                {
+                    changesResultCount = await LoadDeltaDifferenceToSummary();
+                    result += "Delta loading:" + changesResultCount;
+                }
 
                 else //firsttime
-                    result += "Updated:" + await LoadSummaryFromAllVotesFirstTime();
+                {
+                    changesResultCount = await LoadSummaryFromAllVotesFirstTime();
+                    result += "Updated:" + changesResultCount;
+                }
+                if (changesResultCount > 0)
+                    await UpdateVotesCount();
                 lastLoadedOn = DateTime.Now;
                 result += " at " + lastLoadedOn.ToString();
                 DeltaLoadingInProgress = false;
@@ -77,15 +88,34 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             throw;
         }
     }
+    private async Task UpdateVotesCount()
+    {
+        var constituencyVotes = await context.Votes.AsNoTracking().GroupBy(x => x.ConstituencyId).ToListAsync();
+        if (constituencyVotes != null && constituencyVotes.Count > 0)
+        {
+            //todo here this can be check and update kind of instead of direct update later on 
+            foreach (var item in constituencyVotes)
+            {
+                var votesCount = item.Count();
+                var votesCountAgainst = item.Count(i => i.WishToReElectMp == false);
+                var votesCountFor = item.Count(i => i.WishToReElectMp == true);
+                var res = await context.VoteSummaries.Where(s => s.ConstituencyId == item.Key)
+                       .ExecuteUpdateAsync(s => s
+                       .SetProperty(p => p.VotesCount, votesCount)
+                       .SetProperty(p => p.VotesCountAgainstExistingMp, votesCountAgainst)
+                       .SetProperty(p => p.VotesCountForExistingMp, votesCountFor)
+                       );
+            }
+            return;
+        }
+    }
     //summary loadings
     private async Task<int> LoadSummaryFromAllVotesFirstTime()
     //first time or weekly once to reload complete summary db ondemand only with backup
     {//very costly heavy operation
-        DeltaLoadingInProgress = true;
         var constituencyVotes = await context.Votes.AsNoTracking().GroupBy(x => x.ConstituencyId).ToListAsync();
         if (constituencyVotes == null || constituencyVotes.Count == 0)
         {
-            DeltaLoadingInProgress = false;
             return 0;
         }
         //improve this whole logic based on fetching constituency wise votes ,while fetching itself write to result set and make a sigle call to summary db... prefarrably delta db...once ready shift all to main table...using some switch in between
@@ -93,13 +123,13 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         var totalChangesCount = 0;
         foreach (var votes in constituencyVotes)
         {
-            var isFirstTime = false;
+            // var isFirstTime = false;
             var existing = await context.VoteSummaries.AsNoTracking().FirstOrDefaultAsync(x => x.ConstituencyId == votes.Key);
             foreach (var vote in votes)//running for 1 constituency at one time
             {
                 if (existing == null || existing.ConstituencyId == 0)//case1
                 {
-                    isFirstTime = true;
+                    //isFirstTime = true;
                     var temp = new List<KPIVote>();
                     if (vote.KPIRatingComments != null && vote.KPIRatingComments.Count > 0)
                         vote.KPIRatingComments.ForEach(k => temp.Add(new KPIVote() { KPI = k.KPI_Id, RatingTypeCountsList = [new((sbyte)k.Rating, 1)] }));
@@ -183,7 +213,6 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 totalChangesCount += finalCountOf1Constituency;
             }
         }
-        DeltaLoadingInProgress = false;
         return totalChangesCount;
     }
 
@@ -197,7 +226,6 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //4.add those to db
         //5.update back the step2 records delta(id & string both) as null
 
-        DeltaLoadingInProgress = true;
 
         //TODO had to add trnasaction & rollback,since IApplciationDbcontext using so need some more ground work
         //using (var transaction = await context..Database.BeginTransactionAsync())
@@ -229,7 +257,6 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
 
         if (deltaVotesToLoad == null || deltaVotesToLoad.Count == 0)
         {
-            DeltaLoadingInProgress = true;
             return 0;
         }
         //step3- getting difference
@@ -285,7 +312,6 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         //{
         //    context.V_Votes.executeu
         //}
-        DeltaLoadingInProgress = false;
         return result;
     }
 
@@ -328,7 +354,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                         KPIVotes = temp,
 
                         //if VoteSummary constructor does this job then this can be removed
-                      //  VotesCount = temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),
+                        //  VotesCount = temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),
 
                         //for,against had to be fetched directly from votes table direct data only
                         //VotesCountForExistingMp= temp.Sum(x => x.RatingTypeCountsList.Sum(c => c.Count)),

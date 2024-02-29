@@ -35,8 +35,8 @@ public class GetByUserIdQueryHandler :
     public async Task<VoteDto> Handle(GetByUserIdQuery request, CancellationToken cancellationToken)
     {
         var data = await _context.Votes.ApplySpecification(new VoteByUserIdSpecification(request.UserId))
-                     .ProjectTo<VoteDto>(_mapper.ConfigurationProvider)
-                     .FirstAsync(cancellationToken) ?? throw new NotFoundException($"Vote with UserId: [{request.UserId}] not found.");
+                     .ProjectTo<VoteDto>(_mapper.ConfigurationProvider).FirstOrDefaultAsync(cancellationToken);
+        //?? throw new NotFoundException($"Vote with UserId: [{request.UserId}] not found.");
         return data;
     }
 }

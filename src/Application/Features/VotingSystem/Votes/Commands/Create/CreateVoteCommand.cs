@@ -34,7 +34,7 @@ public class CreateVoteCommandHandler : IRequestHandler<CreateVoteCommand, Resul
     private readonly IApplicationDbContext _context;
     private readonly IMapper _mapper;
     private readonly IStringLocalizer<CreateVoteCommand> _localizer;
-    private IVoteSummaryService _voteSummaryService;
+    private readonly IVoteSummaryService _voteSummaryService;
     public CreateVoteCommandHandler(
         IApplicationDbContext context,
         IStringLocalizer<CreateVoteCommand> localizer,
@@ -53,8 +53,9 @@ public class CreateVoteCommandHandler : IRequestHandler<CreateVoteCommand, Resul
         // raise a create domain event
         item.AddDomainEvent(new VoteCreatedEvent(item));
         _context.Votes.Add(item);
-        if (await _context.SaveChangesAsync(cancellationToken) > 0)
-            _voteSummaryService.RefreshSummary();//dont wait for result
+        await _context.SaveChangesAsync(cancellationToken);
+        //if (await _context.SaveChangesAsync(cancellationToken) > 0)
+        //    await _voteSummaryService.RefreshSummary();//dont wait for result
         //may be only wait for first 5 votes .
         return await Result<int>.SuccessAsync(item.Id);
     }
