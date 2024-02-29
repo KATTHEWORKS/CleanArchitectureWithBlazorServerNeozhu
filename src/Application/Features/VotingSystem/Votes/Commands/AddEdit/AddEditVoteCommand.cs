@@ -80,26 +80,42 @@ public class AddEditVoteCommandHandler : IRequestHandler<AddEditVoteCommand, Res
     }
     public async Task<Result<int>> Handle(AddEditVoteCommand request, CancellationToken cancellationToken)
     {
-        if (request.Id > 0)
-        {
+        if (request.KPIRatingComments != null && request.KPIRatingComments.Count > 0)
             request.KPIRatingComments = request.KPIRatingComments.Where(x => x.Rating != null).ToList();
 
-            var item = await _context.Votes.FindAsync(new object[] { request.Id }, cancellationToken) ?? throw new NotFoundException($"Vote with id: [{request.Id}] not found.");
-            item.ConstituencyIdDelta = item.ConstituencyId;
-            item.KPIRatingCommentsDelta = item.KPIRatingComments;
-            item = _mapper.Map(request, item);
+
+        var existingVoteOfUser = await _context.Votes.FirstOrDefaultAsync(x => x.UserId == request.UserId, cancellationToken);
+        if (existingVoteOfUser != null)
+        {//means update
+
+            //ideally this should never come
+            //if (await _context.Votes.CountAsync(x => x.UserId == request.UserId, cancellationToken) > 1)
+            //{
+            //    //had to remove all otherthan first one
+            //}
+
+            if (request.Id != existingVoteOfUser.Id)//means different vote exists
+            {
+                //existingVoteOfUser.RemoveDomainEvent(new VoteDeletedEvent(existingVoteOfUser));
+                //instead of removing lets update
+                request.Id = existingVoteOfUser.Id;
+            }
+            //else //means same vote id
+            //{
+
+            //}
+            //for both above case go for update thats it,since MyVote fetch is also based on userid only
+            existingVoteOfUser.ConstituencyIdDelta = existingVoteOfUser.ConstituencyId;
+            existingVoteOfUser.KPIRatingCommentsDelta = existingVoteOfUser.KPIRatingComments;
+            existingVoteOfUser = _mapper.Map(request, existingVoteOfUser);
+
             // raise a update domain event
-            item.AddDomainEvent(new VoteUpdatedEvent(item));
+            existingVoteOfUser.AddDomainEvent(new VoteUpdatedEvent(existingVoteOfUser));
             if (await _context.SaveChangesAsync(cancellationToken) > 0)
                 VoteSummaryBackgroundService.DatabaseChanged = true;
-            //    await _voteSummaryService.RefreshSummary();//ideally shouldnot wait but its giving efcore issue ,so waiting
-            //                                               //may be only wait for first 5 votes .
-
-            //_cache.Remove(ConstituencyCacheKey.GetAllCacheKey);
-
-            return await Result<int>.SuccessAsync(item.Id);
+            return await Result<int>.SuccessAsync(existingVoteOfUser.Id);
         }
-        else
+        else //first time adding vote,so direct insert
         {
             var item = _mapper.Map<Vote>(request);
             // raise a create domain event
@@ -112,6 +128,40 @@ public class AddEditVoteCommandHandler : IRequestHandler<AddEditVoteCommand, Res
             //_cache.Remove(ConstituencyCacheKey.GetAllCacheKey);
             return await Result<int>.SuccessAsync(item.Id);
         }
+
+
+        //if (request.Id > 0)//existing
+        //{
+        //    var item = await _context.Votes.FindAsync(new object[] { request.Id }, cancellationToken) ?? throw new NotFoundException($"Vote with id: [{request.Id}] not found.");
+        //    item.ConstituencyIdDelta = item.ConstituencyId;
+        //    item.KPIRatingCommentsDelta = item.KPIRatingComments;
+        //    item = _mapper.Map(request, item);
+
+        //    // raise a update domain event
+        //    item.AddDomainEvent(new VoteUpdatedEvent(item));
+        //    if (await _context.SaveChangesAsync(cancellationToken) > 0)
+        //        VoteSummaryBackgroundService.DatabaseChanged = true;
+        //    //    await _voteSummaryService.RefreshSummary();//ideally shouldnot wait but its giving efcore issue ,so waiting
+        //    //                                               //may be only wait for first 5 votes .
+
+        //    //_cache.Remove(ConstituencyCacheKey.GetAllCacheKey);
+
+        //    return await Result<int>.SuccessAsync(item.Id);
+        //}
+        //else
+        //{
+
+        //    var item = _mapper.Map<Vote>(request);
+        //    // raise a create domain event
+        //    item.AddDomainEvent(new VoteCreatedEvent(item));
+        //    _context.Votes.Add(item);
+        //    if (await _context.SaveChangesAsync(cancellationToken) > 0)
+        //        VoteSummaryBackgroundService.DatabaseChanged = true;
+        //    //    await _voteSummaryService.RefreshSummary();//ideally shouldnot wait but its giving efcore issue ,so waiting
+        //    //                                               //may be only wait for first 5 votes .
+        //    //_cache.Remove(ConstituencyCacheKey.GetAllCacheKey);
+        //    return await Result<int>.SuccessAsync(item.Id);
+        //}
 
     }
 }
