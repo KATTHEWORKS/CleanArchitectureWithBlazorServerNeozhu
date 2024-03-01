@@ -114,6 +114,7 @@ public class ApplicationUserDto
                 ;
 
             CreateMap<ApplicationUserDto, ApplicationUser>(MemberList.None)
+                .ForMember(x => x.DisplayName, s => s.MapFrom(y => y.DisplayName ?? y.UserName))
                 .ForMember(x => x.SuperiorId, s => s.MapFrom(y => y.SuperiorId))
                 .ForMember(x => x.UserRoleTenants, s => s.MapFrom(c => c.UserRoleTenants))
                 .ForMember(x => x.DefaultTenantName, s => s.MapFrom(y => y.DefaultTenantName))

@@ -345,7 +345,6 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
                 }
             });
 
-            user.EmailConfirmed = true;//for all email login accounts
             var result = password.IsNullOrEmptyAndTrimSelf() ? await base.CreateAsync(user) : await base.CreateAsync(user, password!);
             return result;
 
