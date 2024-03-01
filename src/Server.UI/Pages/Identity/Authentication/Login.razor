@@ -167,7 +167,7 @@
                     var claims = await TokenProvider.ParseClaimsFromJwt(accessToken);
                     ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(claims);
                     Logger.LogInformation("{@UserName:l} has successfully logged in", user.UserName);
-
+                    await IdentityService.UpdateLiveStatus(user.Id, true);
                     NavigationManager.NavigateTo(NavigationManager.BaseUri + returnUrl, true);
                     Logger.LogInformation("{@UserName:l} has successfully logged in", user.UserName);
                     }
@@ -230,16 +230,19 @@
         }
 
     [JSInvokable]
-    public async Task ConfirmExternal(string provider, string userName, string name, string accessToken)
+    public async Task ConfirmExternal(string provider, string userName, string name, string accessToken, string? pictureUrl = null, bool email_verified = false)
         {
-        var user = await CreateUserWithExternalProvider(provider, userName, name, accessToken);
+        var user = await CreateUserWithExternalProvider(provider, userName, name, accessToken, pictureUrl,email_verified);
         await TokenProvider.Login(user);
-        await IdentityService.UpdateLiveStatus(userId: user.Id, true);
-        NavigationManager.NavigateTo(NavigationManager.Uri, true);
-        Logger.LogInformation("{@UserName:l} has successfully logged in", userName);
+        var claims = await TokenProvider.ParseClaimsFromJwt(accessToken);
+        ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(claims);
+        Logger.LogInformation("{@UserName:l} has successfully logged in", user.UserName);
+        await IdentityService.UpdateLiveStatus(user.Id, true);
+        NavigationManager.NavigateTo(NavigationManager.BaseUri + returnUrl, true);
+        Logger.LogInformation("{@UserName:l} has successfully logged in", user.UserName);
         }
 
-    private async Task<ApplicationUser> CreateUserWithExternalProvider(string provider, string userName, string name, string accessToken)
+    private async Task<ApplicationUser> CreateUserWithExternalProvider(string provider, string userName, string name, string accessToken, string? pictureUrl = null, bool email_verified = false)
         {//need to validate end to end,tesing pending
         var user = await IdentityService.GetUserByUserName(userName);
         if (user is null)
@@ -247,6 +250,7 @@
             //default pass as patient or voter
             var createResult = await IdentityService.CreateUserAsync(new ApplicationUserDto
                     {
+                    Email_Verified = email_verified,
                     //EmailConfirmed = true,
                     IsActive = true,
                     IsLive = true,
@@ -254,6 +258,7 @@
                     Email = userName.Any(x => x == '@') ? userName : $"{userName}@{provider}.com",
                     Provider = provider,
                     DisplayName = name,
+                    ProfilePictureDataUrl = pictureUrl,
                     //SuperiorId = admin.Id,
                     // DefaultTenantId = admin.DefaultTenantId,  //default pass as patient or voter
                     // DefaultTenantName = admin.DefaultTenantName //default pass as patient or voter

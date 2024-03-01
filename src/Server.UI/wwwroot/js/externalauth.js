@@ -65,14 +65,16 @@ async function loginWithGoogle(provider, dotNetHelper) {
     try {
        var client = google.accounts.oauth2.initTokenClient({
             client_id: GOOGLE_CLIENT_ID,
-            scope: 'https://www.googleapis.com/auth/userinfo.email',
+           scope: 'https://www.googleapis.com/auth/userinfo.email',
            ux_mode: 'redirect',
             callback: async response => {
                 try {
                     const access_token = response.access_token;
                     const url = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`;
                     const data = await fetch(url).then(response => response.json());
-                    await dotNetHelper.invokeMethodAsync('ConfirmExternal', provider, data.email, data.name, access_token);
+                    console.log(data);
+                    
+                    await dotNetHelper.invokeMethodAsync('ConfirmExternal', provider, data.email, data.name || data.email, access_token,data.picture,data.email_verified);
                     console.log('login with microsoft success');
                     localStorage.setItem('google_client_token', access_token);
                 }

@@ -109,7 +109,7 @@
             await TokenProvider.RemoveAuthDataFromStorage();
             ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsLoggedOut();
             await new ExternalAuth(JS).Logout();
-            //NavigationManager.NavigateTo("");//ideally this should not be but logout button not happening so temp fix //todo
+            NavigationManager.NavigateTo("");//ideally this should not be but logout button not happening so temp fix //todo
             }
         }
 }

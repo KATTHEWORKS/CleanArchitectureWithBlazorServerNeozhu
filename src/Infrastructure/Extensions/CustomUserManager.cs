@@ -326,8 +326,8 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
                     throw new Exception("No default tenant defined for user");
                 user.DefaultTenantName = StaticData.Tenant(user.DefaultTenantId).Name;
             }
-            if (roles == null || !roles.Any()) return await CreateWithDefaultRolesAsync(user, user.DefaultTenantId, password);
-            user.UserRoleTenants = new List<UserRoleTenant>();//here it ignores already existing UserRoleTenants //TODO need to think of this
+            if (roles == null || roles.Count == 0) return await CreateWithDefaultRolesAsync(user, user.DefaultTenantId, password);
+            user.UserRoleTenants = [];//here it ignores already existing UserRoleTenants //TODO need to think of this
             roles.ForEach(c =>
             {
                 var roleId = (_roleManager.FindByNameAsync(c).Result)?.Id;
@@ -344,6 +344,8 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
                     */
                 }
             });
+
+            user.EmailConfirmed = true;//for all email login accounts
             var result = password.IsNullOrEmptyAndTrimSelf() ? await base.CreateAsync(user) : await base.CreateAsync(user, password!);
             return result;
 

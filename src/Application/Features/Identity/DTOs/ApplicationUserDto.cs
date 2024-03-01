@@ -22,6 +22,7 @@ public class ApplicationUserDto
     [Description("Is User-Tenant Roles Active")] public bool IsUserTenantRolesActive { get; set; } = true;
 
     [Description("Profile Photo")] public string? ProfilePictureDataUrl { get; set; }
+    public bool Email_Verified { get; set; } = false;
 
     [Description("Email")] public string Email { get; set; } = string.Empty;
 
@@ -80,6 +81,7 @@ public class ApplicationUserDto
         {
             //todo this is not working need to check
             CreateMap<ApplicationUser, ApplicationUserDto>(MemberList.None)
+                .ForMember(x => x.Email_Verified, s => s.MapFrom(y => y.EmailConfirmed))//todo think more
                 .ForMember(x => x.SuperiorName, s => s.MapFrom(y => y.Superior!.UserName))
                 .ForMember(x => x.UserRoleTenants, s => s.MapFrom(c => c.UserRoleTenants))
                 //todo need to make sure of this 
@@ -97,7 +99,7 @@ public class ApplicationUserDto
                 .ForMember(x => x.AssignedRoles, s =>
                 s.MapFrom(y => y.UserRoleTenants.Count > 0 ?
                 EnumExtensions.SortByEnum<string, RoleNamesEnum>(
-                y.UserRoleTenants.Select(r => string.IsNullOrEmpty(r.RoleName) ? (r.Role != null ? r.Role.Name : "") : r.RoleName),true).ToArray() : null))
+                y.UserRoleTenants.Select(r => string.IsNullOrEmpty(r.RoleName) ? (r.Role != null ? r.Role.Name : "") : r.RoleName), true).ToArray() : null))
 
                  //.ForMember(x => x.DefaultRole, s =>
                  //s.MapFrom(y => y.UserRoleTenants.Any(g => g.DefaultTenantId == y.DefaultTenantId) ?
