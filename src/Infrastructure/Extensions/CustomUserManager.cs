@@ -56,7 +56,7 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
 {
     readonly List<string> _defaultRoles = new() { RoleNamesEnum.Default.ToString() };
     // private Repository<ApplicationUser> _repository;
-    public const string DefaultTenantId = "";//todo make it loaded as per db
+    //public const string DefaultTenantId = "";//todo make it loaded as per db
     private readonly CustomRoleManager _roleManager;
     private readonly IServiceProvider _serviceProvider;
     private ApplicationDbContext _dbContext;
@@ -316,8 +316,16 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
     {
         try
         {
-            if (tenantId.IsNullOrEmptyAndTrimSelf()) tenantId = DefaultTenantId;
-            if (user.DefaultTenantId.IsNullOrEmptyAndTrimSelf()) user.DefaultTenantId = tenantId;//this overrides already assigned tenant,had to make sure
+            if (string.IsNullOrEmpty(user.Id))
+                user.Id = Guid.NewGuid().ToString();
+            if (user.DefaultTenantId.IsNullOrEmptyAndTrimSelf())
+            {
+                if (tenantId.IsNullOrEmptyAndTrimSelf()) tenantId = StaticData.DefaultTenant.Id;
+                user.DefaultTenantId = tenantId;//this overrides already assigned tenant,had to make sure
+                if (user.DefaultTenantId.IsNullOrEmptyAndTrimSelf())
+                    throw new Exception("No default tenant defined for user");
+                user.DefaultTenantName = StaticData.Tenant(user.DefaultTenantId).Name;
+            }
             if (roles == null || !roles.Any()) return await CreateWithDefaultRolesAsync(user, user.DefaultTenantId, password);
             user.UserRoleTenants = new List<UserRoleTenant>();//here it ignores already existing UserRoleTenants //TODO need to think of this
             roles.ForEach(c =>

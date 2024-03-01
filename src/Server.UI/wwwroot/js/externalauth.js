@@ -8,8 +8,9 @@
 }
 export const MS_CLIENT_ID = '89c688b8-6933-4a93-8bb4-c2c3513a4d76';
 export const MS_CLIENT_SECRET = '770077e1-dbbf-4613-b95c-685f6c5d815c';
-export const GOOGLE_CLIENT_ID = '297897098383-mst0sd9qi5f7p9r0l0ralai3unsqrqmv.apps.googleusercontent.com';
- async function loginWithMicrosoft(provider, dotNetHelper) {
+export const GOOGLE_CLIENT_ID = '283580482176-v7o7a3vs9sd269i8qtknjua8kddmine1.apps.googleusercontent.com';
+
+async function loginWithMicrosoft(provider, dotNetHelper) {
     var client = new msal.PublicClientApplication({
         auth: {
             clientId: MS_CLIENT_ID,
@@ -60,22 +61,30 @@ export const GOOGLE_CLIENT_ID = '297897098383-mst0sd9qi5f7p9r0l0ralai3unsqrqmv.a
     console.log('login with microsoft success');
     localStorage.setItem('microsoft_client_token', response.account.homeAccountId);
 }
- async function loginWithGoogle(provider, dotNetHelper) {
-    client = google.accounts.oauth2.initTokenClient({
-        client_id: GOOGLE_CLIENT_ID,
-        scope: 'https://www.googleapis.com/auth/userinfo.email',
-        ux_mode: 'popup',
-        callback: async response => {
-            const access_token = response.access_token;
-            const url = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`;
-            const data = await fetch(url).then(response => response.json());
-            await dotNetHelper.invokeMethodAsync('ConfirmExternal', provider, data.email, data.name, access_token);
-            console.log('login with microsoft success');
-            localStorage.setItem('google_client_token', access_token);
-
-        }
-    });
-    client.requestAccessToken();
+async function loginWithGoogle(provider, dotNetHelper) {
+    try {
+       var client = google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: 'https://www.googleapis.com/auth/userinfo.email',
+           ux_mode: 'redirect',
+            callback: async response => {
+                try {
+                    const access_token = response.access_token;
+                    const url = `https://www.googleapis.com/oauth2/v3/userinfo?access_token=${access_token}`;
+                    const data = await fetch(url).then(response => response.json());
+                    await dotNetHelper.invokeMethodAsync('ConfirmExternal', provider, data.email, data.name, access_token);
+                    console.log('login with microsoft success');
+                    localStorage.setItem('google_client_token', access_token);
+                }
+                catch (error1) {
+                    console.error('Error logging in with Google:', error1);
+                }
+            }
+            });
+        client.requestAccessToken();
+    } catch (error) {
+        console.error('Error logging in with Google:', error);
+    }
 }
 export async function externalLogout() {
     let client_token = localStorage.getItem('microsoft_client_token');

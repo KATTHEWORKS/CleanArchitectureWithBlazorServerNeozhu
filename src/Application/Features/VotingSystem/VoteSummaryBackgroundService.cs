@@ -27,7 +27,7 @@ public class VoteSummaryBackgroundService : BackgroundService
                 DatabaseChanged = false; // Reset the flag
             }
 
-            await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken); // Check every 5 minutes
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // Check every 5 minutes
         }
     }
 

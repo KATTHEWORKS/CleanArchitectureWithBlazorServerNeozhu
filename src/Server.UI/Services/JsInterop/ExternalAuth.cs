@@ -14,12 +14,28 @@ public sealed class ExternalAuth
 
     public async Task<ValueTask> Login(string provider, DotNetObjectReference<Login> reference)
     {
-        var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/externalauth.js");
-        return jsmodule.InvokeVoidAsync(JSInteropConstants.ExternalLogin, provider,reference);
+        try
+        {
+            var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/externalauth.js");
+            return jsmodule.InvokeVoidAsync(JSInteropConstants.ExternalLogin, provider, reference);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw;
+        }
     }
     public async Task<ValueTask> Logout()
     {
-        var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/externalauth.js");
-        return jsmodule.InvokeVoidAsync(JSInteropConstants.ExternalLogout);
+        try
+        {
+            var jsmodule = await _jsRuntime.InvokeAsync<IJSObjectReference>("import", "/js/externalauth.js");
+            return jsmodule.InvokeVoidAsync(JSInteropConstants.ExternalLogout);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw;
+        }
     }
 }

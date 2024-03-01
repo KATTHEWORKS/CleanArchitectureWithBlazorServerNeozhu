@@ -162,7 +162,7 @@
                     // }
                     // else
                     // {
-                    
+
                     var accessToken = await TokenProvider.Login(user);
                     var claims = await TokenProvider.ParseClaimsFromJwt(accessToken);
                     ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(claims);
@@ -218,8 +218,15 @@
 
     private async Task SignInExternal(string provider)
         {
-        await new ExternalAuth(JS).Login(provider, DotNetObjectReference.Create(this));
-
+        try
+            {
+            await new ExternalAuth(JS).Login(provider, DotNetObjectReference.Create(this));
+            }
+        catch (Exception e)
+            {
+            Console.WriteLine(e.ToString());
+            throw;
+            }
         }
 
     [JSInvokable]
@@ -275,9 +282,7 @@
             await IdentityService.AddLoginAsync(user, new UserLoginInfo(provider, userName, accessToken));
             //await UserManager.AddLoginAsync(user, new UserLoginInfo(provider, userName, accessToken));
             }
-        else
-            return user;
-        return null;
+        return user;
         }
 
 }

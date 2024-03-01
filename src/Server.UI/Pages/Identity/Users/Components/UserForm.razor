@@ -24,9 +24,9 @@
 @inject IStringLocalizer<Users> L
 
 <MudForm Model="@Model" @ref="@_form" Validation="@(Validator.ValidateValue(Model))">
-    <input For="@(() => Model.Id)" @bind-value="Model.Id" type="hidden"/>
-    <input For="@(() => Model.ProfilePictureDataUrl)" @bind-value="Model.ProfilePictureDataUrl" type="hidden"/>
-    <InputFile id="UploadPhoto" OnChange="UploadPhoto" hidden accept=".jpg, .jpeg, .png"/>
+    <input For="@(() => Model.Id)" @bind-value="Model.Id" type="hidden" />
+    <input For="@(() => Model.ProfilePictureDataUrl)" @bind-value="Model.ProfilePictureDataUrl" type="hidden" />
+    <InputFile id="UploadPhoto" OnChange="UploadPhoto" hidden accept=".jpg, .jpeg, .png" />
     <MudGrid>
         <MudItem sm="12">
             <div class="d-flex justify-center">
@@ -165,9 +165,11 @@
         if (currentTenant == null) return;
 
 
-        if (StaticData.Roles != null && StaticData.Roles.Any())
+        if (StaticData.Roles().Any())
             {
-            StaticData.RolesOfTenantType(currentTenant.Type).ForEach(x => Roles.Add(new CheckItem { Key = x.Name!, Value = false }));
+            var rolesOfTenantType = StaticData.RolesOfTenantType(currentTenant.Type);
+            if (rolesOfTenantType != null && rolesOfTenantType.Count > 0)
+                rolesOfTenantType.ForEach(x => Roles.Add(new CheckItem { Key = x.Name!, Value = false }));
             if (Model.AssignedRoles != null && Model.AssignedRoles.Intersect(Roles.Select(x => x.Key)).Any())
                 {
                 Model.AssignedRoles.Intersect(Roles.Select(x => x.Key)).ToList().ForEach(a => { Roles.Find(r => r.Key == a).Value = true; });
@@ -190,14 +192,13 @@
             //todo 1 take all standard roles from default structure and then add more assigned from Userroles table
             //step1: load standard roles as per tenant
             //step2: update assigned roles
-            if (StaticData.Roles != null && StaticData.Roles.Any())
-                {
-                StaticData.RolesOfTenantType(tenant.Type).ForEach(x => Roles.Add(new CheckItem { Key = x.Name!, Value = false }));
-                var existingRoles = await RoleManager.Roles.Where(x => x.UserRoles.Any(ur => ur.TenantId == id && ur.UserId == Model.Id)).Select(x => x.Name).ToListAsync();
-                if (existingRoles != null && existingRoles.Any())
-                    Roles.ForEach(r => { if (existingRoles.Contains(r.Key)) r.Value = true; });
-                Roles = Roles.OrderByDescending(x => x.Value).ToList();
-                }
+            var rolesOfTenantType = StaticData.RolesOfTenantType(tenant.Type);
+            if (rolesOfTenantType != null && rolesOfTenantType.Count > 0)
+                rolesOfTenantType.ForEach(x => Roles.Add(new CheckItem { Key = x.Name!, Value = false }));
+            var existingRoles = await RoleManager.Roles.Where(x => x.UserRoles.Any(ur => ur.TenantId == id && ur.UserId == Model.Id)).Select(x => x.Name).ToListAsync();
+            if (existingRoles != null && existingRoles.Any())
+                Roles.ForEach(r => { if (existingRoles.Contains(r.Key)) r.Value = true; });
+            Roles = Roles.OrderByDescending(x => x.Value).ToList();
             }
         else
             {
