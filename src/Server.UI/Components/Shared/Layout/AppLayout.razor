@@ -17,7 +17,7 @@
                 ToggleNavigationMenuDrawer="ToggleNavigationMenuDrawer"
                 RightToLeft="@LayoutService.IsRTL"
                 RightToLeftToggle="LayoutService.ToggleRightToLeft"
-                OnSettingClick="@(() => _themingDrawerOpen = true)" IsAnonymousPage=@(IsAnonymousPage(Navigation.Uri)) IsAuthenticated=@IsAuthenticated />
+                OnSettingClick="@(() => _themingDrawerOpen = true)" IsAnonymousPage=@(IsAnonymousPage(Navigation.Uri)) />
 
     <ThemesMenu ThemingDrawerOpen="_themingDrawerOpen"
                 ThemingDrawerOpenChanged="ThemingDrawerOpenChangedHandler"
@@ -58,16 +58,14 @@
     private UserProfile? _userProfile;
     private ErrorBoundary? _errorBoundary { set; get; }
 
-    private bool IsAuthenticated = false;
     [CascadingParameter]
     private Task<AuthenticationState> AuthState { get; set; } = default!;
     protected override async Task OnInitializedAsync()
         {
         var state = await AuthState;
-        IsAuthenticated = state.IsAuthenticated();
-
         _userProfile = state.User.GetUserProfileFromClaim();
         }
+
     protected override void OnParametersSet()
         {
         ResetBoundary();
@@ -116,12 +114,12 @@
     bool IsAnonymousPage(string uri)
         {
         // List the URIs of pages that should be accessible anonymously
-        var anonymousPages = new List<string> { "welcome", "vote","rating" };
+        var anonymousPages = new List<string> { "welcome", "vote", "rating" };
         //var anonymousPagesPrefix = "rating/";//for vote/id
 
         // Check if the current URI is in the list of anonymous pages
         uri = uri.Replace(Navigation.BaseUri, string.Empty);
-       // return string.IsNullOrEmpty(uri)|| anonymousPages.Contains(uri.ToLower()) || uri.StartsWith(anonymousPagesPrefix);
-        return string.IsNullOrEmpty(uri) || anonymousPages.Contains(uri.ToLower()) || int.TryParse(uri,out int conId);
+        // return string.IsNullOrEmpty(uri)|| anonymousPages.Contains(uri.ToLower()) || uri.StartsWith(anonymousPagesPrefix);
+        return string.IsNullOrEmpty(uri) || anonymousPages.Contains(uri.ToLower()) || int.TryParse(uri, out int conId);
         }
 }

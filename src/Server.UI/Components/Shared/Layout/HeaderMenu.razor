@@ -56,7 +56,7 @@
         <MudSpacer />
         <NotificationMenu />
     </MudHidden>
-    @if (IsAuthenticated)@*  || !IsAnonymousPage) *@
+    @if (AuthState.Result.IsAuthenticated())@*  || !IsAnonymousPage) *@
         {
         <UserMenu OnSettingClick="OnSettingClick" />
         }
@@ -67,7 +67,7 @@
             <MudIconButton Class="mx-1"
                            Color="Color.Default"
                            Icon="@Icons.Material.Filled.PermIdentity"
-                           Link="@UiConstants.LoginUrl" />
+                           Href="@UiConstants.LoginUrl" />
         </MudTooltip>
 
         }
@@ -87,6 +87,10 @@
     [EditorRequired][Parameter] public EventCallback RightToLeftToggle { get; set; }
     [Parameter] public EventCallback<EventArgs> OnSettingClick { get; set; }
     [Parameter] public bool IsAnonymousPage { get; set; } = false;
-    [Parameter] public bool IsAuthenticated { get; set; } = false;
-
+  
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthState { get; set; } = default!;
+    // protected override async Task OnInitializedAsync()
+    //     {
+    //     }
 }
