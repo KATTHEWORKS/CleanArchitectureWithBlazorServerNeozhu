@@ -52,7 +52,7 @@ public class KPIRatingComment
 
     public void UpdateModified()
     {
-        LastModified = DateTime.UtcNow;
+        LastModified = DateTime.Now;
     }
 }
 

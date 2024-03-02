@@ -13,7 +13,7 @@ public class LogDto
 
     [Description("Level")] public string Level { get; set; } = default!;
 
-    [Description("Timestamp")] public DateTime TimeStamp { get; set; } = DateTime.UtcNow;
+    [Description("Timestamp")] public DateTime TimeStamp { get; set; } = DateTime.Now;
 
     [Description("Exception")] public string? Exception { get; set; }
 

@@ -48,7 +48,7 @@ public class Vote(int constituencyId, string userId) : BaseAuditableEntity //1 u
 
     public void UpdateModified()
     {
-        LastModified = DateTime.UtcNow;
+        LastModified = DateTime.Now;
     }
     //[Column(TypeName = "jsonb")] //this wont working mssql Adjust based on your database
     //public string? VotesJsonAsString { get; set; }//here comments are not stored

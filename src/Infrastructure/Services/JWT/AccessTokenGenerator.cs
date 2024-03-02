@@ -23,8 +23,8 @@ public class AccessTokenGenerator : IAccessTokenGenerator
             _options.Issuer!,
             _options.Audience!,
             user.Claims,
-            DateTime.UtcNow,
-            DateTime.UtcNow.AddMinutes(signingOptions.ExpirationMinutes)
+            DateTime.Now,
+            DateTime.Now.AddMinutes(signingOptions.ExpirationMinutes)
         );
         return _tokenHandler.WriteToken(new JwtSecurityToken(header, payload));
     }
