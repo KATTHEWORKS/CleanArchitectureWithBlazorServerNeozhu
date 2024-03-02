@@ -74,6 +74,11 @@ public class InMemoryNotificationService : INotificationService
             await _localStorageService.DeleteAsync(LocalStorageKey);
             return DateTime.MinValue;
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw;
+        }
     }
 
 
