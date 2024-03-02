@@ -28,7 +28,7 @@ public static class ClaimsPrincipalExtensions
             profile.DisplayName = claimsPrincipal.GetDisplayName();
             profile.AssignedRoles = claimsPrincipal.GetRoles();//of all tenant
             profile.UserRoleTenants = claimsPrincipal.GetUserRoleTenants();
-            profile.DefaultRole = profile.UserRoleTenants.Where(x => x.TenantId == profile.DefaultTenantId).Select(x => x.RoleName).MaxEnumString<RoleNamesEnum>();
+            profile.DefaultRole = profile.UserRoleTenants==null? RoleNamesEnum.Default.ToString(): profile.UserRoleTenants.Where(x => x.TenantId == profile.DefaultTenantId).Select(x => x.RoleName).MaxEnumString<RoleNamesEnum>();
             profile.ProfilePictureDataUrl = claimsPrincipal.GetProfilePictureDataUrl();
             profile.IsActive = true;
 

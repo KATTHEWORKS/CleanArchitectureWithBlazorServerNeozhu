@@ -1,6 +1,7 @@
 ﻿after login adding claims some issue
 
-userroletenenat is null think of more
+userroletenenat is null on just created place think of more
+reason is defaulttenantid,name missing
 
 System.ArgumentNullException: Value cannot be null. (Parameter 'source')
    at System.Linq.ThrowHelper.ThrowArgumentNullException(ExceptionArgument argument)

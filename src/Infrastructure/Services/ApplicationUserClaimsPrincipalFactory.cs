@@ -53,8 +53,14 @@ public class ApplicationUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<
             ]);
         }
 
-        if (user.UserRoleTenants != null && user.UserRoleTenants.Any())
-        {//mostly this wont execute bcz always defaulttenantid exists...just for safety only
+        if (user.UserRoleTenants == null || user.UserRoleTenants.Count == 0)
+        {//this happens for first time created user 
+            user.UserRoleTenants = [new UserRoleTenant() {UserId=user.Id,RoleId=StaticData.DefaultRole().Id,RoleName= StaticData.DefaultRole().Name,
+                TenantId=StaticData.DefaultTenant().Id,TenantName=StaticData.DefaultTenant().Name } ];
+        }
+
+        if (user.UserRoleTenants != null && user.UserRoleTenants.Count != 0)
+        {
             //since UserRoleTenants are coming in sorted order from db itself so no more sorting again
             //var roleseListDescendingOrder = EnumExtensions.SortByEnum<string, RoleNamesEnum>(user.UserRoleTenants.Select(x => x.RoleName).ToList(), descending: true);
             var rolesStr = string.Join(",", user.UserRoleTenants.Select(x => x.RoleName));

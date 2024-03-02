@@ -321,8 +321,8 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
                 user.Id = Guid.NewGuid().ToString();
             if (user.DefaultTenantId.IsNullOrEmptyAndTrimSelf())
             {
-                if (tenantId.IsNullOrEmptyAndTrimSelf()) tenantId = StaticData.DefaultTenant.Id;
-                user.DefaultTenantId = tenantId;//this overrides already assigned tenant,had to make sure
+                if (tenantId.IsNullOrEmptyAndTrimSelf()) tenantId = StaticData.DefaultTenant().Id;
+                user.DefaultTenantId = tenantId!;//this overrides already assigned tenant,had to make sure
                 if (user.DefaultTenantId.IsNullOrEmptyAndTrimSelf())
                     throw new Exception("No default tenant defined for user");
                 user.DefaultTenantName = StaticData.Tenant(user.DefaultTenantId).Name;

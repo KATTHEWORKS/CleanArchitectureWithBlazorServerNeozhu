@@ -52,7 +52,7 @@ try
     using (var scope = app.Services.CreateScope())//for loading static data for first time
     {//todo alternative can be covered like cache or some more
         var initializer = scope.ServiceProvider.GetRequiredService<StaticData>();
-        await initializer.LoadAllTenants();
+        initializer.LoadAllTenants();
         await initializer.LoadUserBaseRoles();
     }
     //app.UseMiddleware<ConcurrencyControlMiddleware>();

@@ -204,6 +204,7 @@ else
 
     protected override async Task OnInitializedAsync()
         {
+           
         if (UserProfile != null && UserProfile.UserRoleTenants.Any())
             {
             Roles = UserProfile.UserRoleTenants.Where(x => x.TenantId == UserProfile.DefaultTenantId || x.TenantName == nameof(TenantTypeEnum.Internal)).Select(x => x.RoleName).ToList();
