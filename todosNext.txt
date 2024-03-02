@@ -1,3 +1,22 @@
+﻿after login adding claims some issue
+
+userroletenenat is null think of more
+
+System.ArgumentNullException: Value cannot be null. (Parameter 'source')
+   at System.Linq.ThrowHelper.ThrowArgumentNullException(ExceptionArgument argument)
+   at System.Linq.Enumerable.Where[TSource](IEnumerable`1 source, Func`2 predicate)
+   at CleanArchitecture.Blazor.Infrastructure.Extensions.ClaimsPrincipalExtensions.GetUserProfileFromClaim(ClaimsPrincipal claimsPrincipal) in ./Extensions/ClaimsPrincipalExtensions.cs:line 31
+   at CleanArchitecture.Blazor.Server.UI.Components.Shared.Layout.AppLayout.OnInitializedAsync() in C:\nammadhu\src\Server.UI\Components\Shared\Layout\AppLayout.razor:line 66
+   at Microsoft.AspNetCore.Components.ComponentBase.RunInitAndSetParametersAsync()
+[12:54:36 ERR ::1] Unhandled exception in circuit 'IRdugMVsoA1EeKF8tlhtGefHjXWHZQdkT5mTbFXOEGk'.
+System.ObjectDisposedException: Cannot access a disposed object.
+   at Microsoft.AspNetCore.Components.RenderTree.RenderTreeDiffBuilder.InsertNewFrame(DiffContext& diffContext, Int32 newFrameIndex)
+   at Microsoft.AspNetCore.Components.RenderTree.RenderTreeDiffBuilder.AppendDiffEntriesForRange(DiffContext& diffContext, Int32 oldStartIndex, Int32 oldEndIndexExcl, Int32 newStartIndex, Int32 newEndIndexExcl)
+   at Microsoft.AspNetCore.Components.RenderTree.RenderTreeDiffBuilder.AppendDiffEntriesForFramesWithSameSequence(DiffContext& diffContext, Int32 oldFrameIndex, Int32 newFrameIndex)
+   at Microsoft.AspNetCore.Components.RenderTree.RenderTreeDiffBuilder.AppendDiffEntriesForRange(DiffContext& diffContext, Int32 oldStartIndex, Int32 oldEndIndexExcl, Int32 newStartIndex, Int32 newEndIndexExcl)
+   at Microsoft.AspNetCore.Components.RenderTree.RenderTreeDiffBuilder.AppendDiffEntriesForFramesWithSameSequence(DiffContext& diffContext, Int32 oldFrameIndex, Int32 newFrameIndex)
+   at Microsoft.AspNetCore.Components.RenderTree.RenderTreeDiffBuilder.AppendDiffEntriesForRange(DiffContext& diffContext, Int32 oldStartIndex, Int32 oldEndIndexExcl, Int32 newStartIndex,
+
 Build succeeded.
 Microsoft.Extensions.Hosting.HostAbortedException: The host was aborted.
    at Microsoft.Extensions.Hosting.HostFactoryResolver.HostingListener.ThrowHostAborted()

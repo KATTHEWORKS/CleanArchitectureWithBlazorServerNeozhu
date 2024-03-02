@@ -103,7 +103,7 @@
     private bool _success;
     private bool _loading;
     [Inject] public AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
-
+    [Inject] public IMapper _mapper { get; set; }
     // private CustomRoleManager RoleManager { get; set; } = default!;
     private IAccessTokenProvider AccessTokenProvider { get; set; } = default!;
 
@@ -232,12 +232,11 @@
     [JSInvokable]
     public async Task ConfirmExternal(string provider, string userName, string name, string accessToken, string? pictureUrl = null, bool email_verified = false)
         {
-        var user = await CreateUserWithExternalProvider(provider, userName, name, accessToken, pictureUrl,email_verified);
+        var user = await CreateUserWithExternalProvider(provider, userName, name, accessToken, pictureUrl, email_verified);
         await TokenProvider.Login(user);
-        var claims = await TokenProvider.ParseClaimsFromJwt(accessToken);
-        ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(claims);
-        Logger.LogInformation("{@UserName:l} has successfully logged in", user.UserName);
-        await IdentityService.UpdateLiveStatus(user.Id, true);
+        // var claims = await TokenProvider.ParseClaimsFromJwt(accessToken);
+        // ((BlazorAuthenticationStateProvider)AuthenticationStateProvider).MarkUserAsAuthenticated(claims);
+        await IdentityService.UpdateLiveStatus(user.Id, true);//club this with login itself with some flag
         NavigationManager.NavigateTo(NavigationManager.BaseUri + returnUrl, true);
         Logger.LogInformation("{@UserName:l} has successfully logged in", user.UserName);
         }
@@ -248,7 +247,7 @@
         if (user is null)
             {
             //default pass as patient or voter
-            var createResult = await IdentityService.CreateUserAsync(new ApplicationUserDto
+            var newUserDto = new ApplicationUserDto
                     {
                     Email_Verified = email_verified,
                     //EmailConfirmed = true,
@@ -262,7 +261,8 @@
                     //SuperiorId = admin.Id,
                     // DefaultTenantId = admin.DefaultTenantId,  //default pass as patient or voter
                     // DefaultTenantName = admin.DefaultTenantName //default pass as patient or voter
-                    });
+                    };
+            var createResult = await IdentityService.CreateUserAsync(newUserDto);
 
             // //TODO change this below logic of admin referring
             // var admin = await IdentityService.GetUserDtoByUserName(UserName.Administrator) ?? throw new NotFoundException("Administrator's account Not Found.");
@@ -284,7 +284,8 @@
                 {
                 return null;
                 }
-            await IdentityService.AddLoginAsync(user, new UserLoginInfo(provider, userName, accessToken));
+            user = _mapper.Map<ApplicationUser>(newUserDto);
+            await IdentityService.AddLoginAsync(user, new UserLoginInfo(provider, accessToken, user.DisplayName));
             //await UserManager.AddLoginAsync(user, new UserLoginInfo(provider, userName, accessToken));
             }
         return user;
