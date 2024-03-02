@@ -8,7 +8,8 @@
 }
 export const MS_CLIENT_ID = '89c688b8-6933-4a93-8bb4-c2c3513a4d76';
 export const MS_CLIENT_SECRET = '770077e1-dbbf-4613-b95c-685f6c5d815c';
-export const GOOGLE_CLIENT_ID = '283580482176-v7o7a3vs9sd269i8qtknjua8kddmine1.apps.googleusercontent.com';
+export const GOOGLE_CLIENT_ID = '283580482176-v7o7a3vs9sd269i8qtknjua8kddmine1.apps.googleusercontent.com';//https://localhost:7256/
+//https://localhost:44375/pages/authentication/login
 
 async function loginWithMicrosoft(provider, dotNetHelper) {
     var client = new msal.PublicClientApplication({
