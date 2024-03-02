@@ -18,6 +18,7 @@ public class ApplicationUser : IdentityUser
         UserRoleTenants = new HashSet<UserRoleTenant>();
         Logins = new HashSet<ApplicationUserLogin>();
         Tokens = new HashSet<ApplicationUserToken>();
+        CreatedDate = DateTime.Now;
     }
 
 
@@ -45,6 +46,10 @@ public class ApplicationUser : IdentityUser
     public string? SuperiorId { get; set; } = null;
 
     public ApplicationUser? Superior { get; set; } = null;
+
+    public DateTime CreatedDate { get; set; }
+    public DateTime? LastModifiedDate { get; set; }
+    //todo need to add createdby ,modifiedby
 
 #if VOTING_SYSTEM
     //[NotMapped]

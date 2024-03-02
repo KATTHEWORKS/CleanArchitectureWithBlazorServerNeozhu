@@ -113,6 +113,7 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
                     {
                         userToUpdate.DefaultTenantId = tenantId;
                         userToUpdate.DefaultTenantName = tenantName;
+                        userToUpdate.LastModifiedDate = DateTime.Now;
                         // Mark the property as modified
                         _dbContext.Entry(userToUpdate).Property(e => e.DefaultTenantId).IsModified = true;
 
@@ -163,7 +164,7 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
         {
             // Use reflection to set the property value based on the column name
             var propertyInfo = entity.GetType().GetProperty(columnName);
-
+            //user.LastModifiedDate = DateTime.Now;//todo
             if (propertyInfo != null)
             {
                 var convertedValue = Convert.ChangeType(newValue, propertyInfo.PropertyType);
@@ -286,7 +287,7 @@ public class CustomUserManager : UserManager<ApplicationUser>, ICustomUserManage
 
             //todo need to verify the perfection
             user.UserRoleTenants = null;//if this not done then tracking issue will block,so this is improtant to keep
-
+            user.LastModifiedDate = DateTime.Now;
             //type working good
             var existingUser = await _dbContext.Users.FindAsync(user.Id);
             _dbContext.Entry(existingUser).CurrentValues.SetValues(user);
