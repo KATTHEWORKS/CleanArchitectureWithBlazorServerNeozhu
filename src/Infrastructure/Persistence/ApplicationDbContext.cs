@@ -14,6 +14,8 @@ using CleanArchitecture.Blazor.Domain.Entities;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using CleanArchitecture.Blazor.Domain.Entities.VotingSystem;
+using System.Data.Entity.ModelConfiguration.Configuration;
+using System.Data.Entity.Infrastructure;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence;
 
@@ -89,7 +91,16 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         //}
 
         //return base.SaveChanges();
-        return await base.SaveChangesAsync(cancellationToken);
+        try
+        {
+            var result= await base.SaveChangesAsync(cancellationToken);
+            return result;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.ToString());
+            throw;
+        }
     }
 
     // Additional methods

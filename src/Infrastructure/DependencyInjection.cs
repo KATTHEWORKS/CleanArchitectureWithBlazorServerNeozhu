@@ -32,6 +32,7 @@ using Microsoft.IdentityModel.Tokens;
 using ZiggyCreatures.Caching.Fusion;
 using CleanArchitecture.Blazor.Application.Constants.User;
 using CleanArchitecture.Blazor.Application.Constants;
+using Microsoft.Extensions.Options;
 
 namespace CleanArchitecture.Blazor.Infrastructure;
 
@@ -135,6 +136,7 @@ public static class DependencyInjection
                 var databaseSettings = p.GetRequiredService<IOptions<DatabaseSettings>>().Value;
                 m.AddInterceptors(p.GetServices<ISaveChangesInterceptor>());
                 m.UseDatabase(databaseSettings.DBProvider, databaseSettings.ConnectionString);
+                m.EnableSensitiveDataLogging(); // Enable sensitive data logging to disable query caching
             });
             //services.AddDbContextFactory<ApplicationDbContext>((p, m) =>
             //{

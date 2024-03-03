@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CleanArchitecture.Blazor.Application.Features.VotingSystem.Constituencies.Caching;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace CleanArchitecture.Blazor.Application.Features.VotingSystem;
@@ -7,11 +8,13 @@ public class VoteSummaryBackgroundService : BackgroundService
 {
     public static bool DatabaseChanged { get; set; } = false;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IAppCache _cache;
     // private readonly ILogger<DataSynchronizationService> _logger;
 
-    public VoteSummaryBackgroundService(IServiceProvider serviceProvider)//, ILogger<DataSynchronizationService> logger)
+    public VoteSummaryBackgroundService(IServiceProvider serviceProvider, IAppCache cache)//, ILogger<DataSynchronizationService> logger)
     {
         _serviceProvider = serviceProvider;
+        _cache = cache;
         // _logger = logger;
     }
 
@@ -40,6 +43,7 @@ public class VoteSummaryBackgroundService : BackgroundService
             {
                 await summaryService.RefreshSummary();
                 // _logger.LogInformation("Data synchronization completed successfully.");
+                _cache.Remove(ConstituencyCacheKey.GetAllCacheKey);
             }
             catch (Exception ex)
             {

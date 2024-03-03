@@ -52,7 +52,8 @@ public class UpdateVoteCommand: ICacheInvalidatorRequest<Result<int>>
            item = _mapper.Map(request, item);
 		    // raise a update domain event
 		   item.AddDomainEvent(new VoteUpdatedEvent(item));
-           await _context.SaveChangesAsync(cancellationToken);
+        _context.UpdateEntity(item);//this line is missing in autogeneration
+        await _context.SaveChangesAsync(cancellationToken);
            return await Result<int>.SuccessAsync(item.Id);
         }
     }
