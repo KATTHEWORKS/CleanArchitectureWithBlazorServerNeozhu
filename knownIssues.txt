@@ -1,0 +1,1 @@
+when vote count reduces to zero it wont set as 0 in summary table bcz UpdateVotesCount() expects an entry in votes table

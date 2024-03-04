@@ -100,6 +100,10 @@
         if (state.IsAuthenticated())
             {
             MyVote = await Mediator.Send(new GetByUserIdQuery() { UserId = state.GetUserId() }).ConfigureAwait(false);
+            if (IsToAdd == true && constituencies.Count() > 0)
+                {
+                await OnAddMyVoteToConstituency(constituencies.First());
+                }
             }
         }
 
