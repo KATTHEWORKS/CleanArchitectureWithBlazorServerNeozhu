@@ -107,8 +107,8 @@ public class AddEditVoteCommandHandler : IRequestHandler<AddEditVoteCommand, Res
             //for both above case go for update thats it,since MyVote fetch is also based on userid only
             existingVoteOfUser.ConstituencyIdDelta = existingVoteOfUser.ConstituencyId;
             //existingVoteOfUser.KPIRatingCommentsDelta = existingVoteOfUser.KPIRatingComments;//this is problematic,dont use
-            //if (existingVoteOfUser.KPIRatingComments != null)
-            //    existingVoteOfUser.KPIRatingCommentsDelta = existingVoteOfUser.KPIRatingComments.Select(x => new KPIRatingComment(x.KPI_Id, x.Rating ?? 0)).ToList();
+            if (existingVoteOfUser.KPIRatingComments != null)
+                existingVoteOfUser.KPIRatingCommentsDelta = existingVoteOfUser.KPIRatingComments.Select(x => new KPIRatingComment(x.KPI_Id, x.Rating ?? 0)).ToList();
             existingVoteOfUser = _mapper.Map(request, existingVoteOfUser);
 
             // raise a update domain event

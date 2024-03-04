@@ -495,6 +495,7 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
             }
             //else // kpi not exists ,ideally this should never come
         });
+            existing.KPIVotes = existing.KPIVotes.Where(x => x.RatingTypeCountsList.Count > 0).ToList();
         }
     }
 
@@ -564,14 +565,19 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
                 //nothing to remove or nothing on even different constituency id nothing to bother
             }
             else //means old has some data & present also has some data
-            {//had to do difference... mostly this is common scenario
+            {
+                if (vote.KPIRatingCommentsDelta != null && vote.KPIRatingComments != null)
+                {
+                    //had to do difference... mostly this is common scenario
+                    //this works only for same kpi & rating, if rating got changed then it wont work properly
+                    var oldDeltaKpis = vote.KPIRatingCommentsDelta.Select(x => (x.KPI_Id, x.Rating)).ToList();
+                    var presentKpis = vote.KPIRatingComments.Select(x => (x.KPI_Id, x.Rating)).ToList();
+                    // if (oldDeltaKpis == presentKpis) return null;//this comparison is wrong
+                    if (oldDeltaKpis.SequenceEqual(presentKpis)) return null;
 
-                var oldDeltaKpis = vote.KPIRatingCommentsDelta.Select(x => (x.KPI_Id, x.Rating)).ToList();
-                var presentKpis = vote.KPIRatingComments.Select(x => (x.KPI_Id, x.Rating)).ToList();
-                if (oldDeltaKpis == presentKpis) return null;
-
-                toAddRemove.ToRemove = oldDeltaKpis.Except(presentKpis).ToList();
-                toAddRemove.ToAdd = presentKpis.Except(oldDeltaKpis).ToList();
+                    toAddRemove.ToRemove = oldDeltaKpis.Except(presentKpis, new KpiRatingComparer()).ToList();
+                    toAddRemove.ToAdd = presentKpis.Except(oldDeltaKpis, new KpiRatingComparer()).ToList();
+                }
                 /*
                 var toAdd = new List<(int KPI, sbyte? Rating)>();
                 var toRemove = new List<(int KPI, sbyte? Rating)>();
@@ -622,7 +628,20 @@ public class VoteSummaryService(IApplicationDbContext context, IAppCache cache) 
         return toAddRemove;
     }
 
+    public class KpiRatingComparer : IEqualityComparer<(int, sbyte?)>
+    {
+        public bool Equals((int, sbyte?) x, (int, sbyte?) y)
+        {
+            // Compare both KPI_Id and Rating
+            return x.Item1 == y.Item1 && x.Item2 == y.Item2;
+        }
 
+        public int GetHashCode((int, sbyte?) obj)
+        {
+            // Generate hash code based on both KPI_Id and Rating
+            return obj.Item1.GetHashCode() ^ obj.Item2.GetHashCode();
+        }
+    }
 
 
     //mostly this will not be using anymore

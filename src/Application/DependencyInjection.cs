@@ -33,7 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IVoteSummaryService, VoteSummaryService>();
         services.AddHostedService<VoteSummaryBackgroundService>();
         services.AddLazyCache();
-
+        VoteSummaryBackgroundService.DatabaseChanged = true;//set once to run when application starts to load all
         return services;
     }
 }
