@@ -38,7 +38,7 @@
         {
             await ApplyUserPreferences();
             await _mudThemeProvider.WatchSystemPreference(OnSystemPreferenceChanged);
-            StateHasChanged();
+           await InvokeAsync(StateHasChanged);
         }
     }
 
@@ -61,7 +61,7 @@
 
     private void LayoutServiceOnMajorUpdateOccured(object? sender, EventArgs e)
     {
-        StateHasChanged();
+        this.InvokeAsync(() => this.StateHasChanged());
     }
 
 

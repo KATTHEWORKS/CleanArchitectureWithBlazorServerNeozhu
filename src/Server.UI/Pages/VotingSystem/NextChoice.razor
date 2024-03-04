@@ -100,10 +100,11 @@
         if (state.IsAuthenticated())
             {
             MyVote = await Mediator.Send(new GetByUserIdQuery() { UserId = state.GetUserId() }).ConfigureAwait(false);
-            if (IsToAdd == true && constituencies.Count() > 0)
-                {
-                await OnAddMyVoteToConstituency(constituencies.First());
-                }
+            // if (IsToAdd == true && constituencies.Count() > 0)
+            //     {
+            //     await OnAddMyVoteToConstituency(constituencies.First());
+            //this makes problem of thread and JSDisconnectedException raises,so blocking but logic is right //TODO
+            //     }
             }
         }
 
@@ -114,7 +115,7 @@
         if (constituencies == null || constituencies.Count == 0)
             {
             constituencies = allConstituencies.Where(x => x.State.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            || x.MpNameExisting.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            || (!string.IsNullOrEmpty(x.MpNameExisting) && x.MpNameExisting.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
             ).ToList();
             }
         }

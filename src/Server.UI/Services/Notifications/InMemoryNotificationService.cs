@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
+using Microsoft.JSInterop;
 
 namespace CleanArchitecture.Blazor.Server.UI.Services.Notifications;
 
@@ -74,10 +75,17 @@ public class InMemoryNotificationService : INotificationService
             await _localStorageService.DeleteAsync(LocalStorageKey);
             return DateTime.MinValue;
         }
+        catch (JSDisconnectedException ex)
+        {
+            Console.WriteLine(ex.ToString());// Ignore
+            return DateTime.MinValue;
+        }
         catch (Exception e)
         {
             Console.WriteLine(e.ToString());
             throw;
+            //ideally here it should trow error but to time quick made it to passs
+            //return DateTime.MinValue;
         }
     }
 

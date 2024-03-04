@@ -282,7 +282,7 @@
                 Snackbar.Add($"{result.ErrorMessage}", Severity.Error);
             }
 
-            StateHasChanged();
+            await this.InvokeAsync(() => this.StateHasChanged());
         });
     }
 

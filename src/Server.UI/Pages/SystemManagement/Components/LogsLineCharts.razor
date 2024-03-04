@@ -105,7 +105,7 @@
         Options.Fill.Gradient.GradientToColors = colors;
         await Chart.UpdateOptionsAsync(true, true, false);
         await Chart.RenderAsync();
-        StateHasChanged();
+        await this.InvokeAsync(() => this.StateHasChanged());
     }
 
 

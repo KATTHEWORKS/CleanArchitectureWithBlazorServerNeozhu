@@ -23,12 +23,19 @@ try
         .AddInfrastructure(builder.Configuration)
         .AddServer(builder.Configuration)
         .AddServerUI(builder.Configuration);
+    builder.Services.AddServerSideBlazor().AddCircuitOptions(option =>
+    {
+       // if (app.Environment.IsDevelopment()) //Only add details when debugging.
+            option.DetailedErrors = true;
+       
+    });
+
 
     var app = builder.Build();
 
     app.ConfigureServer(builder.Configuration);
 
-
+   
     if (app.Environment.IsDevelopment())
     {
         // Initialise and seed database

@@ -68,7 +68,7 @@
     private bool _uploading;
     private List<FileUploadProgress> _uploadedFiles = new();
 
-    private async void LoadFiles(IReadOnlyList<IBrowserFile> files)
+    private async Task LoadFiles(IReadOnlyList<IBrowserFile> files)
     {
         try
         {
@@ -114,13 +114,13 @@
                 ArrayPool<byte>.Shared.Return(buffer);
 
                 // AddOrUpdate the UI with the final progress
-                StateHasChanged();
+                await this.InvokeAsync(() => this.StateHasChanged());
             }
         }
         finally
         {
             _uploading = false;
-            StateHasChanged();
+            await this.InvokeAsync(() => this.StateHasChanged());
         }
     }
 

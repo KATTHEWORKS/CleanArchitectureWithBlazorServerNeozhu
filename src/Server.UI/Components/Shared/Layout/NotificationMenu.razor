@@ -50,7 +50,7 @@
         {
             _newNotificationsAvailable = await NotificationService.AreNewNotificationsAvailable();
             _messages = await NotificationService.GetNotifications();
-            StateHasChanged();
+            await this.InvokeAsync(() => this.StateHasChanged());
         }
 
         await base.OnAfterRenderAsync(firstRender);
