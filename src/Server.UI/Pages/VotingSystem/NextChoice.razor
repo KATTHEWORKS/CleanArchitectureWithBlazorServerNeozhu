@@ -17,9 +17,14 @@
 
 <PageTitle>@Title</PageTitle>
 <MudCard>
+    @*  <MudCardContent>
+    <MudTextField Label="Search" @bind-Value="searchTerm" Variant="Variant.Filled" Placeholder="Type Constituency Name or MP name" />
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Search">Search</MudButton>
+    </MudCardContent> *@
     <MudCardContent>
-        <MudTextField Label="Search" @bind-Value="searchTerm" Variant="Variant.Filled" Placeholder="" />
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Search">Search</MudButton>
+        <MudAutocomplete T="string" Label="Constituency Name" @bind-Value="searchTerm" SearchFunc="@Search" ResetValueOnEmptyText="@true"
+                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+        @* CoerceText="@true" CoerceValue="@true"  *@
     </MudCardContent>
 </MudCard>
 
@@ -84,7 +89,7 @@
         // Query.PageNumber = state.Page + 1;
         // Query.PageSize = state.PageSize;
         var result = await Mediator.Send(Query).ConfigureAwait(false);
-        allConstituencies = result.ToList();
+        allConstituencies = result.OrderByDescending(x => x.Summary?.LastModified).ToList();
         }
 
     protected override async Task OnInitializedAsync()
@@ -107,26 +112,27 @@
                 }
             }
         }
-
-    private async Task Search()
+    private async Task<IEnumerable<string>> Search(string value)
         {
-        await LoadConstituencies();
-        constituencies = allConstituencies.Where(x => x.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
-        if (constituencies == null || constituencies.Count == 0)
+        searchTerm = value;
+        if (string.IsNullOrEmpty(value))
+            constituencies = allConstituencies.ToList();
+        else
             {
-            constituencies = allConstituencies.Where(x => x.State.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-            || (!string.IsNullOrEmpty(x.MpNameExisting) && x.MpNameExisting.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
-            ).ToList();
+            // await LoadConstituencies();//dont reload as its already done on page load
+            constituencies = allConstituencies.Where(x => x.Name.Contains(value, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (constituencies == null || constituencies.Count == 0)
+                {
+                constituencies = allConstituencies.Where(x => x.State.Contains(value, StringComparison.OrdinalIgnoreCase)
+                || (!string.IsNullOrEmpty(x.MpNameExisting) && x.MpNameExisting.Contains(value, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+                }
             }
+        constituencies = constituencies.Take(5).ToList();
+        StateHasChanged();
+        //return constituencies.Select(x => x.Name).ToList();
+        return null;
         }
-    private async Task HandleKeyPress(KeyboardEventArgs e)
-        {
-        if (e.Key == "Enter")
-            {
-            await Search();
-            }
-        }
-
     private async Task OnAddMyVoteToConstituency(ConstituencyDto dto)
         { //this just opens the screen
         var state = await AuthState;
@@ -161,6 +167,7 @@
             if (!result1.Canceled)
                 {
                 MyVote = await Mediator.Send(new GetByUserIdQuery() { UserId = state.GetUserId() }).ConfigureAwait(false);
+                await LoadConstituencies();
                 //reload inputted constituency results
                 // await _table.ReloadServerData();
                 }
@@ -193,4 +200,40 @@
         //     Navigation.NavigateTo(returnUrl);
         //     }
         }
+    /*
+    private async Task<IEnumerable<string>> Search1(string value)
+        {
+        // In real life use an asynchronous function for fetching data from an api.
+        //await Task.Delay(5);
+
+        // if text is null or empty, show complete list
+        searchTerm = value;
+        Search();
+        return constituencies.Select(x => x.Name);
+    }
+    private void Search()
+        {
+        if (string.IsNullOrEmpty(searchTerm))
+            constituencies = allConstituencies.ToList();
+            else
+            {
+            // await LoadConstituencies();//dont reload as its already done on page load
+            constituencies = allConstituencies.Where(x => x.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (constituencies == null || constituencies.Count == 0)
+                {
+                constituencies = allConstituencies.Where(x => x.State.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                || (!string.IsNullOrEmpty(x.MpNameExisting) && x.MpNameExisting.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+        ).ToList();
+        }
+        }
+        constituencies = constituencies.Take(5).ToList();
+    }
+    private void HandleKeyPress(KeyboardEventArgs e)
+        {
+        if (e.Key == "Enter")
+        {
+            Search();
+    }
+    }
+    */
 }
