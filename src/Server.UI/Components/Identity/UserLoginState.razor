@@ -46,7 +46,7 @@ catch (Exception ex)
         {
         InvokeAsync(() =>
         {
-            Snackbar.Add(string.Format(L["{0} has logged in."], args.UserName), Severity.Info);
+            Snackbar.Add(string.Format(L["{0} has logged in."], args.UserName.Substring(0,3) ), Severity.Info);
             UsersStateContainer.AddOrUpdate(args.ConnectionId, args.UserName);
         });
         }

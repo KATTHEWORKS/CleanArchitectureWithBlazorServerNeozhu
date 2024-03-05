@@ -15,50 +15,52 @@
 @inject IStringLocalizer<ConstituenciesPage> L
  @inject IMapper Mapper
 
-<PageTitle>@Title</PageTitle>
-<MudCard>
-    @*  <MudCardContent>
-    <MudTextField Label="Search" @bind-Value="searchTerm" Variant="Variant.Filled" Placeholder="Type Constituency Name or MP name" />
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Search">Search</MudButton>
-    </MudCardContent> *@
-    <MudCardContent>
-        <MudAutocomplete T="string" Label="Constituency Name" @bind-Value="searchTerm" SearchFunc="@Search" ResetValueOnEmptyText="@true"
-                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
-        @* CoerceText="@true" CoerceValue="@true"  *@
-    </MudCardContent>
-</MudCard>
+<MudContainer>
+    <MudPaper Elevation="3" Class="p-4">
+        <h1 class="mb-2">We can choose Next-MP i.e MP24.in only by validating the work done,not by any rough/caste/religion/dirty political strategy.</h1>
+        <p class="mb-4">Here is a open & central place to collect all those data anonymously,just like voting & to see best Next-Choice Mp24 for great country i.e India - Bharath</p>
+        <p class="mb-4">Mainly 12 key factors by which we can measure the existing MP/Party work status.</p>
+        <p class="mb-4">This is not real voting system but advantage is to bring up the issues upfront to all notice rather keeping quiet like dead-citizen. Even after any elections this can be brought up to priority work mode consideration.</p>
+        <MudCard>
+            <MudCardContent>
+                <MudAutocomplete T="string" Label="Constituency Name" @bind-Value="searchTerm" SearchFunc="@Search" ResetValueOnEmptyText="@true"
+                                 AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+                @* CoerceText="@true" CoerceValue="@true"  *@
+            </MudCardContent>
+        </MudCard>
 
-@if (constituencies != null && constituencies.Any())
-    {
-    <MudCard>
-        <MudCardContent>
-            @foreach (var constituency in constituencies)
-                {
-                <div>
-                    <h3>@constituency.Name / @constituency.State</h3>
-                    <p>Existing MP: @constituency.MpNameExisting/@constituency.ExistingMpParty/@constituency.ExistingMpTerms</p>
-                    @if (MyVote != null && constituency.Id == MyVote.ConstituencyId)
+        @if (constituencies != null && constituencies.Any())
+            {
+            <MudCard>
+                <MudCardContent>
+                    @foreach (var constituency in constituencies)
                         {
-                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Update MyVote</MudButton>
+                        <div>
+                            <h3>@constituency.Name / @constituency.State</h3>
+                            <p>Existing MP: @constituency.MpNameExisting/@constituency.ExistingMpParty/@constituency.ExistingMpTerms</p>
+                            @if (MyVote != null && constituency.Id == MyVote.ConstituencyId)
+                                {
+                                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Update MyVote</MudButton>
+                                }
+                            else
+                                {
+                                <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Add MyVote</MudButton>
+                                }
+                            @if (constituency.Summary != null && constituency.Summary.KPIVotes != null)
+                                {
+                                foreach (var kpi in constituency.Summary.KPIVotes)
+                                    {
+                                    <MudInputLabel> @KPI.Get(kpi.KPI).Name- @kpi.AggregateRatingOfKPI - by @kpi.RatingTypeCountsList.Sum(c => c.Count)</MudInputLabel>
+                                    }
+                                }
+                            <!-- Add/Edit Vote buttons and other details here -->
+                        </div>
                         }
-                    else
-                        {
-                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="() => OnAddMyVoteToConstituency(constituency)">Add MyVote</MudButton>
-                        }
-                    @if (constituency.Summary != null && constituency.Summary.KPIVotes != null)
-                        {
-                        foreach (var kpi in constituency.Summary.KPIVotes)
-                            {
-                            <MudInputLabel> @KPI.Get(kpi.KPI).Name- @kpi.AggregateRatingOfKPI - by @kpi.RatingTypeCountsList.Sum(c => c.Count)</MudInputLabel>
-                            }
-                        }
-                    <!-- Add/Edit Vote buttons and other details here -->
-                </div>
-                }
-        </MudCardContent>
-    </MudCard>
-    }
-
+                </MudCardContent>
+            </MudCard>
+            }
+    </MudPaper>
+</MudContainer>
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> AuthState { get; set; } = default!;
@@ -75,7 +77,8 @@
     private string Title { get; set; } = "Mp24.in";
     private string searchTerm = "";
     private List<ConstituencyDto> constituencies;//on default load last/recent/top search results
-    private List<ConstituencyDto> allConstituencies;
+    private List<ConstituencyDto> allConstituencies;//stays offline
+
     private GetAllConstituenciesQuery Query { get; set; } = new();
     private VoteDto? MyVote = null;
 
@@ -88,7 +91,7 @@
         // Query.SortDirection = state.SortDefinitions.FirstOrDefault()?.Descending ?? true ? SortDirection.Descending.ToString() : SortDirection.Ascending.ToString();
         // Query.PageNumber = state.Page + 1;
         // Query.PageSize = state.PageSize;
-        var result = await Mediator.Send(Query).ConfigureAwait(false);
+        var result = await Mediator.Send(Query).ConfigureAwait(false);//fetches all
         allConstituencies = result.OrderByDescending(x => x.Summary?.LastModified).ToList();
         }
 
@@ -131,7 +134,7 @@
         constituencies = constituencies.Take(5).ToList();
         StateHasChanged();
         //return constituencies.Select(x => x.Name).ToList();
-        return null;
+        return null;//since directly results shown ,so not showing anything on textbox
         }
     private async Task OnAddMyVoteToConstituency(ConstituencyDto dto)
         { //this just opens the screen
@@ -231,8 +234,8 @@
     private void HandleKeyPress(KeyboardEventArgs e)
         {
         if (e.Key == "Enter")
-        {
-            Search();
+    {
+    Search();
     }
     }
     */
