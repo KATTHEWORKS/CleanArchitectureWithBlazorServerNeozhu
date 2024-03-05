@@ -99,12 +99,12 @@
 
         if (state.IsAuthenticated())
             {
-            MyVote = await Mediator.Send(new GetByUserIdQuery() { UserId = state.GetUserId() }).ConfigureAwait(false);
-            // if (IsToAdd == true && constituencies.Count() > 0)
-            //     {
-            //     await OnAddMyVoteToConstituency(constituencies.First());
-            //this makes problem of thread and JSDisconnectedException raises,so blocking but logic is right //TODO
-            //     }
+            MyVote = await Mediator.Send(new GetByUserIdQuery() { UserId = state.GetUserId() }).ConfigureAwait(true);
+            if (IsToAdd == true && constituencies.Count() > 0)
+                {
+                await OnAddMyVoteToConstituency(constituencies.First());
+                //this makes problem of thread and JSDisconnectedException raises,so blocking but logic is right //TODO
+                }
             }
         }
 
