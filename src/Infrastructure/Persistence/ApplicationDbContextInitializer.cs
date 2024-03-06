@@ -129,8 +129,8 @@ public class ApplicationDbContextInitializer
         // Default users
         var defaultGoogleUsers = new List<(string email, RoleNamesEnum role, TenantTypeEnum tenantType)>()
        {("madhusudhan.veerabhadrappa@gmail.com",RoleNamesEnum.ROOTADMIN ,TenantTypeEnum.Internal)
-       ,("vmadhu203@gmail.com", groupAdminRole, groupTenant)
-       ,("vmadhu2023@gmail.com", groupViewerRole, groupTenant)
+       //,("vmadhu203@gmail.com", groupAdminRole, groupTenant)
+       //,("vmadhu2023@gmail.com", groupViewerRole, groupTenant)
        };
         //TODO change this logic hospital admin/viewer should be only under specific hospital tenant rather general
 
@@ -188,7 +188,7 @@ public class ApplicationDbContextInitializer
         await AddNewUserToDb(RoleNamesEnum.VIEWERHOSPITAL.ToString(), hospitalTenant, new List<RoleNamesEnum> { RoleNamesEnum.VIEWERHOSPITAL });
         await AddNewUserToDb(RoleNamesEnum.VIEWERHOSPITAL.ToString() + "1", hospitalTenant, new List<RoleNamesEnum> { RoleNamesEnum.VIEWERHOSPITAL });
 #elif VOTING_SYSTEM
-
+/* 
        VoteConstituency AddConstituency(VoteConstituency c)
         {
             if (!_context.VoteConstituencies.Any(x => x.Name == c.Name && x.State == c.State))
@@ -207,6 +207,7 @@ public class ApplicationDbContextInitializer
             AddConstituency(new VoteConstituency("Tnad", "Tiruchi", "BYR", "asdasdsad"));
             await _context.SaveChangesAsync();
         }
+*/
 #endif
 
         #endregion mustRemove
