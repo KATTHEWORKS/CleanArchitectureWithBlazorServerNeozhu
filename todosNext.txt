@@ -1,4 +1,4 @@
-﻿after login adding claims some issue
+﻿after login adding claims some issue..3
 
 userroletenenat is null on just created place think of more
 reason is defaulttenantid,name missing
