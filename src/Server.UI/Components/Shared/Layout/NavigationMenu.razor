@@ -34,7 +34,7 @@
                     </MudText>
                 </div>
 
-
+                <MudNavLink Href="/mytown">town</MudNavLink>
                 @if (section.SectionItems is not null)
                 {
                     @foreach (var sectionItem in section.SectionItems.Where(x => x.Roles == null || x.Roles.Any(x => Roles.Contains(x))))
