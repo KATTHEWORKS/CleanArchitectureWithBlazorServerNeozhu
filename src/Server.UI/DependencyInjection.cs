@@ -150,6 +150,7 @@ public static class DependencyInjection
                .AddAdditionalAssemblies(typeof(Presentation.BaseRazorClassLibrary._Imports).Assembly)
                .AddAdditionalAssemblies(typeof(Presentation.MainRazorClassLibrary._Imports).Assembly)
                .AddAdditionalAssemblies(typeof(Presentation.MyTownRazorClassLibrary._Imports).Assembly)
+               .AddAdditionalAssemblies(typeof(Presentation.ClientWasm._Imports).Assembly)
                ;
 
         app.MapHub<ServerHub>(ISignalRHub.Url);
