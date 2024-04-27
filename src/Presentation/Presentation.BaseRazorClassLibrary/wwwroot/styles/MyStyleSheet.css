@@ -1,0 +1,107 @@
+﻿.desktop {
+    display: none;
+}
+
+.mobile {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .desktop {
+        display: block;
+    }
+
+    .mobile {
+        display: none;
+    }
+}
+
+
+/* CSS Typewriter effect */
+.typewriterFor1LineOnly {
+    overflow: hidden; /* Ensures content is not revealed until animation */
+    border-right: .1em solid darkblue; /* The typewriter cursor */
+    /* Remove white-space: nowrap; to allow wrapping */
+    margin: 0 auto; /* Gives that scrolling effect as the typing happens */
+    letter-spacing: .1em; /* Adjust as needed */
+    animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+    display: inline-block;
+    text-overflow: ellipsis; /* Adds ellipsis (...) for truncation */
+    color: red; /* Font color: saffron (hex code) */
+    /* Adjust width as needed to control text wrapping */
+    /* width: 500px;  Example width, adjust based on your layout */
+}
+
+.typewriter {
+    border-right: .15em solid orange; /* The typewriter cursor */
+    font-family: monospace;
+    white-space: pre-wrap; /* Allows text to wrap and preserves whitespace */
+    overflow: hidden; /* Hides the overflow text */
+    display: inline-block;
+    animation: typing 3.5s steps(30, end), blink-caret .75s step-end infinite;
+}
+
+/* The typing effect */
+@keyframes typing {
+    from {
+        width: 0
+    }
+
+    to {
+        width: 100%
+    }
+}
+
+/* The typewriter cursor effect */
+@keyframes blink-caret {
+    from, to {
+        border-color: transparent
+    }
+
+    50% {
+        border-color: orange;
+    }
+}
+
+/*to make mud carousel as curved border */
+.mud-carousel.curved-border {
+    /*  border-radius: 50%;  Adjust the radius as needed */
+    overflow: hidden; /* Prevent content from overflowing */
+}
+
+.mud-carousel {
+    width: 100%; /* Take full width of device */
+    margin: 0; /* Remove margin for better fit */
+    padding: 0; /* Remove padding for better fit */
+}
+
+.mud-carousel-container { /* Target the container element */
+    overflow: hidden; /* Prevent content overflow */
+}
+
+
+/*@media (max-width: 600px) {
+    .mud-dialog {
+        width: 90%;*/ /* Adjust width for mobile devices */
+/*padding: 10px;*/ /* Adjust padding for smaller screens */
+/*font-size: 14px;*/ /* Adjust font size for readability */
+/*}
+}*/
+
+
+
+/* Desktop Styles */
+@media (min-width: 768px) {
+    .mud-button {
+        white-space: normal; /* Allow wrapping if needed */
+    }
+}
+
+/* Mobile Styles */
+@media (max-width: 767px) {
+    .mud-button {
+        white-space: nowrap; /* Prevent line breaks */
+        overflow: hidden; /* Hide overflowing text */
+        text-overflow: ellipsis; /* Add ellipsis (...) for truncation */
+    }
+}

@@ -1,0 +1,53 @@
+﻿
+@* https://mudblazor.com/components/card#combined *@
+@if (Model != null)
+    {
+    <MudCard >
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Color="Color.Secondary">@Model.Title.First()</MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                @*  <MudText Typo="Typo.body1">@Model.Title</MudText> *@
+                <StringDisplay Text="@Model.Title" Typo="Typo.body1" />
+                <StringDisplay Text="@Model.SubTitle" Typo="Typo.body2" />
+            </CardHeaderContent>
+            <CardHeaderActions>
+                <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
+            </CardHeaderActions>
+        </MudCardHeader>
+        @*  <MudCardMedia Image="@Model.ImageUrl" Height="250" /> *@
+        <ImageDisplay ImageUrl="@Model.ImageUrl" Height="@ImageHeight" Width="@ImageWidth" /> @* height width can be passsed*@
+        <MudCardContent>
+            <StringDisplay Text="@Model.Description" />
+            <StringDisplay Text="@Model.Address" />
+            <StringDisplay Text="@Model.MobileNumber" />
+        </MudCardContent>
+        <MudCardActions>
+            <UrlIconButton Url="@Model.GoogleProfileUrl" Icon="@("fab fa-youtube")" />
+            <UrlIconButton Url="@Model.GoogleMapAddressUrl" Icon="@("fab fa-youtube")" />
+            <UrlIconButton Url="@Model.YouTubeUrl" Icon="@("fab fa-youtube")" />
+            <UrlIconButton Url="@Model.FaceBookUrl" Icon="@("fab fa-facebook-f")" />
+            <UrlIconButton Url="@Model.InstagramUrl" Icon="@("fab fa-instagram")" />
+            @* Icon="@("fas fa-phone")" Icon="@("fas fa-envelope")"*@
+            <UrlIconButton Url="@Model.OtherReferenceUrl" />
+            @* onclick above opens in new tab *@
+
+            @* <MudIconButton Icon="@Icons.Material.Filled.Share" Color="Color.Default" /> *@
+        </MudCardActions>
+    </MudCard>
+    }
+
+@code {
+    [Parameter]
+    public TownItemDto Model { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
+
+    [Parameter]
+    public int ImageHeight { get; set; } = 250;
+
+    [Parameter]
+    public int ImageWidth { get; set; } = 350;//332
+}

@@ -1,0 +1,21 @@
+﻿@if (!string.IsNullOrEmpty(ImageUrl))
+    {
+    <MudCarouselItem>
+        <ImageDisplay ImageUrl="@ImageUrl" Height="@Height" Width="@Width" />
+    </MudCarouselItem>
+    }
+
+@code {
+    [Parameter]
+    public required string ImageUrl { get; set; }
+    // https://static.india.com/wp-content/uploads/2024/04/MixCollage-09-Apr-2024-11-47-AM-9532.jpg?impolicy=Medium_Widthonly&w=710
+    // https://static.india.com/wp-content/uploads/2024/04/MixCollage-09-Apr-2024-11-47-AM-9532.jpg?impolicy=Medium_Widthonly&w=10
+    // https://static.india.com/wp-content/uploads/2024/04/MixCollage-09-Apr-2024-11-47-AM-9532.jpg
+
+    [Parameter]
+    public int Height { get; set; } = 250;
+
+    [Parameter]
+    public int Width { get; set; } = 350;//332
+
+}

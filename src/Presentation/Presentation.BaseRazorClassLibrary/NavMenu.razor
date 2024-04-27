@@ -1,0 +1,142 @@
+﻿@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            @if (NavigationManager.AppSettings() != null)
+                {
+                <BrandLogo LogoSrc="@NavigationManager.AppSettings().FaviconImage" WidthInPx="36" HeightInPx="30" />
+                @NavigationManager.AppSettings().Title.SubstringSafe(18)
+                }
+        </a>
+        @if (System.Diagnostics.Debugger.IsAttached)
+            {
+            <small>@(AppConfigurations.EnvironmentName??"")</small>
+            }
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="AboutUs">
+                @* <span class="bi bi-person-nav-menu" aria-hidden="true"></span> About-Us *@
+                <BrandLogo WidthInPx="36" HeightInPx="30" /> About-Us
+            </NavLink>
+        </div>
+        @if (UrlDomainBasedHandling.GetApplicationTypeOfUrlDomain(NavigationManager.BaseUri) == ApplicationTypeEnum.MyVote)
+            {
+            <div id="votingSystemNavigations">
+                @* below are voting system navigations *@
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="DareDevil" Match="NavLinkMatch.All">
+                        <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> MP Home
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="WhatIsThisProject">
+                        How It Works?
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Alert">
+                        🔔 Alert
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Facts">
+                        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Facts
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="BitterTruth">
+                        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Bitter-Truth
+                    </NavLink>
+                </div>
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="https://youtu.be/Ktc8GLW3QZo" target="_blank" rel="noopener noreferrer">
+                        <img src="youtubevideosnapshotimage.png" alt="" width="26" height="20" />How To Vote?
+                    </NavLink>
+                </div>
+            </div>
+            }
+        @*  <MudButton OnClick="Share"><MudIcon Icon="@Icons.Material.Rounded.IosShare"></MudIcon>Share<MudImage Src="/img/icons8-india-48.jpg" /></MudButton> *@
+        @if (UrlDomainBasedHandling.GetApplicationTypeOfUrlDomain(NavigationManager.BaseUri) == ApplicationTypeEnum.MyVote)
+            {
+            <AuthorizeView>
+                <Authorized>
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="Account/Manage">
+                            <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name?.SubStringTruncate(15)
+                        </NavLink>
+                    </div>
+                    <div class="nav-item px-3">
+                        <form action="Account/Logout" method="post">
+                            <AntiforgeryToken />
+                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                            <button type="submit" class="nav-link">
+                                <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                            </button>
+                        </form>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    @* <div class="nav-item px-3">
+                <NavLink class="nav-link" href="Account/Register">
+                <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                </NavLink>
+                </div> *@
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="Account/Login">
+                            <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login/Register
+                        </NavLink>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+            }
+        @* <div class="nav-item px-3">
+        <NavLink class="nav-link" href="counter">
+        <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+        </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+        <NavLink class="nav-link" href="weather">
+        <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
+        </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+        <NavLink class="nav-link" href="auth">
+        <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Auth Required
+        </NavLink>
+        </div> *@
+
+    </nav>
+</div>
+
+@code {
+    private string? currentUrl;
+
+    protected override void OnInitialized()
+        {
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+        }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+        {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+        }
+
+    public void Dispose()
+        {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+        }
+
+
+}
+

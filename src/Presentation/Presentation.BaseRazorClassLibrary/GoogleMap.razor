@@ -1,0 +1,82 @@
+﻿<div id="mapContainer" style="height: 400px;"></div>
+<script>
+    function initMap(mapUrl) {
+        const geocoder = new google.maps.Geocoder();
+        const mapContainer = document.getElementById("mapContainer");
+
+        geocoder.geocode({ 'address': mapUrl }, function (results, status) {
+            if (status === 'OK') {
+                const map = new google.maps.Map(mapContainer, {
+                    zoom: 15,
+                    center: results[0].geometry.location
+                });
+                // Add markers or other customizations here (optional)
+            } else {
+                console.error("Geocode was not successful for the following reason: " + status);
+            }
+        });
+    }
+
+</script>
+@code {
+
+    [Parameter]
+    public required string MapUrl { get; set; }
+
+    //private string mapUrl = "https://www.google.com/maps/place/Eiffel+Tower,+Paris+France/@48.858944,2.294706,15z/data=!3m1!1e3";
+    // Replace with your Google Maps URL
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+        if (firstRender && !string.IsNullOrEmpty(MapUrl))
+            {
+            await JSRuntime.InvokeAsync<object>("initMap", MapUrl);
+            }
+        }
+    /*
+    private async Task OpenInDeviceMap()
+        {
+        double latitude = 37.7749; // Replace with your desired latitude
+        double longitude = -122.4194; // Replace with your desired longitude
+        bool isBrowser = await JSRuntime.InvokeAsync<bool>("navigator.geolocation"); // Check for geolocation API (common in browsers)
+        string mapUrl;
+        if (!isBrowser) // Assuming device platform when geolocation API is not available
+            {
+            mapUrl = $"geo:{latitude},{longitude}";
+            // Android
+            // mapUrl = $"http://maps.apple.com/?ll={latitude},{longitude}&q=Your+Location+Name"; // iOS (optional)
+        }
+        else // Debugging in browser
+            {
+            mapUrl = $"https://www.google.com/maps/@{latitude},{longitude},15z";
+        }
+        await JSRuntime.InvokeAsync<object>("openMap", mapUrl);
+    }
+    */
+    /*
+    Javascript code also as below
+    function openMap(mapUrl)
+    {
+    window.location.href = mapUrl;
+    }
+    */
+    /*   private bool isServerSide => Environment.GetEnvironmentVariable("BlazorVersion") == null;
+    private async Task OpenInDeviceMap()
+    {
+    double latitude = 37.7749; // Replace with your desired latitude
+    double longitude = -122.4194; // Replace with your desired longitude
+    string mapUrl;
+    if (JSRuntime.GetCurrentRuntime().Name == "Blazor") // For debugging in browser
+    {
+    mapUrl = $"https://www.google.com/maps/@{latitude},{longitude},15z";
+    }
+    else // For device platforms (Android, iOS)
+    {
+    mapUrl = $"geo:{latitude},{longitude}"; // Android
+                                            // mapUrl = $"http://maps.apple.com/?ll={latitude},{longitude}&q=Your+Location+Name"; // iOS (optional)
+    }
+    await JSRuntime.InvokeAsync<object>("openMap", mapUrl);
+    } */
+}
+
+

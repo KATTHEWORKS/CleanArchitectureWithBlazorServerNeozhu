@@ -1,0 +1,215 @@
+﻿@using System.Diagnostics
+@* @page "/"
+@page "/katthe"
+@page "/aboutus"
+ Mention page route only on client Project/final usage only, not on RCL *@
+
+
+@* @rendermode InteractiveWebAssembly *@
+@* Mention render mode Client Project only,not on RCL *@
+
+
+<!-- Add specific meta tags for this page -->
+<meta name="description" content="Learn about our small software startup">
+<meta property="og:title" content="Katthe Softwares & Solutions, India">
+<meta property="og:description" content="Small team of passionate Developers & Contributors for creating Innovative Softwares & Solutions.
+            Our goal is to make a positive impact through technology especially Non-Standard Necessary Scenarios.">
+<!-- Add other relevant meta tags as needed -->
+
+<MudContainer>
+    <MudStack Row=true>
+        <MudItem xs="9" md="9">
+            <h1>ಕತ್ತೆ Katthe Softwares & Solutions, India</h1>
+        </MudItem>
+        <MudItem xs="3" md="3">
+            <BrandLogo WidthInPercent="100%" />
+        </MudItem>
+    </MudStack>
+
+    <MudLink Href="/WhyKatthe" Color="Color.Primary"><b> Why Katthe-Donkey-ಕತ್ತೆ?</b></MudLink>
+
+    <MudExpansionPanels MultiExpansion="true">
+
+        <!-- About Us Section -->
+        <MudExpansionPanel Icon="@Icons.Material.Filled.Diversity1" Text="Who We Are?" IsInitiallyExpanded=true Style="background-color: lightblue">
+            <div id="about-us">
+                <MudText>TEAM of Developers + Contributors <MudIcon Icon="@Icons.Material.Filled.Public" /></MudText>
+                <MudText>Goal:+Ve Impact through Technologies Especially Non-Standard Cases</MudText>
+            </div>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Icon="@Icons.Material.Outlined.Construction" Text="Working Areas?" Style="background-color: lightgreen;">
+            <!-- Working Areas Section -->
+            <div id="working-areas">
+                <MudList Dense=true>
+                    <MudListItem Icon="@Icons.Material.Outlined.Terminal">Software Development</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.StoreMallDirectory">Small Scale Inductry Technology Development</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.MiscellaneousServices">Software Services & Assistance</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.DeviceUnknown">Non Standard Requirements</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.CastForEducation" Text="Social Awareness" InitiallyExpanded="true">
+                        <NestedList>
+                            <MudListItem Icon="@Icons.Material.Outlined.HealthAndSafety">Health Sector Affordability</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.Webhook">Technical Guidance</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.WrongLocation">Miss-Understandings</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.Rule">Corruptions & Bribery</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.HealthAndSafety">Safety Concerns</MudListItem>
+                        </NestedList>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.LocationCity">Mainly Non-Metro Tier2&3 Towns</MudListItem>
+                </MudList>
+            </div>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Icon="@Icons.Material.Outlined.Rocket" Text="Projects (Non-Profit)" Style="background-color: lightcyan">
+            <!-- Projects Section -->
+            <div id="projects">
+                <!-- Display project cards with details using MudCard -->
+                <MudList Dense=true>
+                    <MudListItem Icon="@Icons.Material.Outlined.Medication"><a href="https://UnWell.in" target="_blank">UnWell.in</a>  To Make Medicines affordable to Needy.</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.HowToVote"><a href="https://www.Next-MP.in" target="_blank">Next-MP.in</a> For Transparent MP work quality data collection</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.ChangeCircle"><a href="https://www.Holige.in" target="_blank">Holige.in</a> ಹೋಳಿಗೆ + ಹೊಲಿಗೆ  For Home Made workers espcially women development</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.Girl"><a href="https://www.Hennu.in" target="_blank">Hennu.in</a> ಹೆಣ್ಣು Women Safety & Empowerment</MudListItem>
+                    @* <MudListItem><a href="https://www.next-MLA.in" target="_blank">www.Next-MLA.in</a> for transparent MLA work quality & data collection.(Non-Profit)</MudListItem> *@
+                    <MudListItem Icon="@Icons.Material.Outlined.NoiseAware" Text="Sharing Awareness" InitiallyExpanded="true">
+                        <NestedList>
+
+                            <MudListItem Icon="@Icons.Custom.Brands.YouTube"><a href="https://youtube.com/@@nammadhu?si=smDsH-vNNjzED1PH" target="_blank">Youtube  @@nammadhu </a></MudListItem>
+                            <MudListItem Icon="@Icons.Custom.Brands.Twitter">
+                                <a href="https://twitter.com/katthe___" target="_blank">Xtwitter @@Katthe___</a>,
+                                <a href="https://twitter.com/namadhu_" target="_blank">@@namadhu_</a>
+                            </MudListItem>
+                            <MudListItem Icon="@Icons.Custom.Brands.LinkedIn"><a href="https://www.linkedin.com/company/katthe" target="_blank">Linkedin @@Katthe </a>,<a href="https://www.linkedin.com/in/nammadhu/" target="_blank">@@nammadhu </a></MudListItem>
+
+                        </NestedList>
+                    </MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.DeveloperBoard">Rural & Non-Development Areas Growth</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.Expand">Expanding in Multiple sectors also with other Startups</MudListItem>
+                </MudList>
+
+            </div>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Icon="@Icons.Material.Outlined.Money" Text="Pricing ₹ $ Є" Style="background-color: lightgoldenrodyellow ">
+            <!-- Pricing Areas Section -->
+            <div id="pricing-areas">
+                <MudList Dense=true>
+                    <MudListItem Icon="@Icons.Material.Outlined.Wysiwyg">Work + Effort + Research</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.WavingHand">Completely Transparent</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.Stars" Text="What Special?" InitiallyExpanded="true">
+                        <NestedList>
+                            <MudListItem Icon="@Icons.Material.Outlined.StarHalf">Prepared With Prooven Researched Samples</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.Loyalty">Preferred To Save Users Cost Benefits</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.CropFree">Utilizing Free - Open Source Content</MudListItem>
+                        </NestedList>
+                    </MudListItem>
+
+                    <MudListItem Icon="@Icons.Material.Outlined.Error" Text="What We DON'T Do?" InitiallyExpanded="true">
+                        <NestedList>
+                            <MudListItem Icon="@Icons.Material.Outlined.AccountBalance">Balanced Pricing</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.GppBad">Fake Offers Buy1Get1</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.AccountBalance">Bundled Packages Forcing Directly or Indirectly</MudListItem>
+                            <MudListItem Icon="@Icons.Material.Outlined.GppBad">Bluffing Missleading Ads</MudListItem>
+                        </NestedList>
+                    </MudListItem>
+                    @*  <MudListItem>Note:We Share what we know Trasnparently</MudListItem> *@
+                </MudList>
+            </div>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Icon="@Icons.Material.Outlined.NotAccessible" Text="Non Working Areas" Style="background-color: orange ">
+            <!-- Non Working Areas Section -->
+            <div id="non-working-areas">
+                <MudList Dense=true>
+                    <MudListItem Icon="@Icons.Material.Outlined.RunningWithErrors">Illegal Activties</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.TempleHindu">Political or Religion Based Hatred Activities</MudListItem>
+                    <MudListItem Icon="@Icons.Material.Outlined.Warning">Blind Belief or Fake News</MudListItem>
+                </MudList>
+            </div>
+        </MudExpansionPanel>
+
+
+        <!-- Join Us Section disabled now-->
+        <MudExpansionPanel Icon="@Icons.Material.Outlined.Handshake" Text="To Join Us" Disabled=true Style="background-color:  burlywood ">
+            <div id="join-us" style="display:none">
+                <h2>To Join Us</h2>
+                <MudText Typo="Typo.body1">
+                    If U r Interested & 1 among below, Share your details. Let's connect!
+                </MudText>
+                <MudList Dense=true>
+                    <MudListItem>Software Developer <versysmall>(Web)</versysmall></MudListItem>
+                    <MudListItem>Freelancers</MudListItem>
+                    <MudListItem>Non Technical Having Current Affairs Practical Knowledge</MudListItem>
+                    <MudListItem>Remote Located From any Village or Housewives or Retired. <versysmall> Technology Connects Every-BODY</versysmall></MudListItem>
+                    <MudListItem>Expert in Rare skills which helps Society</MudListItem>
+                    <MudListItem>Graduated & Skilled Non-Working</MudListItem>
+                    <MudListItem Text="How Do We Utilise All:We have many Projects in loop. Few examples," Expanded=true InitiallyExpanded=true>
+                        <NestedList>
+                            <MudListItem>Retired Employee (Manager,SalesMan): Letting to Gather Next Projects Requirement with their working experience questionnaire.</MudListItem>
+                            <MudListItem>Engineering Girl/Women: First learn necessary Technology & Gradual works.</MudListItem>
+                            <MudListItem>Non-Graduate With Good Knowledge: Focus on Projects like City development, Issue analysis, Troublesooting</MudListItem>
+                        </NestedList>
+                    </MudListItem>
+                </MudList>
+
+                <MudText Typo="Typo.body1">
+                    We're in very early stage, so No Fixed Salary BUT "Transparent Work to Pay" direct ratio.
+                </MudText>
+                <!-- Include a call-to-action button or contact details using MudButton -->
+            </div>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Icon="@Icons.Material.Outlined.AppRegistration" Text="Registered Under Government of India">
+            <div id="registered">
+                <MudText> <MudIcon Icon="@Icons.Material.Rounded.Home" />Upper Huttha, Bhadravathi, Karnataka India</MudText>
+                <!-- Add a feedback form using MudCard or MudDialog -->
+            </div>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel Icon="@Icons.Material.Outlined.Chat" Text="Q?s" Style="background-color: yellow ">
+            <!-- User Questions & Feedback Section -->
+            <div id="feedback">
+                <MudIcon Icon="@Icons.Material.Rounded.Message" /><MudIcon Icon="@Icons.Material.Rounded.Feedback" />
+                <!-- Add a feedback form using MudCard or MudDialog -->
+                <ContactEmail />
+            </div>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+
+</MudContainer>
+
+@code {
+    bool redirected = false;
+
+    protected override void OnAfterRender(bool firstRender)
+        {
+        if (Debugger.IsAttached)
+            RedirectToSpecificAppLandingPage();
+        // return base.OnAfterRenderAsync(firstRender);
+        }
+
+    protected override void OnInitialized()
+        {
+        if (!Debugger.IsAttached)
+            RedirectToSpecificAppLandingPage();
+        // return base.OnInitializedAsync();
+        }
+
+    private void RedirectToSpecificAppLandingPage()
+        {
+
+        //currently using this same app for pointing katthe.com domain so this redirection
+        //when user hits "katthe.com" it goes to thispage/aboutus remaining all as usual navigation,even MP home page also works fine
+
+        //actually this is nneeded to execute on oninitiazied but it throwse Javascript interop not initialized error so here calling
+        //System.InvalidOperationException: 'JavaScript interop calls cannot be issued at this time. This is because the component is being statically rendered. When prerendering is enabled, JavaScript interop calls can only be performed during the OnAfterRenderAsync lifecycle method.'
+        if (!redirected && NavigationManager.Uri == NavigationManager.BaseUri) //means its only main url no other parameters
+                                                                               //&& !NavigationManager.BaseUri.EndsWith("katthe.com/", StringComparison.InvariantCultureIgnoreCase))
+            {
+            var landingPage = UrlDomainBasedHandling.GetLandingPageOfUrl(NavigationManager.BaseUri);
+            redirected = true;
+            if (landingPage != "/" && NavigationManager != null)
+                NavigationManager.NavigateTo(landingPage);
+            }
+        }
+
+}

@@ -1,0 +1,34 @@
+﻿@if (WidthInPercent != default)
+    {
+    <img src="@LogoSrc" width="@WidthInPercent" />
+    }
+else if (WidthInPx != default && HeightInPx != default)
+    {
+    <img src="@LogoSrc" alt="@Alt" width="@WidthInPx" height="@HeightInPx" />
+    }
+else
+    {
+    <img src="@LogoSrc" />
+    }
+
+@* <img width="20%" src="katthelogo.png" /> *@
+
+@* <img src="_content/BaseBlazorComponentsRCL/images/youtubevideosnapshotimage.png" alt="" width="26" height="20" /> *@
+
+@code {
+    [Parameter]
+    public string? WidthInPercent { get; set; }
+
+    [Parameter]
+    public int? WidthInPx { get; set; }
+
+    [Parameter]
+    public int? HeightInPx { get; set; }
+
+    [Parameter]
+    public string? Alt { get; set; }
+
+    [Parameter]
+    public string LogoSrc { get; set; } = "_content/BaseBlazorComponentsRCL/images/katthelogo.png";
+
+}

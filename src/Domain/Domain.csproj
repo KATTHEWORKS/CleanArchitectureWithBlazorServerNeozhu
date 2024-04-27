@@ -10,9 +10,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Entities\MyTown\**" />
+      <Compile Remove="Entities\MyVote\**" />
+      <EmbeddedResource Remove="Entities\MyTown\**" />
+      <EmbeddedResource Remove="Entities\MyVote\**" />
+      <None Remove="Entities\MyTown\**" />
+      <None Remove="Entities\MyVote\**" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="MediatR" Version="12.2.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.4" />
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.4" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.2" />
     </ItemGroup>
 
 </Project>

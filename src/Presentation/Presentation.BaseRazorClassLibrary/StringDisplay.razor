@@ -1,0 +1,13 @@
+﻿@* we can apply trimming if needed *@
+@if (!string.IsNullOrEmpty(Text))
+    {
+    <MudText Typo="@Typo">@Text</MudText>
+    }
+
+@code {
+    [Parameter]
+    public string Text { get; set; }
+
+    [Parameter]
+    public Typo Typo { get; set; } = Typo.body2;
+}

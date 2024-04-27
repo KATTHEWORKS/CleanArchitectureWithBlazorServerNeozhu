@@ -1,0 +1,53 @@
+﻿@page "/mytown"
+@rendermode RenderMode.InteractiveWebAssembly
+
+@* <TownMainHeaderCardDisplay Model="@TownDto.SampleData" /> *@
+@if (Model != null)
+    {
+    @* <TownItemCardDisplay Model="@((TownItemDto)Model)" ImageHeight=350 /> *@
+
+    <MudText><i> <small>To Add Your Content Send details to <ContactEmail /></small></i></MudText>
+    @if (Model.TownItems != null && Model.TownItems.Any())
+        {
+        @foreach (var group in objGroups)
+            {
+            <StringDisplay Text="@group.Key.Name" Typo="Typo.body1" />
+            <MudCarousel Class="mud-width-full" ShowArrows="@true" ShowBullets="@true" EnableSwipeGesture="@true" AutoCycle="@true" TData="object"
+                         Style="@($" color:{@Colors.Red.Default};height:50vh;mud-carousel;")">
+                @foreach (var ent in group)
+                    {
+                    <MudCarouselItem Transition="Transition.Slide">
+                        <TownItemCardDisplay Model="@ent" />  @* Style="height:200px;" *@
+                    </MudCarouselItem>
+                    }
+            </MudCarousel>
+            <MudSpacer />
+            }
+        }
+    }
+else
+    {
+    <MudText>Loading...</MudText>
+    }
+@code {
+
+
+    TownDto Model;
+    IEnumerable<IGrouping<ItemTypeCardMasterDataDto, TownItemDto>> objGroups;// = Model.Objects;
+
+    protected override void OnInitialized()
+        {
+        //on page load based on url fetch the model & display
+        Model = Bhadravathi.Data;// TownDto.SampleData?.Where(x => x.Title == "Bhadravathi")?.FirstOrDefault();
+        if (Model != null && Model.TownItems != null && Model.TownItems.Any())
+            objGroups = Model.TownItems.GroupBy(x => x.Type);
+        base.OnInitialized();
+        }
+    protected override void OnAfterRender(bool firstRender)
+        {
+        if (Model == null) NavigationManager.NavigateTo(".");
+        if (Model.TownItems != null && Model.TownItems.Any())
+            objGroups = Model.TownItems.GroupBy(x => x.Type);
+        // return base.OnAfterRenderAsync(firstRender);
+        }
+}

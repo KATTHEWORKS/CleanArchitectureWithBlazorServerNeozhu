@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using CleanArchitecture.Blazor.Server.UI.Pages.Dashboard.Components
 @using MudBlazor.Utilities
+@using Presentation.MyTownRazorClassLibrary
 @inject IStringLocalizer<Dashboard> L
 <PageTitle>@Title</PageTitle>
 
@@ -182,6 +183,8 @@
         </MudGrid>
     </LandingSection>
 </MudContainer>
+
+<Problems></Problems>
 
 <style>
     .lp-app-grid {

@@ -1,0 +1,15 @@
+﻿@if (!string.IsNullOrEmpty(YouTubeUrlSrc))
+    {
+    <iframe width="@Width" height="@Height" src="@YouTubeUrlSrc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    }
+@code {
+    [Parameter]
+    public required string YouTubeUrlSrc { get; set; }
+    //"https://www.youtube.com/embed/Ktc8GLW3QZo?si=T0JUqrfq8RXIPewX"
+
+    [Parameter]
+    public int Height { get; set; } = 250;//315;
+
+    [Parameter]
+    public int Width { get; set; } = 425;//560;
+}

@@ -1,0 +1,22 @@
+﻿@if (!string.IsNullOrEmpty(API.Settings?.ContactEmail))
+    {
+    @* <a href="mailto:KATTHE@OUTLOOK.IN?Subject=Mp24">KATTHE@OUTLOOK.IN </a> *@
+    <a href="@mailTo"><MudIcon Icon="@Icons.Material.Filled.Email"/> @API.Settings?.ContactEmail</a>
+    }
+@code {
+    string mailTo;
+    // [Parameter]
+    // public string mailTo { get; set; }
+    protected override async Task OnInitializedAsync()
+        {
+        if (API.Settings == null)
+            await Http.LoadSettings();
+
+        if (!string.IsNullOrEmpty(API.Settings?.ContactEmail))
+            {
+            base.OnInitialized();
+            //"mailto:KATTHE@OUTLOOK.IN?Subject=Mp24"
+            mailTo = $"mailto:{API.Settings.ContactEmail.ToUpper()}?Subject={NavigationManager.BaseUri}";
+            }
+        }
+}

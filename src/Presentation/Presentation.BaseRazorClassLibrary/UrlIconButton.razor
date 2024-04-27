@@ -1,0 +1,27 @@
+﻿@if (!Url.IsEmpty())
+    {
+    <MudIconButton Title="@Text" Icon="@Icon" Color="Color.Default" OnClick="()=>OpenUrl(Url)" />
+    }
+
+@code {
+    [Parameter]
+    public string? Text { get; set; } = "";
+
+    [Parameter]
+    public required string Url { get; set; }
+
+    [Parameter]
+    public required string Icon { get; set; } = Icons.Material.Rounded.Link;
+
+    private async Task OpenUrl(string url)
+        {
+        try
+            {
+            await JSRuntime.InvokeVoidAsync("open", url, "_blank");
+            }
+        catch (Exception ex)
+            {
+            Console.WriteLine($"An error occurred: {ex.Message}");
+            }
+        }
+}

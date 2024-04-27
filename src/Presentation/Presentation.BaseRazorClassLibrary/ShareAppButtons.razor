@@ -1,0 +1,25 @@
+﻿<MudStack Row=true>
+    <a href="whatsapp://send?text=@GetText()" data-action="share/whatsapp/share">
+        <img src="_content/BaseBlazorComponentsRCL/images/whatsapp-symbol-logo-svgrepo-com.svg" width="24" height="24" />
+    </a>
+
+    <a href="https://www.facebook.com/sharer/sharer.php?u=@GetText()">
+        <img src="_content/BaseBlazorComponentsRCL/images/icons8-facebook-96.svg" width="24" height="24" />
+    </a>
+</MudStack>
+@* <a href="whatsapp://send?text=Choose%20your%20Right%20Mp%20at%20www.Mp24.in%20or%20www.Next-Mp.in%20%26%20For%20more%20info%20check%20at%20https%3A%2F%2Fyoutu.be%2FKtc8GLW3QZo" data-action="share/whatsapp/share"> *@
+@code {
+
+    private string GetText()
+        {
+        var txt1 = $"{NavigationManager.AppSettings().Title} {NavigationManager.AppSettings().PublicDomainAbsoluteUrl} {NavigationManager.AppSettings().Description ?? ""}";
+
+        var byKatthe = $"{NavigationManager.AppSettings().CompanyUrl} {NavigationManager.AppSettings().CompanTagLine} ";
+        if (NavigationManager.AppSettings().PublicDomainAbsoluteUrl != NavigationManager.AppSettings().CompanyUrl)
+            txt1 += $"\n by {byKatthe}";
+        if (!string.IsNullOrEmpty(NavigationManager.AppSettings().AppVideoUrl))
+            txt1 += $"\n More detailed information available at {NavigationManager.AppSettings().AppVideoUrl}";
+
+        return Uri.EscapeDataString(txt1);
+        }
+}

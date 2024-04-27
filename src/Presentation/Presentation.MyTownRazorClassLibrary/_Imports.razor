@@ -1,0 +1,21 @@
+﻿@using Microsoft.JSInterop
+@using MudBlazor
+@using static MudBlazor.Icons
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
+
+@using Blazorise.Icons.FontAwesome
+@using System.Timers
+
+@using PublicCommon
+@using Presentation.Shared
+@using BaseRazorClassLibrary
+@using MyTownRazorClassLibrary
+
+@using Dto
+@using Dto.MyTown
+
+@inject HttpClient Http
+
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime //for auto refresh

@@ -1,0 +1,108 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="FlashMessage.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="wwwroot\images\favicon.ico" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\favicon.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\faviconKATTHELogo.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\icons8-facebook-48.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\icons8-facebook-96.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\KATTHELogo-big.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\KATTHELogo-very-big.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\KATTHELogo.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\twitter-brand.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\whatsapp-symbol-logo-svgrepo-com.svg" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\whatsapp.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\youtubeVideoSnapshotImage.png" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles\app.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles\bootstrap\bootstrap.min.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles\bootstrap\bootstrap.min.css.map" />
+    <_ContentIncludedByDefault Remove="wwwroot\styles\MyStyleSheet.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="FlashMessage.razor" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.5.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="8.0.1" />
+    <PackageReference Include="MudBlazor" Version="6.19.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Dto\Dto.csproj" />
+    <ProjectReference Include="..\..\PublicCommon\PublicCommon.csproj" />
+    <ProjectReference Include="..\Presentation.Shared\Presentation.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="BrandLogo.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="Build.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="ContactEmail.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="GoogleMap.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="HomeComponent.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="ImageCarouselItemDisplay.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="ImageDisplay.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="NavMenu.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="ShareAppButtons.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="StringDisplay.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="UrlIconButton.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="WhyKattheComponent.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="wwwroot\background.png">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="wwwroot\exampleJsInterop.js">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="YouTubeVideoDisplay.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+    <Content Update="_Imports.razor">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </Content>
+  </ItemGroup>
+
+</Project>
