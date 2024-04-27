@@ -32,7 +32,11 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddServerUI(this IServiceCollection services, IConfiguration config)
     {
-        services.AddRazorComponents().AddInteractiveServerComponents();
+        //services.AddRazorComponents().AddInteractiveServerComponents();
+        services.AddRazorComponents()
+             .AddInteractiveServerComponents()
+             .AddInteractiveWebAssemblyComponents();
+
         services.AddCascadingAuthenticationState();
         services.AddScoped<IdentityUserAccessor>();
         services.AddScoped<IdentityRedirectManager>();
@@ -139,7 +143,15 @@ public static class DependencyInjection
             Authorization = new[] { new HangfireDashboardAuthorizationFilter() },
             AsyncAuthorization = new[] { new HangfireDashboardAsyncAuthorizationFilter() }
         });
-        app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+        //app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
+        app.MapRazorComponents<App>()
+               .AddInteractiveServerRenderMode()
+               .AddInteractiveWebAssemblyRenderMode()
+               .AddAdditionalAssemblies(typeof(Presentation.BaseRazorClassLibrary._Imports).Assembly)
+               .AddAdditionalAssemblies(typeof(Presentation.MainRazorClassLibrary._Imports).Assembly)
+               .AddAdditionalAssemblies(typeof(Presentation.MyTownRazorClassLibrary._Imports).Assembly)
+               ;
+
         app.MapHub<ServerHub>(ISignalRHub.Url);
 
         //QuestPDF License configuration
