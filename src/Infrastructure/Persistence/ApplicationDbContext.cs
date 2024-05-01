@@ -5,6 +5,8 @@ using System.Reflection;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using CleanArchitecture.Blazor.Domain.Identity;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using static CleanArchitecture.Blazor.Infrastructure.PermissionSet.Permissions;
 
 namespace CleanArchitecture.Blazor.Infrastructure.Persistence;
 
@@ -19,6 +21,11 @@ public class ApplicationDbContext : IdentityDbContext<
     {
     }
 
+
+    public DbSet<TypeOfProfileMasterData> TypeOfProfileMasterDatas { get; set; }
+    public DbSet<Town> Towns { get; set; }
+    public DbSet<TownProfile> TownProfiles { get; set; }
+
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Logger> Loggers { get; set; }
     public DbSet<AuditTrail> AuditTrails { get; set; }
@@ -31,10 +38,16 @@ public class ApplicationDbContext : IdentityDbContext<
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        
+
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         builder.ApplyGlobalFilters<ISoftDelete>(s => s.Deleted == null);
+
+        builder.Entity<TownProfile>()
+    .HasOne(p => p.TypeOfProfile) // Assuming a navigation property named TypeOfProfile
+    .WithMany()
+    .HasForeignKey(p => p.TypeOfProfileId)
+    .OnDelete(DeleteBehavior.Restrict); // Set OnDelete to Restrict
     }
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -44,7 +57,7 @@ public class ApplicationDbContext : IdentityDbContext<
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        
+
         if (!optionsBuilder.IsConfigured)
         {
         }

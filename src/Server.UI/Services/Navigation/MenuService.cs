@@ -125,6 +125,12 @@ public class MenuService : IMenuService
                             Href = "/system/logs",
                             PageStatus = PageStatus.Completed
                         },
+                         new()
+                        {
+                            Title = "ttpe",
+                            Href = "/pages/TypeOfProfileMasterDatas",
+                            PageStatus = PageStatus.Completed
+                        },
                         new()
                         {
                             Title = "Jobs",

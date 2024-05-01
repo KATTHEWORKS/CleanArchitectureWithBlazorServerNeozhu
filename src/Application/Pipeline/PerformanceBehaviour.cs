@@ -6,8 +6,8 @@ namespace CleanArchitecture.Blazor.Application.Pipeline;
 ///     This class is a behavior pipeline in MediatR. It is used to monitor performance
 ///     and log warnings if a request takes longer to execute than a specified threshold.
 /// </summary>
-/// <typeparam name="TRequest">Type of the Request</typeparam>
-/// <typeparam name="TResponse">Type of the Response</typeparam>
+/// <typeparam name="TRequest">TypeOfProfile of the Request</typeparam>
+/// <typeparam name="TResponse">TypeOfProfile of the Response</typeparam>
 public class PerformanceBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {

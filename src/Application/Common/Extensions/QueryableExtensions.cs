@@ -15,7 +15,7 @@ public static class QueryableExtensions
     ///     This method uses the SpecificationEvaluator to evaluate and modify the provided query based on the given
     ///     specification.
     /// </remarks>
-    /// <typeparam name="T">Type of the entities in the query</typeparam>
+    /// <typeparam name="T">TypeOfProfile of the entities in the query</typeparam>
     /// <param name="query">The original query to which the specification should be applied</param>
     /// <param name="spec">The specification to apply to the query</param>
     /// <param name="evaluateCriteriaOnly">
