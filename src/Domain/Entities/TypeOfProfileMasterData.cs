@@ -28,6 +28,7 @@ public class TypeOfProfileMasterData : BaseAuditableEntity//, IMasterData
     public string ShortName { get; set; }
     public string Description { get; set; }
     public int Price { get; set; }//100
+    public virtual ICollection<TownProfile> TownProfiles { get; set; }
     public static TypeOfProfileMasterData? Get(int id)
     {
         return StandardList.Find(x => x.Id == id);

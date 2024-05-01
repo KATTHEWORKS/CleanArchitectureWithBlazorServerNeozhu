@@ -46,6 +46,14 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         [ForeignKey(nameof(TypeOfProfileId))]
         public TypeOfProfileMasterData TypeOfProfile { get; set; }
 
+       
+        [Required]
+        public int TownId { get; set; } //bhadravathi,kadur,bidar
+
+        [ForeignKey(nameof(TownId))]
+        public Town Town { get; set; }
+
+
         public bool Active { get; set; }
         public string Name { get; set; }
         public string? SubTitle { get; set; }//qualification,type of business,home/hotel/veg/nonveg
@@ -68,14 +76,6 @@ namespace CleanArchitecture.Blazor.Domain.Entities
         public string? TwitterUrl { get; set; }
 
         public string? OtherReferenceUrl { get; set; }
-
-
-
-        [Required]
-        public int TownId { get; set; } //bhadravathi,kadur,bidar
-
-        [ForeignKey(nameof(TownId))]
-        public Town Town { get; set; }
 
 
         //separatetable "TownProfileApproval"

@@ -44,10 +44,16 @@ public class ApplicationDbContext : IdentityDbContext<
         builder.ApplyGlobalFilters<ISoftDelete>(s => s.Deleted == null);
 
         builder.Entity<TownProfile>()
-    .HasOne(p => p.TypeOfProfile) // Assuming a navigation property named TypeOfProfile
-    .WithMany()
-    .HasForeignKey(p => p.TypeOfProfileId)
-    .OnDelete(DeleteBehavior.Restrict); // Set OnDelete to Restrict
+         .HasOne(tp => tp.Town)
+         .WithMany(t => t.TownProfiles)
+         .HasForeignKey(tp => tp.TownId)
+         .OnDelete(DeleteBehavior.Restrict); // Prevents cascading deletes
+
+        builder.Entity<TownProfile>()
+            .HasOne(tp => tp.TypeOfProfile)
+            .WithMany(top => top.TownProfiles)
+            .HasForeignKey(tp => tp.TypeOfProfileId)
+            .OnDelete(DeleteBehavior.Restrict); // Prevents cascading deletes
     }
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {

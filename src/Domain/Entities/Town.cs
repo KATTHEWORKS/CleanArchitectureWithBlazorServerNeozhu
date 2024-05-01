@@ -16,41 +16,27 @@ public class Town : BaseAuditableEntity
     {
         //this should never be called,1ly for the sake of EF cores
     }
-    public Town(TypeOfProfileMasterData type, string title)
+    public Town(string title)
     {
-        TypeOfProfile = type;
         Name = title;
     }
-    public Town(int townProfileTypeId, string title) : this(TypeOfProfileMasterData.Get(townProfileTypeId), title)
-    {
-    }
-    public Town(int townProfileTypeId, string title, string subtitle) : this(TypeOfProfileMasterData.Get(townProfileTypeId), title)
+
+    public Town(string title, string subtitle) : this(title)
     {
         SubTitle = subtitle;
     }
 
-    public Town(TypeOfProfileMasterData type, string title, string subtitle) : this(type, title)
-    {
-        SubTitle = subtitle;
-    }
-    public Town(TypeOfProfileMasterData type, int id, string title, string subtitle) : this(type, title, subtitle)
+    public Town(int id, string title, string subtitle) : this(title, subtitle)
     {
         //this should be removed later,as id is from db or from screen its 0/null only
         Id = id;
     }
+    public virtual ICollection<TownProfile> TownProfiles { get; set; } = new List<TownProfile>();
     public string District { get; set; }//later move to other table called districts & refer here only id 
     public string State { get; set; }//later move to other table called states & refer here only id 
 
     public string UrlName1 { get; set; }//bhadravathi.com
     public string UrlName2 { get; set; }//bdvt.in
-
-
-    public virtual ICollection<TownProfile> TownProfiles { get; set; } = new List<TownProfile>();
-    [Required]
-    public int TypeOfProfileId { get; set; }// 1 for town,doctor,event,business
-
-    [ForeignKey(nameof(TypeOfProfileId))]
-    public TypeOfProfileMasterData TypeOfProfile { get; set; } //= 1;
 
     public bool Active { get; set; }
     public string Name { get; set; }
