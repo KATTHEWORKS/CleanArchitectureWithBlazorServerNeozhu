@@ -19,6 +19,11 @@ public class ApplicationDbContext : IdentityDbContext<
     {
     }
 
+    public DbSet<Town> Towns { get; set; }
+    public DbSet<TownProfile> TownProfiles { get; set; }
+    public DbSet<TypeOfProfileMasterData> TypeOfProfileMasterDatas { get; set; }
+
+
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Logger> Loggers { get; set; }
     public DbSet<AuditTrail> AuditTrails { get; set; }

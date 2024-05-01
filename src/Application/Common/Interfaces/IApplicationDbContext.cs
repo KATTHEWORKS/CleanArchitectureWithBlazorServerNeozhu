@@ -9,6 +9,13 @@ namespace CleanArchitecture.Blazor.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {
+
+    public DbSet<Town> Towns { get; set; }
+    public DbSet<TownProfile> TownProfiles { get; set; }
+    public DbSet<TypeOfProfileMasterData> TypeOfProfileMasterDatas { get; set; }
+
+
+
     DbSet<Logger> Loggers { get; set; }
     DbSet<AuditTrail> AuditTrails { get; set; }
     DbSet<Document> Documents { get; set; }
