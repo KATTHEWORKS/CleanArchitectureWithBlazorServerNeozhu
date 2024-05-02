@@ -30,6 +30,7 @@
     private IComponentRenderMode? RenderModeForPage => HttpContext.Request.Path.StartsWithSegments("/pages/authentication")
         ? null
         : new InteractiveServerRenderMode(false);
+        //Todo This should be improved
 
     protected override Task OnInitializedAsync()
     {
