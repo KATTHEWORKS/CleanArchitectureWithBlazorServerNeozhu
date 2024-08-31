@@ -3,17 +3,17 @@ using PublicCommon.Common;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using PublicCommon;
 
-namespace MyTown.Domain;
+namespace CleanArchitecture.Blazor.Domain.Entities;
 
 //db entity
 public class Town : BaseAuditableEntity
-    {
+{
     [Key]
     public override int Id { get; set; }
     public Town()
-        {
+    {
 
-        }
+    }
     public string Name { get; set; }//had to remove this or alter duplication of card
     public string? Name2 { get; set; }//had to remove this a duplicate of card
     public string? Description { get; set; }//had to remove this a duplicate of card
@@ -33,6 +33,6 @@ public class Town : BaseAuditableEntity
     public string? UrlName1 { get; set; }//bhadravathi.com
     public string? UrlName2 { get; set; }//bdvt.in
 
-    public DateTime? LastCardUpdateTime { get; set; } = PublicCommon.DateTimeExtension.CurrentTime;
-    }
+    public DateTime? LastCardUpdateTime { get; set; } = DateTimeExtension.CurrentTime;
+}
 

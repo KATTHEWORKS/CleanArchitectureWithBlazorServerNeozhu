@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MyTown.Domain;
+namespace CleanArchitecture.Blazor.Domain.Entities;
 //each called iCard , internet card of any user or business entity
 //dbentity, once verified then will be moving the verified entity to CardVerified table
 public class Card : CardBase, IEquatable<Card>
@@ -18,7 +18,7 @@ public class Card : CardBase, IEquatable<Card>
     //public int IdCard { get; set; }
     public Card()
     {
-        if (Guid.TryParse(CreatedBy, out Guid by))
+        if (Guid.TryParse(CreatedBy, out var by))
             IdOwner = by;  //LastModifiedBy ?? CreatedBy;
                            //this is must for EF cores migration & all
     }
@@ -48,7 +48,7 @@ public class Card : CardBase, IEquatable<Card>
 
     public bool EqualImages(Card? other)//compares including id
     {
-        return CardBase.EqualImages(this, other);
+        return EqualImages(this, other);
     }
 
     //this wont check CardData or CardDetails
@@ -76,6 +76,6 @@ public class Card : CardBase, IEquatable<Card>
     //this wont check CardData or CardDetails
     public static bool Equals(Card? draft, VerifiedCard? verified)//compares including id
     {
-        return CardBase.Equals(verified, draft) && draft?.Id == verified?.Id;
+        return Equals(verified, draft) && draft?.Id == verified?.Id;
     }
 }

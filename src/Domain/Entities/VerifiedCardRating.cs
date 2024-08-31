@@ -5,10 +5,10 @@ using CleanArchitecture.Blazor.Domain.Common.Entities;
 using PublicCommon;
 
 
-namespace MyTown.Domain;
+namespace CleanArchitecture.Blazor.Domain.Entities;
 
 public class VerifiedCardRating : BaseAuditableEntity
-    {
+{
     //IdCard+UserId
     [Required]
     public int IdCARD { get; set; } //bhadravathi,kadur,bidar
@@ -23,7 +23,7 @@ public class VerifiedCardRating : BaseAuditableEntity
     //either like or rating anyone might be enough //later
     public int Rating { get; set; }
     public string? Message { get; set; }
-    }
+}
 
 
 

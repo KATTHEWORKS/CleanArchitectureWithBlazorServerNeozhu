@@ -4,10 +4,10 @@ using PublicCommon.Common;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using PublicCommon;
 
-namespace MyTown.Domain;
+namespace CleanArchitecture.Blazor.Domain.Entities;
 
 public class CardTag : BaseAuditableEntity
-    {
+{
     //here its actually one tag for one town,so had to be unique with townid
     //later we can plan for multiple taf for single town or card
     [Required]
@@ -19,4 +19,4 @@ public class CardTag : BaseAuditableEntity
 
     //here its actually one tag for one town,so had to be unique with townid
     public required string Tag { get; set; }
-    }
+}

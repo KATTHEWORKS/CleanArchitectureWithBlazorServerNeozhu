@@ -3,12 +3,12 @@ using PublicCommon.Common;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using PublicCommon;
 
-namespace CleanArchitecture.Domain.MyTown.Entities
-    {
+namespace CleanArchitecture.Blazor.Domain.Entities
+{
 
     //later not yet included in db schema
     public class Wallet : BaseAuditableEntity
-        {
+    {
 
         [Key]
         public Guid UserId { get; set; } // Foreign key to ApplicationUser
@@ -19,6 +19,6 @@ namespace CleanArchitecture.Domain.MyTown.Entities
         public float Balance { get; set; }//decimal is constly
 
         // Other properties as needed
-        }
-
     }
+
+}

@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
-namespace MyTown.Domain;
+namespace CleanArchitecture.Blazor.Domain.Entities;
 
 
 public class CardApproval : BaseAuditableEntity
-    {
+{
     //here admin entry will be as townidcard +admin id
 
     //Step1 user will choose approver
@@ -32,5 +32,5 @@ public class CardApproval : BaseAuditableEntity
     public Guid? ApproverUserId { get; set; } = null;//can be admin or any other verified card owner with right
 
     public string? Message { get; set; }
-    }
+}
 

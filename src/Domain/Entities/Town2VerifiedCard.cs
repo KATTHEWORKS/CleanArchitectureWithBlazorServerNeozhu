@@ -2,20 +2,19 @@
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using PublicCommon;
 
-
-namespace MyTown.Domain
-    {
+namespace CleanArchitecture.Blazor.Domain.Entities
+{
 
     public class Town2VerifiedCard : BaseAuditableEntity
-        {
+    {
         public Town2VerifiedCard()
-            {
-            }
+        {
+        }
         public Town2VerifiedCard(int idTown, int idCard)
-            {
+        {
             IdTown = idTown;
             IdCARD = idCard;
-            }
+        }
         private new int Id { get; set; }
 
         public int IdTown { get; set; }
@@ -26,5 +25,5 @@ namespace MyTown.Domain
 
         //[ForeignKey(nameof(IdTown))]
         public virtual Town? Town { get; set; }
-        }
     }
+}

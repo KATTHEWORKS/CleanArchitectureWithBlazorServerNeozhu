@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MyTown.Domain;
+namespace CleanArchitecture.Blazor.Domain.Entities;
 
 
 public class VerifiedCard : CardBase, IEquatable<VerifiedCard>
@@ -17,7 +17,7 @@ public class VerifiedCard : CardBase, IEquatable<VerifiedCard>
     public VerifiedCard()
     {
         VerifiedCardDisplayDates = [];//new HashSet<TownVerifiedCardSelectedDate>();
-        if (Guid.TryParse(CreatedBy, out Guid by))
+        if (Guid.TryParse(CreatedBy, out var by))
             IdOwner = by;  //LastModifiedBy ?? CreatedBy;
     }
     public VerifiedCard(int typeId, string title) : this()
@@ -54,7 +54,7 @@ public class VerifiedCard : CardBase, IEquatable<VerifiedCard>
     //this wont check CardData or CardDetails
     public bool EqualImages(VerifiedCard? other)//wont compare id
     {
-        return CardBase.EqualImages(this, other);
+        return EqualImages(this, other);
     }
 
     //this wont check CardData or CardDetails

@@ -3,8 +3,8 @@ using PublicCommon.Common;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using PublicCommon;
 
-namespace MyTown.Domain
-    {
+namespace CleanArchitecture.Blazor.Domain.Entities
+{
     //town table
     //townitemtype master data table
     //townid+ townitem table
@@ -30,38 +30,38 @@ namespace MyTown.Domain
 
     //db entity
     public class CardType : BaseAuditableEntity, IMasterData
-        {//this is only masterdata
+    {//this is only masterdata
 
         [Key]
         public override int Id { get; set; }
         public CardType()
-            {
+        {
             Name = string.Empty;
             ShortName = string.Empty;
-            }
+        }
         public CardType(string name)
-            {
+        {
             Name = name;
             ShortName = name;
-            }
+        }
         public CardType(string name, string shortName)
-            {
+        {
             Name = name;
             ShortName = shortName;
-            }
+        }
 
         public CardType(int id, string name)
-            {
+        {
             Id = id;
             Name = name;
             ShortName = name;
-            }
+        }
         public CardType(int id, string name, string shortName)
-            {
+        {
             Id = id;
             Name = name;
             ShortName = shortName;
-            }
+        }
 
         //[Key]
         //public int Id { get; set; }
@@ -126,6 +126,6 @@ namespace MyTown.Domain
             //user complaints
             };
         */
-        }
-
     }
+
+}

@@ -2,7 +2,7 @@
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 using PublicCommon;
 
-namespace MyTown.Domain
+namespace CleanArchitecture.Blazor.Domain.Entities
 {
     public class UserCardLimits : BaseAuditableEntity
     {

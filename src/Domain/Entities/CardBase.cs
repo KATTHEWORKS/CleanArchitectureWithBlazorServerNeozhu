@@ -5,7 +5,7 @@ using PublicCommon;
 using PublicCommon.Common;
 
 
-namespace MyTown.Domain
+namespace CleanArchitecture.Blazor.Domain.Entities
 {
     //town table
     //townItemType master data table
@@ -31,7 +31,7 @@ namespace MyTown.Domain
 
     //CardBase NonDbEntity
     public class CardBase : BaseAuditableEntity, IEquatable<CardBase>
-        {
+    {
         public CardData? CardData { get; set; }
 
         public CardDetail? CardDetail { get; set; }//optionsla so virtual
@@ -42,19 +42,19 @@ namespace MyTown.Domain
         //public int? IdTownFirst { get; set; }
 
         public CardBase()
-            {
+        {
             Title = string.Empty;//only to avoid warnings
-            //this should never be called,1ly for the sake of EF cores
-            }
+                                 //this should never be called,1ly for the sake of EF cores
+        }
         public CardBase(string title)
-            {
+        {
             Title = title;
-            }
+        }
 
         public CardBase(string title, string subtitle) : this(title)
-            {
+        {
             SubTitle = subtitle;
-            }
+        }
 
         //public CardBase(int id, string title, string subtitle) : this(title, subtitle)
         //    {
@@ -105,41 +105,41 @@ namespace MyTown.Domain
 
         public string? Image2 { get; set; }
         public void ResetImages()
-            {
+        {
             Image1 = null;
             Image2 = null;
-            }
+        }
 
-        public static bool IsNullOrDefaultImages(CardBase? card) => (card == null ||
-     (!ImageInfoBase64Url.IsUrl(card.Image1) && !ImageInfoBase64Url.IsUrl(card.Image2)));
+        public static bool IsNullOrDefaultImages(CardBase? card) => card == null ||
+     !ImageInfoBase64Url.IsUrl(card.Image1) && !ImageInfoBase64Url.IsUrl(card.Image2);
 
 
         public virtual bool EqualImages(CardBase? otherCard)//compares without id
-            {//usage bool isEqual1 = person1.EqualImages(person2);
+        {//usage bool isEqual1 = person1.EqualImages(person2);
             if (otherCard == null) return false; // Not the same type
 
             //IdCardBrand == otherCard.IdCardBrand //here wont check for id
             return EqualImages(this, otherCard); // Compare properties
-            }
+        }
         public static bool EqualImages(CardBase source, CardBase? otherDetails)//compares without id
-            {
+        {
             if (otherDetails == null) return false; // Not the same type
 
             //IdCardBrand == otherCard.IdCardBrand //here wont check for id
             return
                 StringExtensions.Equals(source.Image1, otherDetails.Image1) &&
                 StringExtensions.Equals(source.Image2, otherDetails.Image2);
-            }
+        }
 
 
         public bool Equals(CardBase? otherDetails)//compares including id
-            {//usage bool isEqual1 = person1.Equals(person2);
+        {//usage bool isEqual1 = person1.Equals(person2);
             if (otherDetails == null) return false; // Not the same type
             return Equals(this, otherDetails);
-            }
+        }
 
         public static bool Equals(CardBase? source, CardBase? otherDetails)//compares including id
-            {//usage bool isEqual1 = person1.Equals(person2);
+        {//usage bool isEqual1 = person1.Equals(person2);
             if (source == null && otherDetails == null) return true; // Not the same type
             if (source == null || otherDetails == null) return false;
             //id card compare on derived
@@ -151,7 +151,7 @@ namespace MyTown.Domain
                 StringExtensions.Equals(source.ShortNote, otherDetails.ShortNote) &&
                 StringExtensions.Equals(source.Address, otherDetails.Address) &&
               EqualImages(source, otherDetails); // Compare properties
-            }
+        }
 
 
         //2 types of images...
@@ -173,7 +173,7 @@ namespace MyTown.Domain
             Description = description;
             }*/
 
-        }
-
-
     }
+
+
+}

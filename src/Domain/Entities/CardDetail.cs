@@ -3,10 +3,9 @@ using PublicCommon;
 using PublicCommon.Common;
 using CleanArchitecture.Blazor.Domain.Common.Entities;
 
-
-namespace MyTown.Domain;
+namespace CleanArchitecture.Blazor.Domain.Entities;
 public class CardDetail : BaseAuditableEntity, IEquatable<CardDetail>
-    {
+{
     public bool? IsOpenNow { get; set; }//true is open,false is closed
 
     //in json
@@ -40,38 +39,38 @@ public class CardDetail : BaseAuditableEntity, IEquatable<CardDetail>
     public string? MoreImages { get; set; }//json format
     //"storageaccounc.om/1.jpg,storageaccounc.om/2.png,storageaccounc.om/3.jpeg,google.com/4.jpeg"
 
-    public static bool IsNullOrDefault(CardDetail? details) => (details == null ||
-        (!ImageInfoBase64Url.IsUrl(details.Image1) && !ImageInfoBase64Url.IsUrl(details.Image2)
+    public static bool IsNullOrDefault(CardDetail? details) => details == null ||
+        !ImageInfoBase64Url.IsUrl(details.Image1) && !ImageInfoBase64Url.IsUrl(details.Image2)
         && !ImageInfoBase64Url.IsUrl(details.Image3) && !ImageInfoBase64Url.IsUrl(details.Image4)
         && !ImageInfoBase64Url.IsUrl(details.Image5) && !ImageInfoBase64Url.IsUrl(details.Image6)
-        && string.IsNullOrEmpty(details.DetailDescription)));
+        && string.IsNullOrEmpty(details.DetailDescription);
     public void ResetImages()
-        {
+    {
         Image1 = null;
         Image2 = null;
         Image3 = null;
         Image4 = null;
         Image5 = null;
         Image6 = null;
-        }
+    }
     //IEquatable<CardProduct> implementation
     public bool Equals(CardDetail? otherDetails)//compares including id
-        {//usage bool isEqual1 = person1.Equals(person2);
+    {//usage bool isEqual1 = person1.Equals(person2);
         if (otherDetails == null) return false; // Not the same type
         return Equals(this, otherDetails);
-        }
+    }
 
     public static bool Equals(CardDetail? source, CardDetail? otherDetails)//compares including id
-        {//usage bool isEqual1 = person1.Equals(person2);
+    {//usage bool isEqual1 = person1.Equals(person2);
         if (source == null && otherDetails == null) return true; // Not the same type
         if (source == null || otherDetails == null) return false;
 
         return source.Id == otherDetails.Id && EqualImages(source, otherDetails)
             && source.DetailDescription == otherDetails.DetailDescription; // Compare properties
-        }
+    }
 
     public static bool EqualImages(CardDetail source, CardDetail? otherDetails)//compares without id
-        {//usage bool isEqual1 = person1.EqualImages(person2);
+    {//usage bool isEqual1 = person1.EqualImages(person2);
         if (otherDetails == null) return false; // Not the same type
 
         //IdCardBrand == otherCard.IdCardBrand //here wont check for id
@@ -83,7 +82,7 @@ public class CardDetail : BaseAuditableEntity, IEquatable<CardDetail>
             StringExtensions.Equals(source.Image5, otherDetails.Image5) &&
             StringExtensions.Equals(source.Image6, otherDetails.Image6) &&
             StringExtensions.Equals(source.MoreImages, otherDetails.MoreImages);
-        }
+    }
 
     //[JsonIgnore]
     //[ForeignKey(nameof(IdCard))]
@@ -94,4 +93,4 @@ public class CardDetail : BaseAuditableEntity, IEquatable<CardDetail>
     public VerifiedCard? VerifiedCard { get; set; }
 
 
-    }
+}
