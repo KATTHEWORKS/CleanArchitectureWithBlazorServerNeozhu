@@ -32,8 +32,8 @@ namespace CleanArchitecture.Blazor.Domain.Entities
     public class CardType : BaseAuditableEntity, IMasterData
     {//this is only masterdata
 
-        [Key]
-        public override int Id { get; set; }
+        //[Key]
+        //public override int Id { get; set; }
         public CardType()
         {
             Name = string.Empty;

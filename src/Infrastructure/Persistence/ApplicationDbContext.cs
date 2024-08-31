@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<
         : base(options)
     {
     }
+    public DbSet<CardType> CardTypes { get; set; }
 
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<Logger> Loggers { get; set; }
