@@ -15,4 +15,8 @@
         <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\PublicCommon\PublicCommon.csproj" />
+    </ItemGroup>
+
 </Project>

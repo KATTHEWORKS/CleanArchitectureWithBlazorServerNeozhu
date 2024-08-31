@@ -39,6 +39,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Migrators.SqLite", "src\Mig
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server.UI", "src\Server.UI\Server.UI.csproj", "{3E4AF4E5-02EE-4F26-9B6D-8723670172B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PublicCommon", "src\PublicCommon\PublicCommon.csproj", "{D6BCB9B4-1321-4D95-AADB-6FDB364DF6BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -89,6 +91,10 @@ Global
 		{3E4AF4E5-02EE-4F26-9B6D-8723670172B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E4AF4E5-02EE-4F26-9B6D-8723670172B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E4AF4E5-02EE-4F26-9B6D-8723670172B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6BCB9B4-1321-4D95-AADB-6FDB364DF6BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6BCB9B4-1321-4D95-AADB-6FDB364DF6BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6BCB9B4-1321-4D95-AADB-6FDB364DF6BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6BCB9B4-1321-4D95-AADB-6FDB364DF6BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -105,6 +111,7 @@ Global
 		{08778353-0814-41BB-B49E-36BBA8D7751D} = {5C45543E-B3FA-4C1F-9D7D-DA2E6654BD61}
 		{469D68F1-379E-46A6-AAC3-CD1E4C0E7D77} = {5C45543E-B3FA-4C1F-9D7D-DA2E6654BD61}
 		{3E4AF4E5-02EE-4F26-9B6D-8723670172B3} = {21DC0B96-ED87-4130-BA8D-E8CF73903344}
+		{D6BCB9B4-1321-4D95-AADB-6FDB364DF6BB} = {21DC0B96-ED87-4130-BA8D-E8CF73903344}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {384CDE06-46A5-4FC5-AED4-7B23339EA56F}
