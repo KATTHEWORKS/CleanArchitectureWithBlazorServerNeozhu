@@ -15,9 +15,9 @@ public class CardApproval : BaseAuditableEntity
     // public virtual int Id { get; set; }//dont use the default id, to avoid confusion
     [Required]
     //[DatabaseGenerated(DatabaseGeneratedOption.None)] // Disable identity column]//this is not working use fluent on ApplicationDbContext
-    public int IdCard { get; set; } //draftcardid for which approval taking
+    public override int Id { get; set; } //draftcardid for which approval taking
 
-    [ForeignKey(nameof(IdCard))]
+    [ForeignKey(nameof(Id))]
     public virtual Card? DraftCard { get; set; }
 
     [Required]//for admin this will be townidcard

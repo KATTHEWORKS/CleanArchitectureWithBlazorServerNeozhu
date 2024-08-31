@@ -9,7 +9,7 @@ namespace MyTown.Domain;
 public class Town : BaseAuditableEntity
     {
     [Key]
-    public int IdTown { get; set; }
+    public override int Id { get; set; }
     public Town()
         {
 

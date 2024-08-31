@@ -19,7 +19,7 @@ public class CardDetail : BaseAuditableEntity, IEquatable<CardDetail>
     public string? Queue { get; set; } //json of List<QueueItem>
 
     [Key]
-    public int IdCardDetail { get; set; }//same as idCard,not auto generated
+    public override int Id { get; set; }//same as idCard,not auto generated
 
     public string? DetailDescription { get; set; }
 
@@ -66,7 +66,7 @@ public class CardDetail : BaseAuditableEntity, IEquatable<CardDetail>
         if (source == null && otherDetails == null) return true; // Not the same type
         if (source == null || otherDetails == null) return false;
 
-        return source.IdCardDetail == otherDetails.IdCardDetail && EqualImages(source, otherDetails)
+        return source.Id == otherDetails.Id && EqualImages(source, otherDetails)
             && source.DetailDescription == otherDetails.DetailDescription; // Compare properties
         }
 

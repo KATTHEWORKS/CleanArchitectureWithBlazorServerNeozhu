@@ -10,7 +10,7 @@ namespace MyTown.Domain;
 public class VerifiedCardDisplayDate : BaseAuditableEntity
     {
     // public virtual int Id { get; set; }//dont use the default id, to avoid confusion
-    [Key]
+    
     public int IdCARD { get; set; }
     public DateOnly Date { get; set; }
 

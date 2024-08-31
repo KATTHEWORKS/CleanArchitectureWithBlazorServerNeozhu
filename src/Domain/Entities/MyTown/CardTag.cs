@@ -11,9 +11,9 @@ public class CardTag : BaseAuditableEntity
     //here its actually one tag for one town,so had to be unique with townid
     //later we can plan for multiple taf for single town or card
     [Required]
-    public int IdCard { get; set; } //bhadravathi,kadur,bidar
+    public override int Id { get; set; } //bhadravathi,kadur,bidar
 
-    [ForeignKey(nameof(IdCard))]
+    [ForeignKey(nameof(Id))]
     public virtual Card? DraftCard { get; set; }
 
 

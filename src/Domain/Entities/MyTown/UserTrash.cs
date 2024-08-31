@@ -8,7 +8,7 @@ namespace MyTown.Domain;
 public class UserTrash : BaseAuditableEntity
     {
     //non auto generated key
-    public required Guid UserId { get; set; }
+    public new Guid Id { get; set; }
     public required string UserDataAsJsonString { get; set; }
     }
 

@@ -33,7 +33,7 @@ namespace MyTown.Domain
         {//this is only masterdata
 
         [Key]
-        public int IdCardType { get; set; }
+        public override int Id { get; set; }
         public CardType()
             {
             Name = string.Empty;
@@ -52,13 +52,13 @@ namespace MyTown.Domain
 
         public CardType(int id, string name)
             {
-            IdCardType = id;
+            Id = id;
             Name = name;
             ShortName = name;
             }
         public CardType(int id, string name, string shortName)
             {
-            IdCardType = id;
+            Id = id;
             Name = name;
             ShortName = shortName;
             }

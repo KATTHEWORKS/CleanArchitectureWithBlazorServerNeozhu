@@ -6,7 +6,7 @@ namespace MyTown.Domain;
 public class VerifiedCard : CardBase, IEquatable<VerifiedCard>
 {
     [Key]
-    public int IdCARD { get; set; }
+    public override int Id { get; set; }
 
     public virtual ICollection<VerifiedCardRating>? VerifiedCardRatings { get; set; }
     // public virtual int Id { get; set; }//dont use the default id, to avoid confusion
@@ -61,7 +61,7 @@ public class VerifiedCard : CardBase, IEquatable<VerifiedCard>
     public bool Equals(VerifiedCard? other)//compares including id
     {//usage bool isEqual1 = person1.Equals(person2);
         if (other == null) return false; // Not the same type
-        return IdCARD == other.IdCARD && Equals(this, other);
+        return Id == other.Id && Equals(this, other);
     }
 
     //this wont check CardData or CardDetails
@@ -80,7 +80,7 @@ public class VerifiedCard : CardBase, IEquatable<VerifiedCard>
 
     public static bool Equals(VerifiedCard? verified, Card? draft)//compares including id
     {
-        return CardBase.Equals(verified, draft) && draft?.IdCard == verified?.IdCARD;
+        return CardBase.Equals(verified, draft) && draft?.Id == verified?.Id;
     }
 }
 

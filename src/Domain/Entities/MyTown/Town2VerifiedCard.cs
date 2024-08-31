@@ -16,6 +16,8 @@ namespace MyTown.Domain
             IdTown = idTown;
             IdCARD = idCard;
             }
+        private new int Id { get; set; }
+
         public int IdTown { get; set; }
         public int IdCARD { get; set; }
 
